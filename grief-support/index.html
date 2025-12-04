@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Grief support resources from Forever Fields. You're not alone in this journey. Find healing prompts, articles, and community stories.">
+    <title>Grief Support - Forever Fields</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        /* Header */
+        .page-header {
+            background: var(--warm-white);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--sage-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .page-header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--gray-body);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--sage-primary);
+        }
+
+        .header-cta {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .header-cta .btn {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 900px) {
+            .nav-links { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .header-cta .btn-secondary { display: none; }
+        }
+
+        /* Hero */
+        .grief-hero {
+            background: linear-gradient(180deg, var(--lavender-subtle) 0%, var(--cream) 100%);
+            padding: 5rem 1.5rem;
+            text-align: center;
+        }
+
+        .grief-hero h1 {
+            font-family: var(--font-serif);
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+
+        .grief-hero p {
+            font-size: 1.15rem;
+            color: var(--gray-body);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Healing Prompts Section */
+        .prompts-section {
+            padding: 5rem 1.5rem;
+            background: var(--warm-white);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            color: var(--gray-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .section-header p {
+            color: var(--gray-body);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .prompts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .prompt-card {
+            background: linear-gradient(135deg, var(--cream) 0%, var(--sage-pale) 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--sage-light);
+            transition: transform 0.3s ease;
+        }
+
+        .prompt-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .prompt-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .prompt-card h3 {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .prompt-card p {
+            color: var(--gray-body);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        /* Resource Library */
+        .resources-section {
+            padding: 5rem 1.5rem;
+            background: var(--cream);
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .resource-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--sage-light);
+            transition: all 0.3s ease;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px var(--shadow-soft);
+        }
+
+        .resource-image {
+            height: 160px;
+            background: linear-gradient(135deg, var(--sage-pale) 0%, var(--lavender-subtle) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .resource-content {
+            padding: 1.5rem;
+        }
+
+        .resource-tag {
+            display: inline-block;
+            background: var(--sage-pale);
+            color: var(--sage-primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .resource-card h3 {
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-card p {
+            color: var(--gray-body);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .resource-link {
+            color: var(--sage-primary);
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .resource-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Community Stories */
+        .stories-section {
+            padding: 5rem 1.5rem;
+            background: var(--warm-white);
+        }
+
+        .stories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .story-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            border-left: 4px solid var(--sage-primary);
+            box-shadow: 0 5px 20px var(--shadow-soft);
+        }
+
+        .story-quote {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            font-style: italic;
+            color: var(--gray-dark);
+            line-height: 1.7;
+            margin-bottom: 1.25rem;
+        }
+
+        .story-quote::before {
+            content: '"';
+            font-size: 2rem;
+            color: var(--sage-primary);
+            line-height: 0;
+            margin-right: 0.25rem;
+        }
+
+        .story-author {
+            color: var(--gray-body);
+            font-size: 0.9rem;
+        }
+
+        /* Partner Resources */
+        .partners-section {
+            padding: 4rem 1.5rem;
+            background: var(--cream);
+        }
+
+        .partners-section h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            color: var(--gray-dark);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .partners-section > p {
+            text-align: center;
+            color: var(--gray-body);
+            margin-bottom: 2.5rem;
+        }
+
+        .partners-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .partner-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--sage-light);
+            text-align: center;
+        }
+
+        .partner-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .partner-card h3 {
+            font-family: var(--font-serif);
+            font-size: 1rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .partner-card p {
+            color: var(--gray-body);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+        }
+
+        .partner-link {
+            color: var(--sage-primary);
+            font-size: 0.85rem;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .partner-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Crisis Banner */
+        .crisis-banner {
+            background: linear-gradient(135deg, var(--twilight) 0%, #4a5568 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .crisis-banner h3 {
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .crisis-banner p {
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+
+        .crisis-number {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gold-muted);
+        }
+
+        /* Daily Reflection Widget */
+        .daily-reflection {
+            padding: 4rem 1.5rem;
+            background: linear-gradient(135deg, var(--sage-primary) 0%, #6B8E63 100%);
+            text-align: center;
+            color: white;
+        }
+
+        .reflection-card {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .reflection-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            margin-bottom: 1rem;
+        }
+
+        .reflection-prompt {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            font-style: italic;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .reflection-action {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* CTA */
+        .cta-section {
+            padding: 5rem 1.5rem;
+            background: var(--cream);
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            color: var(--gray-body);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer */
+        .site-footer {
+            background: var(--gray-dark);
+            color: rgba(255,255,255,0.7);
+            padding: 3rem 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .footer-logo { font-size: 1.75rem; margin-bottom: 1rem; }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover { color: var(--gold-muted); }
+
+        .footer-tagline {
+            font-family: var(--font-serif);
+            font-style: italic;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-copyright {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="page-header">
+        <div class="page-header-inner">
+            <a href="../" class="logo">
+                <span>🌿</span>
+                <span>Forever Fields</span>
+            </a>
+            <nav class="nav-links">
+                <a href="../how-it-works/">How It Works</a>
+                <a href="../for-families/">For Families</a>
+                <a href="../for-funeral-homes/">For Professionals</a>
+                <a href="../pricing/">Pricing</a>
+                <a href="./" class="active">Grief Support</a>
+            </nav>
+            <div class="header-cta">
+                <a href="../login/" class="btn btn-secondary">Sign In</a>
+                <a href="../create/" class="btn btn-primary">Create Memorial</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="grief-hero">
+        <h1>You're Not Alone in This Journey</h1>
+        <p>Grief is personal, and healing takes time. Here you'll find gentle prompts, helpful resources, and stories from others who understand what you're going through.</p>
+    </section>
+
+    <!-- Crisis Banner -->
+    <div class="crisis-banner">
+        <h3>Need immediate support?</h3>
+        <p>If you're struggling, please reach out. Help is available 24/7.</p>
+        <div class="crisis-number">988 Suicide & Crisis Lifeline</div>
+    </div>
+
+    <!-- Daily Reflection -->
+    <section class="daily-reflection fade-in">
+        <div class="reflection-card">
+            <div class="reflection-label">Today's Reflection</div>
+            <div class="reflection-prompt">"What small moment with them still brings a smile to your face?"</div>
+            <p class="reflection-action">Take a moment to sit with this memory. It's okay to smile and cry at the same time.</p>
+        </div>
+    </section>
+
+    <!-- Healing Prompts -->
+    <section class="prompts-section">
+        <div class="section-header">
+            <h2>Gentle Healing Prompts</h2>
+            <p>Sometimes it helps to reflect. Choose a prompt that feels right for today.</p>
+        </div>
+        <div class="prompts-grid">
+            <div class="prompt-card fade-in">
+                <div class="prompt-icon">🌅</div>
+                <h3>Morning Reflection</h3>
+                <p>"What would they tell you if they could see you carrying on today?"</p>
+            </div>
+            <div class="prompt-card fade-in">
+                <div class="prompt-icon">🎵</div>
+                <h3>Sound of Memory</h3>
+                <p>"What song immediately transports you back to a moment with them?"</p>
+            </div>
+            <div class="prompt-card fade-in">
+                <div class="prompt-icon">🍳</div>
+                <h3>Taste of Love</h3>
+                <p>"What dish or meal will you forever associate with their love?"</p>
+            </div>
+            <div class="prompt-card fade-in">
+                <div class="prompt-icon">💬</div>
+                <h3>Words to Hold</h3>
+                <p>"What's something they said that you find yourself repeating?"</p>
+            </div>
+            <div class="prompt-card fade-in">
+                <div class="prompt-icon">🌸</div>
+                <h3>Inherited Joy</h3>
+                <p>"What habit or hobby of theirs do you now find comfort in?"</p>
+            </div>
+            <div class="prompt-card fade-in">
+                <div class="prompt-icon">✨</div>
+                <h3>Legacy of Light</h3>
+                <p>"How has knowing them made you a better person?"</p>
+            </div>
+            <div class="prompt-card fade-in">
+                <div class="prompt-icon">📸</div>
+                <h3>Frozen Moment</h3>
+                <p>"If you could relive one ordinary day with them, which would you choose?"</p>
+            </div>
+            <div class="prompt-card fade-in">
+                <div class="prompt-icon">🌙</div>
+                <h3>Evening Peace</h3>
+                <p>"What would you want them to know about how much they're missed?"</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resource Library -->
+    <section class="resources-section">
+        <div class="section-header">
+            <h2>Resource Library</h2>
+            <p>Articles and guides to help you navigate this difficult time.</p>
+        </div>
+        <div class="resources-grid">
+            <div class="resource-card fade-in">
+                <div class="resource-image">📖</div>
+                <div class="resource-content">
+                    <span class="resource-tag">Guide</span>
+                    <h3>Coping with the First Year</h3>
+                    <p>The first year of grief is full of "firsts." Learn what to expect and how to be gentle with yourself through each milestone.</p>
+                    <a href="#" class="resource-link">Read more →</a>
+                </div>
+            </div>
+            <div class="resource-card fade-in">
+                <div class="resource-image">👶</div>
+                <div class="resource-content">
+                    <span class="resource-tag">Family</span>
+                    <h3>Talking to Children About Death</h3>
+                    <p>Age-appropriate ways to explain loss to children and help them process their emotions in healthy ways.</p>
+                    <a href="#" class="resource-link">Read more →</a>
+                </div>
+            </div>
+            <div class="resource-card fade-in">
+                <div class="resource-image">☀️</div>
+                <div class="resource-content">
+                    <span class="resource-tag">Healing</span>
+                    <h3>Finding Joy After Loss</h3>
+                    <p>It's okay to laugh again. Learn how to honor their memory while allowing yourself moments of happiness.</p>
+                    <a href="#" class="resource-link">Read more →</a>
+                </div>
+            </div>
+            <div class="resource-card fade-in">
+                <div class="resource-image">🎄</div>
+                <div class="resource-content">
+                    <span class="resource-tag">Traditions</span>
+                    <h3>Holiday Traditions That Honor Them</h3>
+                    <p>Creative ways to include their memory in celebrations and create new traditions that keep them present.</p>
+                    <a href="#" class="resource-link">Read more →</a>
+                </div>
+            </div>
+            <div class="resource-card fade-in">
+                <div class="resource-image">💔</div>
+                <div class="resource-content">
+                    <span class="resource-tag">Understanding</span>
+                    <h3>The Waves of Grief</h3>
+                    <p>Grief isn't linear. Understanding its unpredictable nature can help you be kinder to yourself on hard days.</p>
+                    <a href="#" class="resource-link">Read more →</a>
+                </div>
+            </div>
+            <div class="resource-card fade-in">
+                <div class="resource-image">🤝</div>
+                <div class="resource-content">
+                    <span class="resource-tag">Support</span>
+                    <h3>How to Support a Grieving Friend</h3>
+                    <p>Practical advice for being there for someone in grief—what to say, what to do, and what to avoid.</p>
+                    <a href="#" class="resource-link">Read more →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Stories -->
+    <section class="stories-section">
+        <div class="section-header">
+            <h2>From Our Community</h2>
+            <p>Words of hope from families who have walked this path.</p>
+        </div>
+        <div class="stories-grid">
+            <div class="story-card fade-in">
+                <p class="story-quote">Creating Mom's memorial was the first time I could look at her photos without breaking down. Somehow, building something beautiful from our memories helped me start to heal.</p>
+                <p class="story-author">— Sarah, Ohio</p>
+            </div>
+            <div class="story-card fade-in">
+                <p class="story-quote">My kids visit their grandfather's memorial every Sunday. They add little notes and stories. It's become a ritual that keeps him present in their lives.</p>
+                <p class="story-author">— Michael, Texas</p>
+            </div>
+            <div class="story-card fade-in">
+                <p class="story-quote">The healing prompts have become part of my morning routine. Some days they make me cry, some days they make me smile. Both feel important.</p>
+                <p class="story-author">— Jennifer, California</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partner Resources -->
+    <section class="partners-section">
+        <h2>Additional Resources</h2>
+        <p>Trusted organizations that offer support during difficult times.</p>
+        <div class="partners-grid">
+            <div class="partner-card fade-in">
+                <div class="partner-icon">📞</div>
+                <h3>988 Suicide & Crisis Lifeline</h3>
+                <p>Free, confidential support available 24/7 for anyone in distress.</p>
+                <a href="tel:988" class="partner-link">Call 988</a>
+            </div>
+            <div class="partner-card fade-in">
+                <div class="partner-icon">💜</div>
+                <h3>GriefShare</h3>
+                <p>Find grief support groups in your local community.</p>
+                <a href="https://www.griefshare.org" target="_blank" rel="noopener" class="partner-link">griefshare.org →</a>
+            </div>
+            <div class="partner-card fade-in">
+                <div class="partner-icon">📚</div>
+                <h3>The Grief Recovery Method</h3>
+                <p>Books, workshops, and programs for moving through grief.</p>
+                <a href="https://www.griefrecoverymethod.com" target="_blank" rel="noopener" class="partner-link">griefrecoverymethod.com →</a>
+            </div>
+            <div class="partner-card fade-in">
+                <div class="partner-icon">🕊️</div>
+                <h3>The Dougy Center</h3>
+                <p>Resources specifically for grieving children and families.</p>
+                <a href="https://www.dougy.org" target="_blank" rel="noopener" class="partner-link">dougy.org →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>Creating Can Be Part of Healing</h2>
+        <p>Many families find that building a memorial helps them process their grief. It's a way to honor their memory while beginning to heal.</p>
+        <a href="../create/" class="btn btn-primary">Create a Memorial →</a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-logo">🌿</div>
+        <nav class="footer-links">
+            <a href="../about/">About</a>
+            <a href="../how-it-works/">How It Works</a>
+            <a href="../for-families/">For Families</a>
+            <a href="../for-funeral-homes/">For Funeral Homes</a>
+            <a href="./">Grief Resources</a>
+            <a href="../pricing/">Pricing</a>
+        </nav>
+        <p class="footer-tagline">Made with love for grieving hearts</p>
+        <p class="footer-copyright">© 2025 Forever Fields. All rights reserved.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/script.js"></script>
+</body>
+</html>

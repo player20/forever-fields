@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Learn about Forever Fields - built by grieving hearts, for grieving hearts. Our mission is to help families preserve memories that last forever.">
+    <title>About Us - Forever Fields</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        /* Header */
+        .page-header {
+            background: var(--warm-white);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--sage-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .page-header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--gray-body);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--sage-primary);
+        }
+
+        .header-cta {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .header-cta .btn {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 900px) {
+            .nav-links { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .header-cta .btn-secondary { display: none; }
+        }
+
+        /* Hero */
+        .about-hero {
+            background: linear-gradient(180deg, var(--sage-pale) 0%, var(--cream) 100%);
+            padding: 5rem 1.5rem;
+            text-align: center;
+        }
+
+        .about-hero h1 {
+            font-family: var(--font-serif);
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+
+        .about-hero p {
+            font-size: 1.15rem;
+            color: var(--gray-body);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Founder Story */
+        .founder-section {
+            padding: 5rem 1.5rem;
+            background: var(--warm-white);
+        }
+
+        .founder-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        @media (max-width: 700px) {
+            .founder-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+
+        .founder-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--sage-pale) 0%, var(--lavender-subtle) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            margin: 0 auto;
+            border: 4px solid var(--sage-light);
+        }
+
+        .founder-story h2 {
+            font-family: var(--font-serif);
+            font-size: 1.75rem;
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+
+        .founder-story p {
+            color: var(--gray-body);
+            line-height: 1.8;
+            margin-bottom: 1.25rem;
+        }
+
+        .founder-story p:first-of-type::first-letter {
+            font-family: var(--font-serif);
+            font-size: 3rem;
+            float: left;
+            line-height: 1;
+            margin-right: 0.5rem;
+            color: var(--sage-primary);
+        }
+
+        .founder-name {
+            font-family: var(--font-serif);
+            font-style: italic;
+            color: var(--gray-dark);
+            margin-top: 2rem;
+        }
+
+        /* Mission Section */
+        .mission-section {
+            padding: 5rem 1.5rem;
+            background: linear-gradient(135deg, var(--sage-primary) 0%, #6B8E63 100%);
+            text-align: center;
+            color: white;
+        }
+
+        .mission-section h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            margin-bottom: 1.5rem;
+        }
+
+        .mission-statement {
+            font-family: var(--font-serif);
+            font-size: 1.35rem;
+            font-style: italic;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+            opacity: 0.95;
+        }
+
+        /* Values Section */
+        .values-section {
+            padding: 5rem 1.5rem;
+            background: var(--cream);
+        }
+
+        .values-section h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            color: var(--gray-dark);
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .value-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid var(--sage-light);
+            transition: transform 0.3s ease;
+        }
+
+        .value-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .value-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .value-card h3 {
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .value-card p {
+            color: var(--gray-body);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* Team Section */
+        .team-section {
+            padding: 5rem 1.5rem;
+            background: var(--warm-white);
+        }
+
+        .team-section h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            color: var(--gray-dark);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .team-section > p {
+            text-align: center;
+            color: var(--gray-body);
+            margin-bottom: 3rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .team-member {
+            text-align: center;
+        }
+
+        .team-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--sage-pale) 0%, var(--cream) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--sage-light);
+        }
+
+        .team-member h3 {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .team-member .role {
+            color: var(--sage-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            padding: 4rem 1.5rem;
+            background: var(--twilight);
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .stat-item {
+            padding: 1rem;
+        }
+
+        .stat-number {
+            font-family: var(--font-serif);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            padding: 4rem 1.5rem;
+            background: var(--cream);
+            text-align: center;
+        }
+
+        .contact-section h2 {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+
+        .contact-section p {
+            color: var(--gray-body);
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-email {
+            font-size: 1.25rem;
+            color: var(--sage-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-email:hover {
+            text-decoration: underline;
+        }
+
+        /* CTA */
+        .cta-section {
+            padding: 5rem 1.5rem;
+            background: linear-gradient(180deg, var(--sage-pale) 0%, var(--cream) 100%);
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            color: var(--gray-body);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer */
+        .site-footer {
+            background: var(--gray-dark);
+            color: rgba(255,255,255,0.7);
+            padding: 3rem 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .footer-logo { font-size: 1.75rem; margin-bottom: 1rem; }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover { color: var(--gold-muted); }
+
+        .footer-tagline {
+            font-family: var(--font-serif);
+            font-style: italic;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-copyright {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="page-header">
+        <div class="page-header-inner">
+            <a href="../" class="logo">
+                <span>🌿</span>
+                <span>Forever Fields</span>
+            </a>
+            <nav class="nav-links">
+                <a href="../how-it-works/">How It Works</a>
+                <a href="../for-families/">For Families</a>
+                <a href="../for-funeral-homes/">For Professionals</a>
+                <a href="../pricing/">Pricing</a>
+                <a href="../grief-support/">Grief Support</a>
+            </nav>
+            <div class="header-cta">
+                <a href="../login/" class="btn btn-secondary">Sign In</a>
+                <a href="../create/" class="btn btn-primary">Create Memorial</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="about-hero">
+        <h1>Built by Grieving Hearts, for Grieving Hearts</h1>
+        <p>Forever Fields was born from personal loss and a desire to help families preserve the memories that matter most.</p>
+    </section>
+
+    <!-- Founder Story -->
+    <section class="founder-section">
+        <div class="founder-content fade-in">
+            <div class="founder-image">👤</div>
+            <div class="founder-story">
+                <h2>Our Story</h2>
+                <p>When I lost my grandmother in 2019, I spent weeks gathering photos, recipes, and stories from family members. Her famous apple pie recipe was on a faded index card. Her voice was captured in a single voicemail I couldn't bear to delete. Cousins across the country had photos I'd never seen.</p>
+                <p>I realized how fragile these memories were—scattered across devices, fading in boxes, living only in the minds of those who knew her. And I thought: there has to be a better way.</p>
+                <p>Forever Fields is that better way. It's the place I wish existed when I was grieving. A beautiful, permanent home for every photo, every story, every recipe that made her who she was. A place where our whole family could contribute and visit, no matter where they lived.</p>
+                <p>We built Forever Fields not as a business, but as a labor of love. Every feature exists because we've been where you are. We know the weight of loss, and we know the comfort of preserving what remains.</p>
+                <p class="founder-name">— The Forever Fields Team</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission -->
+    <section class="mission-section fade-in">
+        <h2>Our Mission</h2>
+        <p class="mission-statement">"To ensure that no life is forgotten, and no memory is lost. We help families preserve the stories, traditions, and love that define the people they've lost—creating a legacy that future generations can treasure."</p>
+    </section>
+
+    <!-- Values -->
+    <section class="values-section">
+        <h2>What We Believe</h2>
+        <div class="values-grid">
+            <div class="value-card fade-in">
+                <div class="value-icon">💚</div>
+                <h3>Grief Deserves Gentleness</h3>
+                <p>Every interaction is designed with sensitivity. We never rush you, never push you, and always meet you where you are in your journey.</p>
+            </div>
+            <div class="value-card fade-in">
+                <div class="value-icon">🔒</div>
+                <h3>Memories Deserve Protection</h3>
+                <p>Your loved one's memory is precious. We use enterprise-grade security and multiple backups to ensure nothing is ever lost.</p>
+            </div>
+            <div class="value-card fade-in">
+                <div class="value-icon">♾️</div>
+                <h3>Forever Means Forever</h3>
+                <p>We don't believe in holding memories hostage. Even if you stop paying, your memorial stays online. That's our promise.</p>
+            </div>
+            <div class="value-card fade-in">
+                <div class="value-icon">👨‍👩‍👧‍👦</div>
+                <h3>Family Comes First</h3>
+                <p>We build for real families—not perfect ones. Our tools make it easy for everyone to contribute, regardless of technical skill.</p>
+            </div>
+            <div class="value-card fade-in">
+                <div class="value-icon">🌱</div>
+                <h3>Healing Is Possible</h3>
+                <p>Grief never fully goes away, but it can transform. We believe that honoring memories is part of the healing process.</p>
+            </div>
+            <div class="value-card fade-in">
+                <div class="value-icon">✨</div>
+                <h3>Beauty Matters</h3>
+                <p>Your loved one deserves something beautiful. Every memorial is designed with care, dignity, and aesthetic intentionality.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team -->
+    <section class="team-section">
+        <h2>The Team</h2>
+        <p>A small, dedicated group united by personal experience with loss.</p>
+        <div class="team-grid">
+            <div class="team-member fade-in">
+                <div class="team-photo">👩</div>
+                <h3>Sarah Chen</h3>
+                <p class="role">Founder & CEO</p>
+            </div>
+            <div class="team-member fade-in">
+                <div class="team-photo">👨</div>
+                <h3>Marcus Johnson</h3>
+                <p class="role">Head of Product</p>
+            </div>
+            <div class="team-member fade-in">
+                <div class="team-photo">👩</div>
+                <h3>Emily Rodriguez</h3>
+                <p class="role">Lead Designer</p>
+            </div>
+            <div class="team-member fade-in">
+                <div class="team-photo">👨</div>
+                <h3>David Park</h3>
+                <p class="role">Engineering</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats-section fade-in">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">12,000+</div>
+                <div class="stat-label">Memorials Created</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">89,000+</div>
+                <div class="stat-label">Photos Preserved</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">45,000+</div>
+                <div class="stat-label">Family Members Connected</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">150+</div>
+                <div class="stat-label">Partner Funeral Homes</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="contact-section fade-in">
+        <h2>Get in Touch</h2>
+        <p>Questions, feedback, or just want to say hello? We'd love to hear from you.</p>
+        <a href="mailto:hello@foreverfields.com" class="contact-email">hello@foreverfields.com</a>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>Join Us in Preserving Memories</h2>
+        <p>Every memorial you create helps keep someone's story alive for generations to come.</p>
+        <a href="../create/" class="btn btn-primary">Create a Memorial →</a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-logo">🌿</div>
+        <nav class="footer-links">
+            <a href="./">About</a>
+            <a href="../how-it-works/">How It Works</a>
+            <a href="../for-families/">For Families</a>
+            <a href="../for-funeral-homes/">For Funeral Homes</a>
+            <a href="../grief-support/">Grief Resources</a>
+            <a href="../pricing/">Pricing</a>
+        </nav>
+        <p class="footer-tagline">Made with love for grieving hearts</p>
+        <p class="footer-copyright">© 2025 Forever Fields. All rights reserved.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Create a beautiful online memorial for your loved one. Our gentle, step-by-step process helps you preserve their story.">
+    <title>Create a Memorial - Forever Fields</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        /* Creation Wizard Specific Styles */
+        .create-page {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #f5f7f5 0%, var(--cream) 50%, var(--warm-white) 100%);
+        }
+
+        /* Simple Header for Create Page */
+        .create-header {
+            padding: 1rem 1.5rem;
+            background: var(--warm-white);
+            border-bottom: 1px solid var(--sage-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .create-header-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .create-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            text-decoration: none;
+        }
+
+        .create-logo:hover {
+            color: var(--sage-primary);
+        }
+
+        .autosave-indicator {
+            font-size: 0.85rem;
+            color: var(--gray-light);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .autosave-indicator.saved {
+            color: var(--sage-primary);
+        }
+
+        .autosave-indicator.saving {
+            color: var(--gold-muted);
+        }
+
+        /* Progress Bar */
+        .wizard-progress {
+            padding: 1.5rem;
+            background: var(--warm-white);
+            border-bottom: 1px solid var(--sage-light);
+            position: sticky;
+            top: 60px;
+            z-index: 99;
+        }
+
+        .wizard-progress-inner {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .wizard-progress-bar {
+            height: 4px;
+            background: var(--sage-light);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .wizard-progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--sage-primary), var(--twilight));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .wizard-progress-dots {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .wizard-progress-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--cream);
+            border: 2px solid var(--sage-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: var(--gray-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .wizard-progress-dot.active {
+            background: var(--twilight);
+            border-color: var(--twilight);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .wizard-progress-dot.completed {
+            background: var(--sage-primary);
+            border-color: var(--sage-primary);
+            color: white;
+        }
+
+        .wizard-progress-dot:hover:not(.active) {
+            border-color: var(--sage-primary);
+            transform: scale(1.05);
+        }
+
+        .wizard-progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+
+        .wizard-progress-label {
+            font-size: 0.7rem;
+            color: var(--gray-light);
+            text-align: center;
+            width: 60px;
+            margin-left: -14px;
+        }
+
+        .wizard-progress-label:first-child {
+            margin-left: 0;
+            text-align: left;
+        }
+
+        .wizard-progress-label:last-child {
+            text-align: right;
+        }
+
+        .wizard-progress-label.active {
+            color: var(--sage-primary);
+            font-weight: 500;
+        }
+
+        /* Wizard Container */
+        .wizard-container {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        /* Wizard Steps */
+        .wizard-step {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .wizard-step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .step-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .step-header h1 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            color: var(--gray-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .step-header p {
+            color: var(--gray-body);
+            font-size: 1rem;
+            max-width: 450px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group label .optional {
+            font-weight: 400;
+            color: var(--gray-light);
+            font-size: 0.85rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1.5px solid var(--sage-light);
+            border-radius: 12px;
+            font-family: var(--font-sans);
+            font-size: 1rem;
+            background: var(--warm-white);
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--sage-primary);
+            box-shadow: 0 0 0 3px rgba(167, 201, 162, 0.2);
+        }
+
+        .form-group input.invalid,
+        .form-group textarea.invalid {
+            border-color: #e57373;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .field-error {
+            color: #e57373;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        .field-hint {
+            color: var(--gray-light);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--gray-light);
+            margin-top: 0.25rem;
+        }
+
+        .char-counter.warning {
+            color: var(--gold-muted);
+        }
+
+        .char-counter.limit {
+            color: #e57373;
+        }
+
+        /* Form Row (side by side) */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 500px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Radio/Checkbox Options */
+        .option-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--warm-white);
+            border: 2px solid var(--sage-light);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-card:hover {
+            border-color: var(--sage-primary);
+            background: var(--sage-pale);
+        }
+
+        .option-card.selected {
+            border-color: var(--sage-primary);
+            background: var(--sage-pale);
+        }
+
+        .option-card input {
+            display: none;
+        }
+
+        .option-radio {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--sage-light);
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+            transition: all 0.2s ease;
+        }
+
+        .option-card.selected .option-radio {
+            border-color: var(--sage-primary);
+            background: var(--sage-primary);
+        }
+
+        .option-radio::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: white;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .option-card.selected .option-radio::after {
+            opacity: 1;
+        }
+
+        .option-content h4 {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .option-content p {
+            font-size: 0.9rem;
+            color: var(--gray-body);
+            line-height: 1.5;
+        }
+
+        /* Toggle Switch */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            background: var(--warm-white);
+            border: 1.5px solid var(--sage-light);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-label {
+            font-size: 0.95rem;
+            color: var(--gray-dark);
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 28px;
+            background: var(--sage-light);
+            border-radius: 28px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--sage-primary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(22px);
+        }
+
+        /* Portrait Upload */
+        .portrait-upload {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 1.5rem;
+            border: 3px dashed var(--sage-light);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--warm-white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .portrait-upload:hover {
+            border-color: var(--sage-primary);
+            background: var(--sage-pale);
+        }
+
+        .portrait-upload.has-image {
+            border-style: solid;
+            border-color: var(--sage-primary);
+        }
+
+        .portrait-upload input {
+            display: none;
+        }
+
+        .portrait-upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .portrait-upload-text {
+            font-size: 0.85rem;
+            color: var(--gray-body);
+            text-align: center;
+            padding: 0 1rem;
+        }
+
+        .portrait-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Repeatable Blocks */
+        .repeatable-section {
+            margin-bottom: 2rem;
+        }
+
+        .repeatable-section h3 {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .repeatable-blocks {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .repeatable-block {
+            background: var(--warm-white);
+            border: 1.5px solid var(--sage-light);
+            border-radius: 16px;
+            padding: 1.25rem;
+            position: relative;
+        }
+
+        .repeatable-block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .repeatable-block-title {
+            font-weight: 500;
+            color: var(--gray-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .remove-block-btn {
+            background: none;
+            border: none;
+            color: var(--gray-light);
+            cursor: pointer;
+            padding: 0.25rem;
+            font-size: 1.2rem;
+            transition: color 0.2s;
+        }
+
+        .remove-block-btn:hover {
+            color: #e57373;
+        }
+
+        .add-block-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 1rem;
+            background: var(--sage-pale);
+            border: 2px dashed var(--sage-light);
+            border-radius: 12px;
+            color: var(--sage-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .add-block-btn:hover {
+            background: var(--sage-light);
+            border-color: var(--sage-primary);
+        }
+
+        /* Preview Section (Step 6) */
+        .memorial-preview-card {
+            background: var(--warm-white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px var(--shadow-soft);
+            margin-bottom: 2rem;
+        }
+
+        .preview-header {
+            background: linear-gradient(135deg, var(--twilight), #4a5568);
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .preview-portrait {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--gold-light);
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            border: 3px solid rgba(255,255,255,0.5);
+            overflow: hidden;
+        }
+
+        .preview-portrait img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-name {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .preview-dates {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .preview-body {
+            padding: 1.5rem;
+        }
+
+        .preview-section-title {
+            font-family: var(--font-serif);
+            font-size: 1rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .preview-bio {
+            color: var(--gray-body);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--sage-light);
+        }
+
+        .preview-placeholder {
+            background: var(--sage-pale);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            color: var(--gray-light);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .edit-section-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.8rem;
+            color: var(--sage-primary);
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .edit-section-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* Publish Options */
+        .publish-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 500px) {
+            .publish-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .publish-option {
+            padding: 1.5rem;
+            background: var(--warm-white);
+            border: 2px solid var(--sage-light);
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .publish-option:hover {
+            border-color: var(--sage-primary);
+        }
+
+        .publish-option.primary {
+            background: linear-gradient(135deg, var(--twilight), #4a5568);
+            border-color: var(--twilight);
+            color: white;
+        }
+
+        .publish-option h4 {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .publish-option p {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* Reassurance Messages */
+        .reassurance {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.25rem;
+            background: #f0f4f0;
+            border: 1px solid var(--sage-light);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: var(--gray-dark);
+            margin-top: 1.5rem;
+        }
+
+        .reassurance-icon {
+            font-size: 1.25rem;
+        }
+
+        /* Navigation Buttons */
+        .wizard-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--sage-light);
+        }
+
+        .wizard-nav .btn {
+            min-width: 140px;
+        }
+
+        .wizard-nav .btn-back {
+            background: transparent;
+            border: 1.5px solid var(--sage-light);
+            color: var(--gray-body);
+        }
+
+        .wizard-nav .btn-back:hover {
+            border-color: var(--sage-primary);
+            color: var(--sage-primary);
+        }
+
+        /* Grief Support Link */
+        .grief-support-link {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1.25rem;
+            background: #f5f7f5;
+            border: 1px solid var(--sage-light);
+            border-radius: 16px;
+        }
+
+        .grief-support-link p {
+            color: var(--gray-body);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .grief-support-link a {
+            color: var(--sage-primary);
+            font-weight: 500;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .wizard-progress-labels {
+                display: none;
+            }
+
+            .wizard-progress-dot {
+                width: 28px;
+                height: 28px;
+                font-size: 0.7rem;
+            }
+
+            .step-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .wizard-nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .wizard-nav .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="create-page">
+    <!-- Header -->
+    <header class="create-header">
+        <div class="create-header-inner">
+            <a href="../" class="create-logo">
+                <span>🌿</span>
+                <span>Forever Fields</span>
+            </a>
+            <div class="autosave-indicator" id="autosaveIndicator">
+                <span class="indicator-icon">✓</span>
+                <span class="indicator-text">All changes saved</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="wizard-progress">
+        <div class="wizard-progress-inner">
+            <div class="wizard-progress-bar">
+                <div class="wizard-progress-bar-fill" id="progressBarFill"></div>
+            </div>
+            <div class="wizard-progress-dots">
+                <div class="wizard-progress-dot active" data-step="0">1</div>
+                <div class="wizard-progress-dot" data-step="1">2</div>
+                <div class="wizard-progress-dot" data-step="2">3</div>
+                <div class="wizard-progress-dot" data-step="3">4</div>
+                <div class="wizard-progress-dot" data-step="4">5</div>
+                <div class="wizard-progress-dot" data-step="5">6</div>
+            </div>
+            <div class="wizard-progress-labels">
+                <span class="wizard-progress-label active">Welcome</span>
+                <span class="wizard-progress-label">Privacy</span>
+                <span class="wizard-progress-label">About</span>
+                <span class="wizard-progress-label">History</span>
+                <span class="wizard-progress-label">Memories</span>
+                <span class="wizard-progress-label">Publish</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wizard Container -->
+    <div class="wizard-container" id="wizardContainer">
+        <form id="memorialForm" data-autosave="memorial-draft" data-validate>
+
+            <!-- Step 1: Welcome & Quick Profile -->
+            <div class="wizard-step active" data-step="0">
+                <div class="step-header">
+                    <span class="step-icon">📋</span>
+                    <h1>Let's get started</h1>
+                    <p>Take your time. There's no rush here. We'll guide you through each step.</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="userEmail">Your Email</label>
+                    <input type="email" id="userEmail" name="userEmail" placeholder="you@example.com" required>
+                    <span class="field-hint">We'll use this to save your progress and send you a link to your memorial.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="userName">Your Name</label>
+                    <input type="text" id="userName" name="userName" placeholder="Your first name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="relationship">Your Relationship to Them</label>
+                    <select id="relationship" name="relationship" required>
+                        <option value="">Select...</option>
+                        <option value="child">Son/Daughter</option>
+                        <option value="spouse">Spouse/Partner</option>
+                        <option value="parent">Parent</option>
+                        <option value="sibling">Sibling</option>
+                        <option value="grandchild">Grandchild</option>
+                        <option value="friend">Friend</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="reassurance">
+                    <span class="reassurance-icon">✓</span>
+                    <span>We'll save your progress automatically. You can come back anytime.</span>
+                </div>
+            </div>
+
+            <!-- Step 2: Privacy & Preferences -->
+            <div class="wizard-step" data-step="1">
+                <div class="step-header">
+                    <span class="step-icon">🔐</span>
+                    <h1>Who should be able to visit?</h1>
+                    <p>You can change these settings anytime. Your comfort comes first.</p>
+                </div>
+
+                <div class="form-group">
+                    <div class="option-cards">
+                        <label class="option-card selected" data-value="public">
+                            <input type="radio" name="privacy" value="public" checked>
+                            <div class="option-radio"></div>
+                            <div class="option-content">
+                                <h4>Public Memorial</h4>
+                                <p>Anyone with the link can visit and leave memories. Perfect for honoring a life lived fully.</p>
+                            </div>
+                        </label>
+                        <label class="option-card" data-value="family">
+                            <input type="radio" name="privacy" value="family">
+                            <div class="option-radio"></div>
+                            <div class="option-content">
+                                <h4>Family Only</h4>
+                                <p>Only people you invite can visit. Share special invite links with family members.</p>
+                            </div>
+                        </label>
+                        <label class="option-card" data-value="private">
+                            <input type="radio" name="privacy" value="private">
+                            <div class="option-radio"></div>
+                            <div class="option-content">
+                                <h4>Private (Just You)</h4>
+                                <p>A personal space for your own healing journey. You can always open it up later.</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="toggle-group">
+                    <span class="toggle-label">Allow visitors to light candles & leave flowers</span>
+                    <div class="toggle-switch active" data-toggle="allowInteractions"></div>
+                </div>
+
+                <div class="toggle-group">
+                    <span class="toggle-label">Enable daily healing prompts on the memorial</span>
+                    <div class="toggle-switch active" data-toggle="enableHealingPrompts"></div>
+                </div>
+
+                <div class="reassurance">
+                    <span class="reassurance-icon">✓</span>
+                    <span>You can change these settings anytime from your dashboard.</span>
+                </div>
+            </div>
+
+            <!-- Step 3: Memorial Basics -->
+            <div class="wizard-step" data-step="2">
+                <div class="step-header">
+                    <span class="step-icon">👤</span>
+                    <h1>Tell us about them</h1>
+                    <p>Start with the basics. You can always add more details later.</p>
+                </div>
+
+                <label class="portrait-upload" id="portraitUpload">
+                    <input type="file" id="portraitInput" name="portrait" accept="image/*">
+                    <span class="portrait-upload-icon">📷</span>
+                    <span class="portrait-upload-text">Add their photo<br><small>Click or drag to upload</small></span>
+                </label>
+
+                <div class="form-group">
+                    <label for="deceasedName">Their Full Name</label>
+                    <input type="text" id="deceasedName" name="deceasedName" placeholder="First Middle Last" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="birthDate">Date of Birth</label>
+                        <input type="date" id="birthDate" name="birthDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passingDate">Date of Passing</label>
+                        <input type="date" id="passingDate" name="passingDate" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="shortBio">A Few Words About Them <span class="optional">(optional)</span></label>
+                    <textarea id="shortBio" name="shortBio" placeholder="What would they want people to know first? A sentence or two that captures their spirit..." maxlength="500"></textarea>
+                    <div class="char-counter"><span id="bioCharCount">0</span>/500</div>
+                </div>
+            </div>
+
+            <!-- Step 4: Family History -->
+            <div class="wizard-step" data-step="3">
+                <div class="step-header">
+                    <span class="step-icon">📍</span>
+                    <h1>Where their story began</h1>
+                    <p>Help future generations understand where they came from.</p>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="birthCity">Birthplace (City)</label>
+                        <input type="text" id="birthCity" name="birthCity" placeholder="e.g., Chicago">
+                    </div>
+                    <div class="form-group">
+                        <label for="birthState">State/Country</label>
+                        <input type="text" id="birthState" name="birthState" placeholder="e.g., Illinois">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="parentsNames">Parents' Names <span class="optional">(optional)</span></label>
+                    <input type="text" id="parentsNames" name="parentsNames" placeholder="e.g., Mary and John Smith">
+                </div>
+
+                <div class="form-group">
+                    <label for="siblings">Siblings <span class="optional">(optional)</span></label>
+                    <input type="text" id="siblings" name="siblings" placeholder="e.g., Brother James, Sister Sarah">
+                </div>
+
+                <div class="reassurance">
+                    <span class="reassurance-icon">→</span>
+                    <span>You can build a visual family tree later and link to other family members' memorials.</span>
+                </div>
+            </div>
+
+            <!-- Step 5: Accomplishments & Everyday Joys -->
+            <div class="wizard-step" data-step="4">
+                <div class="step-header">
+                    <span class="step-icon">⭐</span>
+                    <h1>The moments that made them who they were</h1>
+                    <p>Add as many or as few as you'd like. These can be big achievements or simple moments.</p>
+                </div>
+
+                <!-- Achievements -->
+                <div class="repeatable-section">
+                    <h3>⭐ Life Highlights</h3>
+                    <div class="repeatable-blocks" id="achievementBlocks">
+                        <div class="repeatable-block" data-block-type="achievement">
+                            <div class="repeatable-block-header">
+                                <span class="repeatable-block-title">Achievement</span>
+                                <button type="button" class="remove-block-btn" title="Remove">&times;</button>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="text" name="achievement_title_0" placeholder="e.g., Graduated from Harvard">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" name="achievement_date_0" placeholder="Year or date (e.g., 1985)">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <textarea name="achievement_desc_0" placeholder="Tell the story behind this moment..." rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-block-btn" data-add="achievement">+ Add Another Achievement</button>
+                </div>
+
+                <!-- Favorite Foods -->
+                <div class="repeatable-section">
+                    <h3>🍳 Favorite Foods & Recipes</h3>
+                    <div class="repeatable-blocks" id="foodBlocks">
+                        <div class="repeatable-block" data-block-type="food">
+                            <div class="repeatable-block-header">
+                                <span class="repeatable-block-title">Favorite Food</span>
+                                <button type="button" class="remove-block-btn" title="Remove">&times;</button>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="food_name_0" placeholder="e.g., Grandma's Apple Pie">
+                            </div>
+                            <div class="form-group">
+                                <textarea name="food_story_0" placeholder="What made it special? Include the recipe if you have it..." rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-block-btn" data-add="food">+ Add Another Favorite</button>
+                </div>
+
+                <!-- Simple Memories -->
+                <div class="repeatable-section">
+                    <h3>📝 Simple Memories</h3>
+                    <div class="repeatable-blocks" id="memoryBlocks">
+                        <div class="repeatable-block" data-block-type="memory">
+                            <div class="repeatable-block-header">
+                                <span class="repeatable-block-title">Memory</span>
+                                <button type="button" class="remove-block-btn" title="Remove">&times;</button>
+                            </div>
+                            <div class="form-group">
+                                <textarea name="memory_text_0" placeholder="A moment, a habit, something they always said..." rows="2"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="memory_by_0" placeholder="Shared by (your name or relationship)">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-block-btn" data-add="memory">+ Add Another Memory</button>
+                </div>
+
+                <div class="reassurance">
+                    <span class="reassurance-icon">→</span>
+                    <span>You can always add more later. Family members can contribute their own memories too.</span>
+                </div>
+            </div>
+
+            <!-- Step 6: Review, Preview & Publish -->
+            <div class="wizard-step" data-step="5">
+                <div class="step-header">
+                    <span class="step-icon">✓</span>
+                    <h1>Review & Publish</h1>
+                    <p>Here's a preview of the memorial. You can edit any section or publish when ready.</p>
+                </div>
+
+                <div class="memorial-preview-card">
+                    <div class="preview-header">
+                        <div class="preview-portrait" id="previewPortrait">👤</div>
+                        <h2 class="preview-name" id="previewName">Their Name</h2>
+                        <p class="preview-dates" id="previewDates">Birth — Passing</p>
+                    </div>
+                    <div class="preview-body">
+                        <p class="preview-bio" id="previewBio">Their story will appear here...</p>
+
+                        <div class="preview-section-title">
+                            <span>📜 Life Timeline</span>
+                            <span class="edit-section-btn" data-goto="3">✏️ Edit</span>
+                        </div>
+                        <div class="preview-placeholder">Timeline events will appear here</div>
+
+                        <div class="preview-section-title">
+                            <span>✨ Highlights & Memories</span>
+                            <span class="edit-section-btn" data-goto="4">✏️ Edit</span>
+                        </div>
+                        <div class="preview-placeholder">Achievements, favorites, and memories will appear here</div>
+                    </div>
+                </div>
+
+                <div class="publish-options">
+                    <div class="publish-option" id="saveDraftBtn">
+                        <h4>💾 Save as Draft</h4>
+                        <p>Continue editing later</p>
+                    </div>
+                    <div class="publish-option primary" id="publishNowBtn">
+                        <h4>🌟 Publish Now</h4>
+                        <p>Make it live for visitors</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="inviteEmails">Invite family members <span class="optional">(optional)</span></label>
+                    <input type="text" id="inviteEmails" name="inviteEmails" placeholder="Enter email addresses, separated by commas">
+                    <span class="field-hint">They'll receive a gentle invitation to view and contribute to the memorial.</span>
+                </div>
+
+                <div class="grief-support-link">
+                    <p>Creating a memorial can bring up a lot of emotions.</p>
+                    <a href="../grief-support/">Need support? We're here for you →</a>
+                </div>
+            </div>
+
+        </form>
+
+        <!-- Navigation -->
+        <div class="wizard-nav">
+            <button type="button" class="btn btn-back" id="prevBtn" style="visibility: hidden;">
+                ← Back
+            </button>
+            <button type="button" class="btn btn-primary" id="nextBtn">
+                Continue →
+            </button>
+        </div>
+    </div>
+
+    <!-- Shared Scripts -->
+    <script src="../js/script.js"></script>
+
+    <!-- Wizard Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const totalSteps = 6;
+            let currentStep = 0;
+
+            const steps = document.querySelectorAll('.wizard-step');
+            const dots = document.querySelectorAll('.wizard-progress-dot');
+            const labels = document.querySelectorAll('.wizard-progress-label');
+            const progressFill = document.getElementById('progressBarFill');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const autosaveIndicator = document.getElementById('autosaveIndicator');
+
+            // Initialize
+            updateProgress();
+
+            // Navigation
+            nextBtn.addEventListener('click', function() {
+                if (validateCurrentStep()) {
+                    goToStep(currentStep + 1);
+                }
+            });
+
+            prevBtn.addEventListener('click', function() {
+                goToStep(currentStep - 1);
+            });
+
+            // Dot navigation
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', function() {
+                    if (index <= currentStep) {
+                        goToStep(index);
+                    }
+                });
+            });
+
+            // Edit section buttons
+            document.querySelectorAll('.edit-section-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetStep = parseInt(this.dataset.goto);
+                    goToStep(targetStep);
+                });
+            });
+
+            function goToStep(step) {
+                if (step < 0 || step >= totalSteps) return;
+
+                // Hide current step
+                steps[currentStep].classList.remove('active');
+
+                // Show new step
+                currentStep = step;
+                steps[currentStep].classList.add('active');
+
+                updateProgress();
+                updateNavButtons();
+                updatePreview();
+
+                // Scroll to top of wizard
+                document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                // Simulate autosave
+                simulateAutosave();
+            }
+
+            function updateProgress() {
+                const progress = (currentStep / (totalSteps - 1)) * 100;
+                progressFill.style.width = progress + '%';
+
+                dots.forEach((dot, index) => {
+                    dot.classList.remove('active', 'completed');
+                    if (index < currentStep) {
+                        dot.classList.add('completed');
+                    } else if (index === currentStep) {
+                        dot.classList.add('active');
+                    }
+                });
+
+                labels.forEach((label, index) => {
+                    label.classList.remove('active');
+                    if (index === currentStep) {
+                        label.classList.add('active');
+                    }
+                });
+            }
+
+            function updateNavButtons() {
+                prevBtn.style.visibility = currentStep === 0 ? 'hidden' : 'visible';
+
+                if (currentStep === totalSteps - 1) {
+                    nextBtn.style.display = 'none';
+                } else {
+                    nextBtn.style.display = '';
+                    nextBtn.textContent = 'Continue →';
+                }
+            }
+
+            function validateCurrentStep() {
+                const currentStepEl = steps[currentStep];
+                const requiredFields = currentStepEl.querySelectorAll('[required]');
+                let isValid = true;
+
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.classList.add('invalid');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('invalid');
+                    }
+                });
+
+                if (!isValid) {
+                    const firstInvalid = currentStepEl.querySelector('.invalid');
+                    if (firstInvalid) {
+                        firstInvalid.focus();
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+
+                return isValid;
+            }
+
+            // Option cards
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const group = this.closest('.option-cards');
+                    group.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    this.querySelector('input').checked = true;
+                });
+            });
+
+            // Toggle switches
+            document.querySelectorAll('.toggle-switch').forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                });
+            });
+
+            // Portrait upload
+            const portraitUpload = document.getElementById('portraitUpload');
+            const portraitInput = document.getElementById('portraitInput');
+
+            portraitUpload.addEventListener('click', () => portraitInput.click());
+
+            portraitUpload.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                portraitUpload.style.borderColor = 'var(--sage-primary)';
+            });
+
+            portraitUpload.addEventListener('dragleave', () => {
+                portraitUpload.style.borderColor = '';
+            });
+
+            portraitUpload.addEventListener('drop', (e) => {
+                e.preventDefault();
+                portraitUpload.style.borderColor = '';
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handlePortraitUpload(files[0]);
+                }
+            });
+
+            portraitInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    handlePortraitUpload(this.files[0]);
+                }
+            });
+
+            function handlePortraitUpload(file) {
+                if (!file.type.startsWith('image/')) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'portrait-preview';
+
+                    // Remove existing content
+                    portraitUpload.innerHTML = '';
+                    portraitUpload.appendChild(img);
+                    portraitUpload.classList.add('has-image');
+
+                    // Store for preview
+                    portraitUpload.dataset.imageSrc = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Character counter for bio
+            const bioTextarea = document.getElementById('shortBio');
+            const charCount = document.getElementById('bioCharCount');
+
+            if (bioTextarea && charCount) {
+                bioTextarea.addEventListener('input', function() {
+                    const count = this.value.length;
+                    charCount.textContent = count;
+
+                    const counter = charCount.parentElement;
+                    counter.classList.remove('warning', 'limit');
+                    if (count > 450) counter.classList.add('warning');
+                    if (count >= 500) counter.classList.add('limit');
+                });
+            }
+
+            // Repeatable blocks
+            document.querySelectorAll('.add-block-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const type = this.dataset.add;
+                    const container = this.previousElementSibling;
+                    const count = container.children.length;
+
+                    const block = createBlock(type, count);
+                    container.appendChild(block);
+                });
+            });
+
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-block-btn')) {
+                    const block = e.target.closest('.repeatable-block');
+                    const container = block.parentElement;
+                    if (container.children.length > 1) {
+                        block.remove();
+                    }
+                }
+            });
+
+            function createBlock(type, index) {
+                const block = document.createElement('div');
+                block.className = 'repeatable-block';
+                block.dataset.blockType = type;
+
+                if (type === 'achievement') {
+                    block.innerHTML = `
+                        <div class="repeatable-block-header">
+                            <span class="repeatable-block-title">Achievement</span>
+                            <button type="button" class="remove-block-btn" title="Remove">&times;</button>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" name="achievement_title_${index}" placeholder="e.g., Graduated from Harvard">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="achievement_date_${index}" placeholder="Year or date (e.g., 1985)">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <textarea name="achievement_desc_${index}" placeholder="Tell the story behind this moment..." rows="2"></textarea>
+                        </div>
+                    `;
+                } else if (type === 'food') {
+                    block.innerHTML = `
+                        <div class="repeatable-block-header">
+                            <span class="repeatable-block-title">Favorite Food</span>
+                            <button type="button" class="remove-block-btn" title="Remove">&times;</button>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="food_name_${index}" placeholder="e.g., Grandma's Apple Pie">
+                        </div>
+                        <div class="form-group">
+                            <textarea name="food_story_${index}" placeholder="What made it special? Include the recipe if you have it..." rows="3"></textarea>
+                        </div>
+                    `;
+                } else if (type === 'memory') {
+                    block.innerHTML = `
+                        <div class="repeatable-block-header">
+                            <span class="repeatable-block-title">Memory</span>
+                            <button type="button" class="remove-block-btn" title="Remove">&times;</button>
+                        </div>
+                        <div class="form-group">
+                            <textarea name="memory_text_${index}" placeholder="A moment, a habit, something they always said..." rows="2"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="memory_by_${index}" placeholder="Shared by (your name or relationship)">
+                        </div>
+                    `;
+                }
+
+                return block;
+            }
+
+            // Update preview
+            function updatePreview() {
+                if (currentStep !== 5) return;
+
+                const name = document.getElementById('deceasedName').value || 'Their Name';
+                const birthDate = document.getElementById('birthDate').value;
+                const passingDate = document.getElementById('passingDate').value;
+                const bio = document.getElementById('shortBio').value || 'Their story will appear here...';
+
+                document.getElementById('previewName').textContent = name;
+                document.getElementById('previewBio').textContent = bio;
+
+                // Format dates
+                let dateText = 'Birth — Passing';
+                if (birthDate && passingDate) {
+                    const birth = new Date(birthDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                    const passing = new Date(passingDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                    dateText = `${birth} — ${passing}`;
+                }
+                document.getElementById('previewDates').textContent = dateText;
+
+                // Portrait
+                const portraitPreview = document.getElementById('previewPortrait');
+                const uploadedImage = portraitUpload.dataset.imageSrc;
+                if (uploadedImage) {
+                    portraitPreview.innerHTML = `<img src="${uploadedImage}" alt="${name}">`;
+                } else {
+                    portraitPreview.innerHTML = '👤';
+                }
+            }
+
+            // Autosave simulation
+            function simulateAutosave() {
+                autosaveIndicator.innerHTML = '<span class="indicator-icon">⏳</span><span class="indicator-text">Saving...</span>';
+                autosaveIndicator.classList.add('saving');
+                autosaveIndicator.classList.remove('saved');
+
+                setTimeout(() => {
+                    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    autosaveIndicator.innerHTML = `<span class="indicator-icon">✓</span><span class="indicator-text">Saved at ${now}</span>`;
+                    autosaveIndicator.classList.remove('saving');
+                    autosaveIndicator.classList.add('saved');
+                }, 800);
+            }
+
+            // Input change triggers autosave
+            document.querySelectorAll('input, textarea, select').forEach(field => {
+                field.addEventListener('change', () => {
+                    setTimeout(simulateAutosave, 500);
+                });
+            });
+
+            // Publish buttons
+            document.getElementById('saveDraftBtn').addEventListener('click', function() {
+                if (typeof showToast === 'function') {
+                    showToast('Memorial saved as draft. You can continue editing anytime.', 'success');
+                } else {
+                    alert('Memorial saved as draft!');
+                }
+            });
+
+            document.getElementById('publishNowBtn').addEventListener('click', function() {
+                if (typeof showToast === 'function') {
+                    showToast('Your memorial has been published! Redirecting...', 'success');
+                } else {
+                    alert('Memorial published!');
+                }
+                // In a real app, this would redirect to the memorial page
+                setTimeout(() => {
+                    // window.location.href = '../memorial/';
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>

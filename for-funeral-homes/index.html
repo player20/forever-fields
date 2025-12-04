@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Partner with Forever Fields to offer meaningful digital memorials to your families. Increase revenue while providing exceptional service.">
+    <title>For Funeral Homes & Professionals - Forever Fields</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        /* Page Header */
+        .page-header {
+            background: var(--warm-white);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--sage-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .page-header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--gray-body);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--sage-primary);
+        }
+
+        .header-cta .btn {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 900px) {
+            .nav-links { display: none; }
+        }
+
+        /* Hero */
+        .pro-hero {
+            background: linear-gradient(135deg, var(--twilight) 0%, #4A5A6B 50%, var(--sage-primary) 100%);
+            padding: 5rem 1.5rem;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pro-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(212, 175, 55, 0.15) 0%, transparent 30%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1.25rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .pro-hero h1 {
+            font-family: var(--font-serif);
+            font-size: clamp(2rem, 5vw, 3rem);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .pro-hero p {
+            font-size: 1.15rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-white {
+            background: white;
+            color: var(--twilight);
+        }
+
+        .btn-white:hover {
+            background: var(--cream);
+            transform: translateY(-2px);
+        }
+
+        /* Revenue Section */
+        .revenue-section {
+            padding: 5rem 1.5rem;
+            background: var(--warm-white);
+        }
+
+        .revenue-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        @media (max-width: 800px) {
+            .revenue-inner {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+
+        .revenue-content h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.75rem, 4vw, 2.25rem);
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+
+        .revenue-content p {
+            color: var(--gray-body);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .revenue-highlight {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--sage-pale);
+            padding: 1.25rem 1.5rem;
+            border-radius: 16px;
+            border-left: 4px solid var(--sage-primary);
+        }
+
+        .revenue-highlight-icon {
+            font-size: 2rem;
+        }
+
+        .revenue-highlight-text {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+        }
+
+        .revenue-highlight-amount {
+            color: var(--sage-primary);
+            font-weight: 600;
+        }
+
+        .revenue-card {
+            background: linear-gradient(135deg, var(--gold-light), var(--cream-warm));
+            border-radius: 24px;
+            padding: 3rem;
+            text-align: center;
+            border: 2px solid var(--gold-muted);
+        }
+
+        .revenue-card-label {
+            font-size: 0.9rem;
+            color: var(--gray-body);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .revenue-card-amount {
+            font-family: var(--font-serif);
+            font-size: 3.5rem;
+            color: var(--gray-dark);
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .revenue-card-suffix {
+            font-size: 1.25rem;
+            color: var(--gray-body);
+        }
+
+        .revenue-card-note {
+            font-size: 0.9rem;
+            color: var(--gray-light);
+            margin-top: 1rem;
+        }
+
+        /* Benefits Grid */
+        .benefits-section {
+            padding: 5rem 1.5rem;
+            background: var(--cream);
+        }
+
+        .benefits-section h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.75rem, 4vw, 2.25rem);
+            color: var(--gray-dark);
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .benefit-card {
+            background: var(--warm-white);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--sage-light);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px var(--shadow-soft);
+        }
+
+        .benefit-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .benefit-card h3 {
+            font-family: var(--font-serif);
+            font-size: 1.2rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .benefit-card p {
+            font-size: 0.95rem;
+            color: var(--gray-body);
+            line-height: 1.6;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 5rem 1.5rem;
+            background: var(--warm-white);
+        }
+
+        .how-it-works h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.75rem, 4vw, 2.25rem);
+            color: var(--gray-dark);
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 700px) {
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .step-card {
+            text-align: center;
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: var(--sage-primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 auto 1rem;
+        }
+
+        .step-card h3 {
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .step-card p {
+            font-size: 0.9rem;
+            color: var(--gray-body);
+            line-height: 1.6;
+        }
+
+        /* Demo Section (Calendly placeholder) */
+        .demo-section {
+            padding: 5rem 1.5rem;
+            background: linear-gradient(180deg, var(--sage-pale) 0%, var(--cream) 100%);
+        }
+
+        .demo-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        @media (max-width: 800px) {
+            .demo-inner {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .demo-content h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.75rem, 4vw, 2.25rem);
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+
+        .demo-content p {
+            color: var(--gray-body);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .demo-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .demo-features li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--gray-body);
+        }
+
+        .demo-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--sage-primary);
+            font-weight: 600;
+        }
+
+        .calendly-placeholder {
+            background: var(--warm-white);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 10px 40px var(--shadow-soft);
+            border: 2px solid var(--sage-light);
+        }
+
+        .calendly-placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .calendly-placeholder h3 {
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .calendly-placeholder p {
+            color: var(--gray-body);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Testimonials */
+        .testimonials-section {
+            padding: 5rem 1.5rem;
+            background: var(--cream);
+        }
+
+        .testimonials-section h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.75rem, 4vw, 2.25rem);
+            color: var(--gray-dark);
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .testimonial-card {
+            background: var(--warm-white);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px var(--shadow-medium);
+        }
+
+        .testimonial-text {
+            font-size: 0.95rem;
+            color: var(--gray-body);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .testimonial-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--sage-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .testimonial-info {
+            font-size: 0.9rem;
+        }
+
+        .testimonial-name {
+            font-weight: 600;
+            color: var(--gray-dark);
+        }
+
+        .testimonial-role {
+            color: var(--gray-light);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 5rem 1.5rem;
+            background: linear-gradient(135deg, var(--twilight) 0%, var(--sage-primary) 100%);
+            text-align: center;
+            color: white;
+        }
+
+        .cta-section h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer */
+        .site-footer {
+            background: var(--gray-dark);
+            color: rgba(255,255,255,0.7);
+            padding: 3rem 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--gold-muted);
+        }
+
+        .footer-tagline {
+            font-family: var(--font-serif);
+            font-style: italic;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-copyright {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="page-header">
+        <div class="page-header-inner">
+            <a href="../" class="logo">
+                <span>🌿</span>
+                <span>Forever Fields</span>
+            </a>
+            <nav class="nav-links">
+                <a href="../how-it-works/">How It Works</a>
+                <a href="../for-families/">For Families</a>
+                <a href="./" class="active">For Professionals</a>
+                <a href="../pricing/">Pricing</a>
+                <a href="../grief-support/">Grief Support</a>
+            </nav>
+            <div class="header-cta">
+                <a href="#demo" class="btn btn-primary">Schedule a Demo</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="pro-hero">
+        <div class="hero-content">
+            <div class="hero-badge">🏛️ Partner Program</div>
+            <h1>Offer something truly meaningful to your families</h1>
+            <p>Digital memorials and grief support tools that families love—and a new revenue stream that adds value to your services.</p>
+            <div class="hero-buttons">
+                <a href="#demo" class="btn btn-white">Schedule a Demo</a>
+                <a href="#revenue" class="btn btn-secondary" style="border-color: rgba(255,255,255,0.5); color: white;">See Revenue Model</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Revenue Section -->
+    <section class="revenue-section" id="revenue">
+        <div class="revenue-inner">
+            <div class="revenue-content">
+                <h2>A meaningful upsell families appreciate</h2>
+                <p>Unlike add-ons that feel transactional, Forever Fields memorials are a genuine way to help families preserve their loved one's legacy. They'll thank you for introducing them to it.</p>
+                <p>You set the price. We provide the platform, support, and white-label options. Families get a beautiful memorial that lasts generations.</p>
+                <div class="revenue-highlight">
+                    <span class="revenue-highlight-icon">💰</span>
+                    <span class="revenue-highlight-text">Average increase of <span class="revenue-highlight-amount">$800–$2,000</span> per service</span>
+                </div>
+            </div>
+            <div class="revenue-card fade-in">
+                <div class="revenue-card-label">Potential Annual Revenue</div>
+                <div class="revenue-card-amount">$48K<span class="revenue-card-suffix">+</span></div>
+                <div class="revenue-card-note">Based on 50 services/year at $1,000 each</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits -->
+    <section class="benefits-section">
+        <h2>Why Funeral Homes Partner With Us</h2>
+        <div class="benefits-grid">
+            <div class="benefit-card fade-in">
+                <div class="benefit-icon">🤝</div>
+                <h3>We Handle Everything</h3>
+                <p>From the technology to family support, we manage the platform. You focus on what you do best—serving families during their hardest moments.</p>
+            </div>
+            <div class="benefit-card fade-in">
+                <div class="benefit-icon">🎨</div>
+                <h3>White-Label Options</h3>
+                <p>Brand the memorial platform with your logo and colors. It looks like your own proprietary service, building trust with families.</p>
+            </div>
+            <div class="benefit-card fade-in">
+                <div class="benefit-icon">💝</div>
+                <h3>Grief Support Included</h3>
+                <p>Our built-in healing resources set you apart. Families appreciate the ongoing care long after the service ends.</p>
+            </div>
+            <div class="benefit-card fade-in">
+                <div class="benefit-icon">📈</div>
+                <h3>Easy to Sell</h3>
+                <p>Show families the demo memorial and they sell themselves. It's a natural addition to any service package.</p>
+            </div>
+            <div class="benefit-card fade-in">
+                <div class="benefit-icon">🔄</div>
+                <h3>Recurring Revenue</h3>
+                <p>Annual maintenance fees create passive income. Families renew because they value what they've built.</p>
+            </div>
+            <div class="benefit-card fade-in">
+                <div class="benefit-icon">⚡</div>
+                <h3>Quick Setup</h3>
+                <p>Be up and running in days, not months. We provide training, marketing materials, and ongoing support.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <h2>Simple to Implement</h2>
+        <div class="steps-grid">
+            <div class="step-card fade-in">
+                <div class="step-number">1</div>
+                <h3>Schedule a Demo</h3>
+                <p>We'll walk you through the platform and answer all your questions. No commitment required.</p>
+            </div>
+            <div class="step-card fade-in">
+                <div class="step-number">2</div>
+                <h3>Customize Your Offering</h3>
+                <p>Choose your pricing, branding, and package options. We help you position it perfectly for your families.</p>
+            </div>
+            <div class="step-card fade-in">
+                <div class="step-number">3</div>
+                <h3>Start Offering</h3>
+                <p>With training complete and materials in hand, you're ready to provide this meaningful service.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="demo-section" id="demo">
+        <div class="demo-inner">
+            <div class="demo-content">
+                <h2>See It In Action</h2>
+                <p>Schedule a 30-minute demo and discover how Forever Fields can enhance your services while creating a new revenue stream.</p>
+                <ul class="demo-features">
+                    <li>Live walkthrough of the memorial platform</li>
+                    <li>Revenue and pricing strategies</li>
+                    <li>White-label customization options</li>
+                    <li>Q&A with our partnership team</li>
+                    <li>No commitment required</li>
+                </ul>
+            </div>
+            <div class="calendly-placeholder fade-in">
+                <div class="calendly-placeholder-icon">📅</div>
+                <h3>Book Your Demo</h3>
+                <p>Choose a time that works for you. Our team is available Monday–Friday.</p>
+                <a href="mailto:partners@foreverfields.com" class="btn btn-primary">Schedule Now</a>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--gray-light);">Or call us: (555) 123-4567</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials-section">
+        <h2>What Our Partners Say</h2>
+        <div class="testimonials-grid">
+            <div class="testimonial-card fade-in">
+                <p class="testimonial-text">"Forever Fields has become one of our most requested services. Families love being able to show grandchildren their heritage. It's added significant revenue while genuinely helping people."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">🏛️</div>
+                    <div class="testimonial-info">
+                        <div class="testimonial-name">Heritage Memorial Chapel</div>
+                        <div class="testimonial-role">Austin, TX</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card fade-in">
+                <p class="testimonial-text">"The grief support resources set us apart from competitors. Families tell us they feel cared for long after the service. It's improved our reputation and referrals significantly."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">🏛️</div>
+                    <div class="testimonial-info">
+                        <div class="testimonial-name">Peaceful Rest Funeral Home</div>
+                        <div class="testimonial-role">Chicago, IL</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card fade-in">
+                <p class="testimonial-text">"Implementation was seamless. The Forever Fields team handled everything, and our staff was trained in one afternoon. We were offering memorials within a week."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">🏛️</div>
+                    <div class="testimonial-info">
+                        <div class="testimonial-name">Evergreen Mortuary</div>
+                        <div class="testimonial-role">Denver, CO</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>Ready to Enhance Your Services?</h2>
+        <p>Join funeral homes across the country offering meaningful digital memorials.</p>
+        <a href="#demo" class="btn btn-gold">Schedule Your Demo →</a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-logo">🌿</div>
+        <nav class="footer-links">
+            <a href="../about/">About</a>
+            <a href="../how-it-works/">How It Works</a>
+            <a href="../for-families/">For Families</a>
+            <a href="../grief-support/">Grief Resources</a>
+            <a href="../pricing/">Pricing</a>
+        </nav>
+        <p class="footer-tagline">Made with love for grieving hearts</p>
+        <p class="footer-copyright">© 2025 Forever Fields. All rights reserved.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/script.js"></script>
+</body>
+</html>

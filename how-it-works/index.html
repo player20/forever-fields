@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Learn how Forever Fields works. Create a beautiful online memorial in 4 simple steps.">
+    <title>How It Works - Forever Fields</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        /* Header */
+        .page-header {
+            background: var(--warm-white);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--sage-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .page-header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--gray-body);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--sage-primary);
+        }
+
+        .header-cta {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .header-cta .btn {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 900px) {
+            .nav-links { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .header-cta .btn-secondary { display: none; }
+        }
+
+        /* Hero */
+        .how-hero {
+            background: linear-gradient(180deg, var(--sage-pale) 0%, var(--cream) 100%);
+            padding: 5rem 1.5rem;
+            text-align: center;
+        }
+
+        .how-hero h1 {
+            font-family: var(--font-serif);
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+
+        .how-hero p {
+            font-size: 1.15rem;
+            color: var(--gray-body);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Steps Section */
+        .steps-section {
+            padding: 5rem 1.5rem;
+            background: var(--warm-white);
+        }
+
+        .steps-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .step-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            margin-bottom: 5rem;
+        }
+
+        .step-row:nth-child(even) {
+            direction: rtl;
+        }
+
+        .step-row:nth-child(even) > * {
+            direction: ltr;
+        }
+
+        .step-row:last-child {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 700px) {
+            .step-row,
+            .step-row:nth-child(even) {
+                grid-template-columns: 1fr;
+                direction: ltr;
+                gap: 2rem;
+            }
+        }
+
+        .step-content {
+            padding: 1rem 0;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--sage-primary), #7A8E72);
+            color: white;
+            border-radius: 50%;
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+        }
+
+        .step-content h2 {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .step-content p {
+            color: var(--gray-body);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .step-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .step-features li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--gray-body);
+            font-size: 0.95rem;
+        }
+
+        .step-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--sage-primary);
+            font-weight: 600;
+        }
+
+        .step-visual {
+            background: var(--cream);
+            border-radius: 24px;
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            border: 2px solid var(--sage-light);
+            box-shadow: 0 10px 40px var(--shadow-soft);
+        }
+
+        /* Video Section */
+        .video-section {
+            padding: 5rem 1.5rem;
+            background: var(--cream);
+            text-align: center;
+        }
+
+        .video-section h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.75rem, 4vw, 2.25rem);
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+
+        .video-section > p {
+            color: var(--gray-body);
+            margin-bottom: 2rem;
+        }
+
+        .video-placeholder {
+            max-width: 800px;
+            margin: 0 auto;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, var(--twilight), var(--sage-primary));
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 15px 50px var(--shadow-soft);
+        }
+
+        .video-play-btn {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .video-play-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .video-placeholder p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* FAQ Teaser */
+        .faq-teaser {
+            padding: 4rem 1.5rem;
+            background: var(--warm-white);
+            text-align: center;
+        }
+
+        .faq-teaser h2 {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+
+        .faq-teaser p {
+            color: var(--gray-body);
+            margin-bottom: 1.5rem;
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        .faq-card {
+            background: var(--cream);
+            padding: 1.25rem;
+            border-radius: 12px;
+            text-align: left;
+            border: 1px solid var(--sage-light);
+        }
+
+        .faq-card h4 {
+            font-family: var(--font-serif);
+            font-size: 1rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .faq-card p {
+            font-size: 0.9rem;
+            color: var(--gray-body);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* CTA */
+        .cta-section {
+            padding: 5rem 1.5rem;
+            background: linear-gradient(135deg, var(--sage-primary) 0%, #6B8E63 100%);
+            text-align: center;
+            color: white;
+        }
+
+        .cta-section h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer */
+        .site-footer {
+            background: var(--gray-dark);
+            color: rgba(255,255,255,0.7);
+            padding: 3rem 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .footer-logo { font-size: 1.75rem; margin-bottom: 1rem; }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover { color: var(--gold-muted); }
+
+        .footer-tagline {
+            font-family: var(--font-serif);
+            font-style: italic;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-copyright {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="page-header">
+        <div class="page-header-inner">
+            <a href="../" class="logo">
+                <span>🌿</span>
+                <span>Forever Fields</span>
+            </a>
+            <nav class="nav-links">
+                <a href="./" class="active">How It Works</a>
+                <a href="../for-families/">For Families</a>
+                <a href="../for-funeral-homes/">For Professionals</a>
+                <a href="../pricing/">Pricing</a>
+                <a href="../grief-support/">Grief Support</a>
+            </nav>
+            <div class="header-cta">
+                <a href="../login/" class="btn btn-secondary">Sign In</a>
+                <a href="../create/" class="btn btn-primary">Create Memorial</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="how-hero">
+        <h1>Creating a Memorial Is Simple</h1>
+        <p>In just a few steps, you can build a beautiful, lasting tribute that brings your family together and preserves their story for generations.</p>
+    </section>
+
+    <!-- Steps -->
+    <section class="steps-section">
+        <div class="steps-container">
+            <!-- Step 1 -->
+            <div class="step-row fade-in">
+                <div class="step-content">
+                    <div class="step-number">1</div>
+                    <h2>Start with the basics</h2>
+                    <p>No account needed to begin. Just enter your email and we'll save your progress automatically. Add their name, photo, and a few dates to get started.</p>
+                    <ul class="step-features">
+                        <li>No login required to start</li>
+                        <li>Auto-save as you go</li>
+                        <li>Continue anytime from any device</li>
+                    </ul>
+                </div>
+                <div class="step-visual">📝</div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-row fade-in">
+                <div class="step-content">
+                    <div class="step-number">2</div>
+                    <h2>Add their story</h2>
+                    <p>This is where the memorial comes alive. Add their hometown, family history, accomplishments, favorite recipes, photos, and cherished memories.</p>
+                    <ul class="step-features">
+                        <li>Unlimited photos and videos</li>
+                        <li>Timeline of life events</li>
+                        <li>Voice recordings and stories</li>
+                        <li>Recipes, songs, and everyday joys</li>
+                    </ul>
+                </div>
+                <div class="step-visual">📖</div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-row fade-in">
+                <div class="step-content">
+                    <div class="step-number">3</div>
+                    <h2>Invite your family</h2>
+                    <p>Share the memorial with family members so they can contribute their own memories. Everyone can add photos, stories, and tributes.</p>
+                    <ul class="step-features">
+                        <li>Easy invite links</li>
+                        <li>Control who can edit vs. view</li>
+                        <li>Family members add their memories</li>
+                        <li>Works on any device</li>
+                    </ul>
+                </div>
+                <div class="step-visual">👨‍👩‍👧‍👦</div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step-row fade-in">
+                <div class="step-content">
+                    <div class="step-number">4</div>
+                    <h2>Preserve forever</h2>
+                    <p>Once published, the memorial lives on. Visit anytime, light candles, leave flowers, and continue adding memories as your family grows.</p>
+                    <ul class="step-features">
+                        <li>Accessible from anywhere</li>
+                        <li>Secure and backed up</li>
+                        <li>Gentle healing prompts</li>
+                        <li>A legacy for future generations</li>
+                    </ul>
+                </div>
+                <div class="step-visual">🌳</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video -->
+    <section class="video-section">
+        <h2>See It In Action</h2>
+        <p>Watch how easy it is to create a beautiful memorial.</p>
+        <div class="video-placeholder fade-in">
+            <div class="video-play-btn">▶</div>
+            <p>Watch the 2-minute demo</p>
+        </div>
+    </section>
+
+    <!-- FAQ Teaser -->
+    <section class="faq-teaser">
+        <h2>Quick Answers</h2>
+        <p>Still have questions? Here are some common ones.</p>
+        <div class="faq-grid">
+            <div class="faq-card fade-in">
+                <h4>How long does it take?</h4>
+                <p>You can create a basic memorial in 10 minutes. Add more details over time.</p>
+            </div>
+            <div class="faq-card fade-in">
+                <h4>Is it really preserved forever?</h4>
+                <p>Yes. Your memorial will never be deleted, even if you don't renew.</p>
+            </div>
+            <div class="faq-card fade-in">
+                <h4>Can I keep it private?</h4>
+                <p>Absolutely. You control who can view and contribute.</p>
+            </div>
+        </div>
+        <a href="../for-families/#faq" class="btn btn-secondary">See All FAQs</a>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>Ready to Get Started?</h2>
+        <p>Create a free preview and see how beautiful their memorial can be.</p>
+        <a href="../create/" class="btn btn-gold">Start Your Memorial →</a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-logo">🌿</div>
+        <nav class="footer-links">
+            <a href="../about/">About</a>
+            <a href="./">How It Works</a>
+            <a href="../for-families/">For Families</a>
+            <a href="../for-funeral-homes/">For Funeral Homes</a>
+            <a href="../grief-support/">Grief Resources</a>
+            <a href="../pricing/">Pricing</a>
+        </nav>
+        <p class="footer-tagline">Made with love for grieving hearts</p>
+        <p class="footer-copyright">© 2025 Forever Fields. All rights reserved.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/script.js"></script>
+</body>
+</html>

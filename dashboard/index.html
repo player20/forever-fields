@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Manage your Forever Fields memorials. View, edit, and create new memorials for your loved ones.">
+    <title>My Memorials - Forever Fields</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        /* Header */
+        .dashboard-header {
+            background: var(--warm-white);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--sage-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .dashboard-header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            text-decoration: none;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .header-links a {
+            color: var(--gray-body);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .header-links a:hover {
+            color: var(--sage-primary);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: var(--sage-pale);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .user-menu:hover {
+            background: var(--sage-light);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--sage-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+            color: var(--gray-dark);
+            font-weight: 500;
+        }
+
+        @media (max-width: 600px) {
+            .header-links { display: none; }
+            .user-name { display: none; }
+        }
+
+        /* Main Content */
+        .dashboard-main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            margin-bottom: 2rem;
+        }
+
+        .welcome-section h1 {
+            font-family: var(--font-serif);
+            font-size: 1.75rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            color: var(--gray-body);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-actions .btn {
+            padding: 0.75rem 1.5rem;
+        }
+
+        /* Memorials Grid */
+        .memorials-section h2 {
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .memorial-count {
+            background: var(--sage-pale);
+            color: var(--sage-primary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: var(--font-sans);
+        }
+
+        .memorials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Memorial Card */
+        .memorial-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--sage-light);
+            transition: all 0.3s ease;
+        }
+
+        .memorial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px var(--shadow-soft);
+        }
+
+        .memorial-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, var(--sage-pale) 0%, var(--cream) 100%);
+        }
+
+        .memorial-portrait {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--sage-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px var(--shadow-soft);
+        }
+
+        .memorial-info h3 {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .memorial-dates {
+            font-size: 0.85rem;
+            color: var(--gray-body);
+        }
+
+        .memorial-card-body {
+            padding: 1.25rem;
+        }
+
+        .memorial-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .memorial-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .memorial-status.published {
+            background: var(--sage-pale);
+            color: #5a8a4a;
+        }
+
+        .memorial-status.draft {
+            background: var(--gold-light);
+            color: #8a7a4a;
+        }
+
+        .memorial-status::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .last-edited {
+            font-size: 0.8rem;
+            color: var(--gray-body);
+        }
+
+        .memorial-stats {
+            display: flex;
+            gap: 1.25rem;
+            padding: 0.75rem 0;
+            border-top: 1px solid var(--sage-pale);
+            border-bottom: 1px solid var(--sage-pale);
+            margin-bottom: 1rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gray-dark);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--gray-body);
+        }
+
+        .memorial-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .memorial-actions .btn {
+            flex: 1;
+            padding: 0.6rem;
+            font-size: 0.85rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--cream);
+            border-radius: 20px;
+            border: 2px dashed var(--sage-light);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--gray-body);
+            margin-bottom: 1.5rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Resources Sidebar */
+        .resources-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--sage-light);
+        }
+
+        .resources-section h2 {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--cream);
+            border-radius: 12px;
+            text-decoration: none;
+            transition: background 0.2s ease;
+        }
+
+        .resource-link:hover {
+            background: var(--sage-pale);
+        }
+
+        .resource-icon {
+            font-size: 1.25rem;
+        }
+
+        .resource-link span {
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        .dashboard-footer {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border-top: 1px solid var(--sage-light);
+        }
+
+        .dashboard-footer p {
+            color: var(--gray-body);
+            font-size: 0.85rem;
+        }
+
+        .dashboard-footer a {
+            color: var(--sage-primary);
+            text-decoration: none;
+        }
+
+        .dashboard-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="dashboard-header-inner">
+            <a href="../" class="logo">
+                <span>🌿</span>
+                <span>Forever Fields</span>
+            </a>
+            <div class="header-actions">
+                <nav class="header-links">
+                    <a href="../grief-support/">Grief Support</a>
+                    <a href="../pricing/">Upgrade</a>
+                </nav>
+                <div class="user-menu">
+                    <div class="user-avatar">S</div>
+                    <span class="user-name">Sarah</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="dashboard-main">
+        <!-- Welcome -->
+        <section class="welcome-section fade-in">
+            <h1>Welcome back, Sarah</h1>
+            <p>Continue preserving the memories that matter most.</p>
+        </section>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions fade-in">
+            <a href="../create/" class="btn btn-primary">+ Create New Memorial</a>
+            <a href="../grief-support/" class="btn btn-secondary">Grief Resources</a>
+        </div>
+
+        <!-- Memorials -->
+        <section class="memorials-section">
+            <h2>
+                Your Memorials
+                <span class="memorial-count">2</span>
+            </h2>
+
+            <div class="memorials-grid">
+                <!-- Memorial 1 -->
+                <div class="memorial-card fade-in">
+                    <div class="memorial-card-header">
+                        <div class="memorial-portrait">👵</div>
+                        <div class="memorial-info">
+                            <h3>Margaret Louise Carter</h3>
+                            <p class="memorial-dates">1938 - 2024</p>
+                        </div>
+                    </div>
+                    <div class="memorial-card-body">
+                        <div class="memorial-meta">
+                            <span class="memorial-status published">Published</span>
+                            <span class="last-edited">Edited 2 days ago</span>
+                        </div>
+                        <div class="memorial-stats">
+                            <div class="stat">
+                                <div class="stat-value">247</div>
+                                <div class="stat-label">Candles</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">89</div>
+                                <div class="stat-label">Flowers</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">34</div>
+                                <div class="stat-label">Memories</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">1.2k</div>
+                                <div class="stat-label">Visits</div>
+                            </div>
+                        </div>
+                        <div class="memorial-actions">
+                            <a href="../memorial/" class="btn btn-secondary">View</a>
+                            <a href="../create/?edit=margaret" class="btn btn-primary">Edit</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Memorial 2 (Draft) -->
+                <div class="memorial-card fade-in">
+                    <div class="memorial-card-header">
+                        <div class="memorial-portrait">👴</div>
+                        <div class="memorial-info">
+                            <h3>Thomas William Carter</h3>
+                            <p class="memorial-dates">1935 - 2022</p>
+                        </div>
+                    </div>
+                    <div class="memorial-card-body">
+                        <div class="memorial-meta">
+                            <span class="memorial-status draft">Draft</span>
+                            <span class="last-edited">Edited 1 week ago</span>
+                        </div>
+                        <div class="memorial-stats">
+                            <div class="stat">
+                                <div class="stat-value">—</div>
+                                <div class="stat-label">Candles</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">—</div>
+                                <div class="stat-label">Flowers</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">8</div>
+                                <div class="stat-label">Memories</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">—</div>
+                                <div class="stat-label">Visits</div>
+                            </div>
+                        </div>
+                        <div class="memorial-actions">
+                            <a href="../preview/" class="btn btn-secondary">Preview</a>
+                            <a href="../create/?edit=thomas" class="btn btn-primary">Continue</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create New Card -->
+                <div class="memorial-card fade-in" style="border-style: dashed; background: var(--cream);">
+                    <a href="../create/" style="display: block; padding: 3rem 1.5rem; text-align: center; text-decoration: none;">
+                        <div style="font-size: 2.5rem; margin-bottom: 1rem;">+</div>
+                        <h3 style="font-family: var(--font-serif); color: var(--gray-dark); margin-bottom: 0.5rem;">Create New Memorial</h3>
+                        <p style="color: var(--gray-body); font-size: 0.9rem;">Honor another loved one</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resources -->
+        <section class="resources-section fade-in">
+            <h2>Quick Links</h2>
+            <div class="resources-grid">
+                <a href="../grief-support/" class="resource-link">
+                    <span class="resource-icon">💜</span>
+                    <span>Grief Support Resources</span>
+                </a>
+                <a href="../how-it-works/" class="resource-link">
+                    <span class="resource-icon">📖</span>
+                    <span>How It Works Guide</span>
+                </a>
+                <a href="mailto:hello@foreverfields.com" class="resource-link">
+                    <span class="resource-icon">💬</span>
+                    <span>Contact Support</span>
+                </a>
+                <a href="../pricing/" class="resource-link">
+                    <span class="resource-icon">✨</span>
+                    <span>Upgrade Your Plan</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+        <p>
+            <a href="../about/">About</a> ·
+            <a href="../pricing/">Pricing</a> ·
+            <a href="mailto:hello@foreverfields.com">Help</a> ·
+            <a href="#" id="signOut">Sign Out</a>
+        </p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/script.js"></script>
+    <script>
+        // Sign out handler
+        document.getElementById('signOut').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Are you sure you want to sign out?')) {
+                window.location.href = '../login/';
+            }
+        });
+    </script>
+</body>
+</html>

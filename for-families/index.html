@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Keep their memory alive, wherever you are. Forever Fields helps families create beautiful online memorials that preserve every detail of their loved one's life.">
+    <title>For Families - Forever Fields</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        /* Page Header */
+        .page-header {
+            background: var(--warm-white);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--sage-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .page-header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--gray-body);
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--sage-primary);
+        }
+
+        .header-cta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-cta .btn {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 900px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header-cta .btn-secondary {
+                display: none;
+            }
+        }
+
+        /* Hero */
+        .families-hero {
+            background: linear-gradient(135deg, var(--sage-pale) 0%, var(--cream-warm) 100%);
+            padding: 5rem 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .families-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(167, 201, 162, 0.3) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(212, 175, 55, 0.15) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .hero-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .families-hero h1 {
+            font-family: var(--font-serif);
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .families-hero p {
+            font-size: 1.15rem;
+            color: var(--gray-body);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Benefits Section */
+        .benefits-section {
+            padding: 5rem 1.5rem;
+            background: var(--warm-white);
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .benefit-card {
+            background: var(--cream);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(167, 201, 162, 0.2);
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px var(--shadow-soft);
+        }
+
+        .benefit-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .benefit-card h3 {
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .benefit-card p {
+            font-size: 0.95rem;
+            color: var(--gray-body);
+            line-height: 1.6;
+        }
+
+        /* Testimonial Section */
+        .testimonial-section {
+            padding: 5rem 1.5rem;
+            background: linear-gradient(180deg, var(--cream) 0%, var(--sage-pale) 100%);
+        }
+
+        .testimonial-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--warm-white);
+            border-radius: 24px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 15px 50px var(--shadow-soft);
+            position: relative;
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            font-family: var(--font-serif);
+            font-size: 6rem;
+            color: var(--sage-light);
+            position: absolute;
+            top: 1rem;
+            left: 2rem;
+            line-height: 1;
+        }
+
+        .testimonial-text {
+            font-family: var(--font-serif);
+            font-size: 1.35rem;
+            color: var(--gray-dark);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--sage-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .author-info {
+            text-align: left;
+        }
+
+        .author-name {
+            font-weight: 600;
+            color: var(--gray-dark);
+        }
+
+        .author-relation {
+            font-size: 0.9rem;
+            color: var(--gray-light);
+        }
+
+        /* Pricing Preview */
+        .pricing-preview {
+            padding: 5rem 1.5rem;
+            background: var(--warm-white);
+            text-align: center;
+        }
+
+        .pricing-preview h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.75rem, 4vw, 2.25rem);
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+
+        .pricing-preview > p {
+            color: var(--gray-body);
+            margin-bottom: 2.5rem;
+            font-size: 1.05rem;
+        }
+
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        .price-card {
+            background: var(--cream);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 2px solid var(--sage-light);
+            transition: all 0.3s ease;
+        }
+
+        .price-card.featured {
+            border-color: var(--gold-muted);
+            position: relative;
+        }
+
+        .price-card.featured::before {
+            content: 'Most Popular';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gold-muted);
+            color: white;
+            padding: 0.25rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .price-card h3 {
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .price-amount {
+            font-family: var(--font-serif);
+            font-size: 2rem;
+            color: var(--sage-primary);
+            font-weight: 600;
+        }
+
+        .price-suffix {
+            font-size: 0.9rem;
+            color: var(--gray-light);
+        }
+
+        .price-card .btn {
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            padding: 5rem 1.5rem;
+            background: var(--cream);
+        }
+
+        .faq-section h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.75rem, 4vw, 2.25rem);
+            color: var(--gray-dark);
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .faq-list {
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--warm-white);
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            border: 1px solid var(--sage-light);
+        }
+
+        .faq-question {
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--gray-dark);
+            transition: background 0.2s;
+        }
+
+        .faq-question:hover {
+            background: var(--sage-pale);
+        }
+
+        .faq-toggle {
+            font-size: 1.25rem;
+            color: var(--sage-primary);
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 300px;
+        }
+
+        .faq-answer-inner {
+            padding: 0 1.5rem 1.5rem;
+            color: var(--gray-body);
+            line-height: 1.7;
+        }
+
+        /* Grief Resources Teaser */
+        .grief-teaser {
+            padding: 4rem 1.5rem;
+            background: linear-gradient(135deg, var(--lavender-subtle), var(--cream));
+            text-align: center;
+        }
+
+        .grief-teaser-inner {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .grief-teaser-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .grief-teaser h3 {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .grief-teaser p {
+            color: var(--gray-body);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 5rem 1.5rem;
+            background: linear-gradient(135deg, var(--sage-primary) 0%, #6B8E63 100%);
+            text-align: center;
+            color: white;
+        }
+
+        .cta-section h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer */
+        .site-footer {
+            background: var(--gray-dark);
+            color: rgba(255,255,255,0.7);
+            padding: 3rem 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--gold-muted);
+        }
+
+        .footer-tagline {
+            font-family: var(--font-serif);
+            font-style: italic;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-copyright {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="page-header">
+        <div class="page-header-inner">
+            <a href="../" class="logo">
+                <span>🌿</span>
+                <span>Forever Fields</span>
+            </a>
+            <nav class="nav-links">
+                <a href="../how-it-works/">How It Works</a>
+                <a href="./" class="active">For Families</a>
+                <a href="../for-funeral-homes/">For Professionals</a>
+                <a href="../pricing/">Pricing</a>
+                <a href="../grief-support/">Grief Support</a>
+            </nav>
+            <div class="header-cta">
+                <a href="../login/" class="btn btn-secondary">Sign In</a>
+                <a href="../create/" class="btn btn-primary">Create Memorial</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="families-hero">
+        <div class="hero-content">
+            <div class="hero-icon">👨‍👩‍👧‍👦</div>
+            <h1>Keep their memory alive, wherever you are</h1>
+            <p>Whether your family is scattered across the globe or gathered close, Forever Fields gives everyone a place to remember, share, and heal together.</p>
+            <div class="hero-buttons">
+                <a href="../create/" class="btn btn-primary">Start Your Memorial</a>
+                <a href="../preview/" class="btn btn-secondary">See an Example</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits -->
+    <section class="benefits-section">
+        <div class="benefits-grid">
+            <div class="benefit-card fade-in">
+                <div class="benefit-icon">🌍</div>
+                <h3>Visit From Anywhere</h3>
+                <p>No more traveling to a cemetery. Visit their memorial from your phone, tablet, or computer—anytime, anywhere in the world.</p>
+            </div>
+            <div class="benefit-card fade-in">
+                <div class="benefit-icon">📖</div>
+                <h3>Preserve Their Full Story</h3>
+                <p>Go beyond dates and names. Save their hometown, favorite recipes, voice recordings, photos by the hundreds, and stories from everyone who loved them.</p>
+            </div>
+            <div class="benefit-card fade-in">
+                <div class="benefit-icon">👶</div>
+                <h3>Connect Generations</h3>
+                <p>Help children and grandchildren know their heritage. Create a living record that grows with your family for generations to come.</p>
+            </div>
+            <div class="benefit-card fade-in">
+                <div class="benefit-icon">💝</div>
+                <h3>Heal Together</h3>
+                <p>Light candles, leave flowers, and share memories with family members near and far. Grief is easier when you're not alone.</p>
+            </div>
+            <div class="benefit-card fade-in">
+                <div class="benefit-icon">🔒</div>
+                <h3>Private or Public</h3>
+                <p>Choose who can visit. Keep it just for family with private invite links, or open it to friends and the community.</p>
+            </div>
+            <div class="benefit-card fade-in">
+                <div class="benefit-icon">🌱</div>
+                <h3>Gentle Grief Support</h3>
+                <p>Our built-in healing prompts and resources help you process your grief at your own pace, one day at a time.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial -->
+    <section class="testimonial-section">
+        <div class="testimonial-card fade-in">
+            <p class="testimonial-text">When Dad passed, our family was spread across three countries. Forever Fields gave us a place to gather, share stories, and feel close to him again. My kids can now hear his voice and see his life story whenever they miss their grandpa.</p>
+            <div class="testimonial-author">
+                <div class="author-avatar">👩</div>
+                <div class="author-info">
+                    <div class="author-name">Jennifer M.</div>
+                    <div class="author-relation">Created a memorial for her father</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Preview -->
+    <section class="pricing-preview">
+        <h2>Simple, Transparent Pricing</h2>
+        <p>One price, forever preserved. No hidden fees or surprises.</p>
+        <div class="pricing-cards">
+            <div class="price-card fade-in">
+                <h3>Forever Plan</h3>
+                <div class="price-amount">$299</div>
+                <div class="price-suffix">one-time + $29/year</div>
+                <a href="../pricing/" class="btn btn-secondary">Learn More</a>
+            </div>
+            <div class="price-card featured fade-in">
+                <h3>Healing Bundle</h3>
+                <div class="price-amount">$399</div>
+                <div class="price-suffix">one-time + $39/year</div>
+                <a href="../pricing/" class="btn btn-gold">Learn More</a>
+            </div>
+        </div>
+        <p style="color: var(--gray-light); font-size: 0.9rem;">Many funeral homes cover this cost. Ask yours!</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+        <h2>Common Questions</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How long does it take to create a memorial?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        You can create a beautiful memorial in as little as 10 minutes. Start with basic information and a photo, then add more details over time. There's no rush—you can continue adding memories, photos, and stories whenever you're ready.
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Can other family members add to the memorial?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        Absolutely! You can invite unlimited family members to contribute their own memories, photos, and stories. You control who can edit and who can view. It becomes a collaborative tribute to your loved one.
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>What happens if I don't renew the yearly fee?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        Your memorial will never be deleted. If you don't renew, the memorial simply becomes view-only—all content remains preserved. You can re-activate editing anytime by renewing your subscription.
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Is my family's information private and secure?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        Yes. We use bank-level encryption to protect all data. You have complete control over privacy settings—make your memorial public, family-only, or completely private. We never sell or share your information.
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Can I create a memorial for someone who passed years ago?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        Of course! Many families create memorials for grandparents, parents, or loved ones who passed years or even decades ago. It's a beautiful way to gather family history and preserve stories before they're forgotten.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Grief Resources Teaser -->
+    <section class="grief-teaser">
+        <div class="grief-teaser-inner fade-in">
+            <div class="grief-teaser-icon">🌸</div>
+            <h3>We're Here for Your Healing</h3>
+            <p>Grief doesn't follow a schedule. Our gentle resources—daily prompts, articles, and community stories—are here whenever you need them.</p>
+            <a href="../grief-support/" class="btn btn-secondary">Explore Grief Support</a>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>Start Preserving Their Story Today</h2>
+        <p>Create a free preview in minutes. No credit card required until you're ready to publish.</p>
+        <a href="../create/" class="btn btn-gold">Create Your Memorial →</a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-logo">🌿</div>
+        <nav class="footer-links">
+            <a href="../about/">About</a>
+            <a href="../how-it-works/">How It Works</a>
+            <a href="../for-funeral-homes/">For Funeral Homes</a>
+            <a href="../grief-support/">Grief Resources</a>
+            <a href="../pricing/">Pricing</a>
+        </nav>
+        <p class="footer-tagline">Made with love for grieving hearts</p>
+        <p class="footer-copyright">© 2025 Forever Fields. All rights reserved.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/script.js"></script>
+    <script>
+        // FAQ Accordion
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', function() {
+                const item = this.parentElement;
+                const wasActive = item.classList.contains('active');
+
+                // Close all
+                document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+
+                // Open clicked (if wasn't already open)
+                if (!wasActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Forever Fields - Beautiful online memorials that preserve every detail of their life, plus gentle tools to help you through grief.">
+    <meta name="keywords" content="memorial, online memorial, digital cemetery, remembrance, tribute, family tree, grief support, healing">
+    <meta name="author" content="Forever Fields">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://foreverfields.com/">
+    <meta property="og:title" content="Forever Fields - Where Their Story Lives On">
+    <meta property="og:description" content="Beautiful online memorials that preserve every detail of their life. Plus gentle tools to help you through grief, one day at a time.">
+    <meta property="og:image" content="https://foreverfields.com/og-image.jpg">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Forever Fields - Where Their Story Lives On">
+    <meta name="twitter:description" content="Beautiful online memorials and gentle grief support tools.">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <title>Forever Fields - A Place Where Their Story Lives On</title>
+
+    <!-- Page-specific styles -->
+    <style>
+        /* Homepage-specific hero enhancements */
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 15% 25%, rgba(255, 255, 255, 0.5) 0%, transparent 8%),
+                radial-gradient(circle at 85% 75%, rgba(212, 168, 84, 0.25) 0%, transparent 10%),
+                radial-gradient(circle at 25% 65%, rgba(201, 169, 98, 0.2) 0%, transparent 6%),
+                radial-gradient(circle at 75% 35%, rgba(255, 255, 255, 0.4) 0%, transparent 7%),
+                radial-gradient(circle at 50% 85%, rgba(139, 159, 130, 0.15) 0%, transparent 12%),
+                radial-gradient(circle at 90% 10%, rgba(255, 243, 224, 0.4) 0%, transparent 5%),
+                radial-gradient(circle at 10% 90%, rgba(212, 168, 84, 0.2) 0%, transparent 8%);
+            pointer-events: none;
+            animation: gentleFloat 25s ease-in-out infinite;
+        }
+
+        @keyframes gentleFloat {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+            50% { transform: translateY(-8px) scale(1.01); opacity: 0.9; }
+        }
+
+        .hero-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+            animation: gentle-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes gentle-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        /* Hero Section - Base Layout */
+        .hero {
+            min-height: 100vh;
+            min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 6rem 1.5rem;
+            background: linear-gradient(180deg, var(--sage-pale) 0%, var(--cream) 50%, var(--warm-white) 100%);
+            position: relative;
+        }
+
+        @supports (min-height: 100dvh) {
+            .hero {
+                min-height: 100dvh;
+            }
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-content h1 {
+            font-family: var(--font-serif);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--gray-dark);
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            color: var(--gray-body);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 6rem 1.5rem;
+            background: var(--warm-white);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 900px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        .hero-tease {
+            font-size: 0.95rem;
+            color: var(--sage-primary);
+            font-style: italic;
+            margin-bottom: 2.5rem;
+            font-family: var(--font-serif);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray-light);
+            font-size: 0.85rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(8px); }
+        }
+
+        /* Emotional Hook Section */
+        .emotional-hook {
+            padding: 5rem 1.5rem;
+            text-align: center;
+            background: var(--cream);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .emotional-hook::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -10%;
+            width: 120%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M0,10 Q25,0 50,10 T100,10' fill='none' stroke='%23C5D1BC' stroke-width='0.3' opacity='0.4'/%3E%3C/svg%3E");
+            background-size: 200px 40px;
+            background-repeat: repeat-x;
+            background-position: center;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .emotional-hook blockquote {
+            font-family: var(--font-serif);
+            font-size: clamp(1.3rem, 3vw, 1.75rem);
+            color: var(--gray-dark);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.7;
+            position: relative;
+            font-weight: 400;
+        }
+
+        /* Features Note */
+        .features-note {
+            text-align: center;
+            margin-top: 2.5rem;
+            font-style: italic;
+            color: var(--sage-primary);
+            font-family: var(--font-serif);
+            font-size: 1.05rem;
+        }
+
+        /* Preview Section */
+        .preview-section {
+            padding: 6rem 1.5rem;
+            background: linear-gradient(180deg, var(--cream) 0%, var(--sage-pale) 100%);
+        }
+
+        .preview-cta {
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .preview-cta p {
+            font-family: var(--font-serif);
+            font-size: 1.2rem;
+            color: var(--gray-dark);
+            margin: 0 auto 1.5rem;
+        }
+
+        /* Grief Support Section */
+        .grief-section {
+            padding: 6rem 1.5rem;
+            background: linear-gradient(180deg, var(--cream-warm) 0%, var(--cream) 100%);
+            position: relative;
+        }
+
+        .grief-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold-muted), transparent);
+        }
+
+        .grief-intro {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 3rem;
+        }
+
+        .grief-intro h2 {
+            margin-bottom: 1rem;
+            color: var(--gray-dark);
+        }
+
+        .grief-intro p {
+            font-size: 1.1rem;
+            color: var(--gray-body);
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .grief-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .grief-cta {
+            text-align: center;
+        }
+
+        /* Audience Section */
+        .audience-section {
+            padding: 6rem 1.5rem;
+            background: var(--warm-white);
+        }
+
+        .audience-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+        .audience-card {
+            padding: 2.5rem 2rem;
+            border-radius: 24px;
+        }
+
+        .audience-card.families {
+            background: linear-gradient(135deg, var(--sage-pale) 0%, var(--cream) 100%);
+            border: 1px solid var(--sage-light);
+        }
+
+        .audience-card.professionals {
+            background: linear-gradient(135deg, var(--lavender-subtle) 0%, var(--cream) 100%);
+            border: 1px solid rgba(139, 159, 130, 0.2);
+        }
+
+        .audience-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .audience-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .audience-features {
+            margin: 1rem 0;
+        }
+
+        .audience-features li {
+            list-style: none;
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.95rem;
+            color: var(--gray-body);
+        }
+
+        .audience-features li::before {
+            content: '\2713';
+            position: absolute;
+            left: 0;
+            color: var(--sage-primary);
+            font-weight: 600;
+        }
+
+        .audience-highlight {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(201, 169, 98, 0.1);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: var(--gray-dark);
+            font-style: italic;
+        }
+
+        /* Pricing Note */
+        .pricing-note {
+            font-size: 0.85rem;
+            color: var(--gray-light);
+            font-style: italic;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--sage-pale);
+            border-radius: 12px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Final CTA Section */
+        .final-cta {
+            padding: 7rem 1.5rem;
+            text-align: center;
+            background: linear-gradient(
+                135deg,
+                var(--twilight) 0%,
+                #5A6B7C 50%,
+                var(--sage-primary) 100%
+            );
+            position: relative;
+        }
+
+        .final-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 15%),
+                radial-gradient(circle at 80% 70%, rgba(201, 169, 98, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .final-cta-content {
+            position: relative;
+            z-index: 1;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        .final-cta h2 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .final-cta p {
+            font-size: 1.15rem;
+            color: rgba(255,255,255,0.85);
+            margin: 0 auto 2rem;
+        }
+
+        .final-cta .btn-gold {
+            font-size: 1.05rem;
+            padding: 1.15rem 2.25rem;
+        }
+
+        /* Header Navigation */
+        .page-header {
+            background: var(--warm-white);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--sage-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .page-header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--gray-body);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            color: var(--sage-primary);
+        }
+
+        .header-cta {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .header-cta .btn {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 900px) {
+            .nav-links { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .header-cta .btn-secondary { display: none; }
+        }
+
+        /* Memorial Mockup Preview */
+        .memorial-mockup {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 60px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            margin: 0 auto;
+            border: 1px solid var(--sage-light);
+        }
+
+        .mockup-header {
+            background: linear-gradient(135deg, var(--twilight) 0%, #4a5a6b 100%);
+            padding: 3rem 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .mockup-header .memorial-portrait {
+            margin: 0 auto 1.5rem;
+            background: rgba(255,255,255,0.2);
+            border: 4px solid rgba(255,255,255,0.4);
+        }
+
+        .mockup-header .memorial-name { color: white; margin-bottom: 0.5rem; }
+        .mockup-header .memorial-dates { color: rgba(255,255,255,0.8); margin-bottom: 1.5rem; }
+
+        .mockup-header .play-song-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mockup-header .play-song-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .mockup-content { padding: 2rem; }
+
+        /* Everyday/Favorite Section */
+        .everyday-section {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            padding: 1.5rem;
+            background: var(--cream);
+            border-radius: 16px;
+            margin: 1.5rem 0;
+        }
+
+        .everyday-image {
+            font-size: 3rem;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .everyday-content h4 {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+        .everyday-content p {
+            color: var(--gray-body);
+            font-style: italic;
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+        }
+        .recipe-link {
+            color: var(--sage-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        .recipe-link:hover { text-decoration: underline; }
+
+        /* Memory Entries */
+        .memory-entry {
+            padding: 1.25rem;
+            background: var(--sage-pale);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+        .memory-entry:last-child { margin-bottom: 0; }
+
+        .memory-author { font-weight: 600; color: var(--gray-dark); font-size: 0.9rem; }
+        .memory-date { color: var(--gray-light); font-size: 0.8rem; margin-left: 0.5rem; }
+        .memory-text { margin-top: 0.5rem; color: var(--gray-body); font-size: 0.95rem; line-height: 1.6; }
+
+        /* Pricing Grid */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .pricing-grid {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: 600px;
+            }
+            .pricing-grid .pricing-card:last-child {
+                grid-column: 1 / -1;
+                max-width: 280px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                max-width: 350px;
+            }
+            .pricing-grid .pricing-card:last-child {
+                grid-column: auto;
+                max-width: none;
+            }
+        }
+
+        /* Comparison Table */
+        .table-scroll-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .pricing-comparison {
+            margin-top: 4rem;
+            text-align: center;
+        }
+
+        .pricing-comparison h3 {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--gray-dark);
+        }
+
+        .comparison-table {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid var(--sage-light);
+        }
+
+        .comparison-table th {
+            background: var(--sage-pale);
+            font-weight: 600;
+            color: var(--gray-dark);
+        }
+
+        .comparison-table th:first-child,
+        .comparison-table td:first-child {
+            text-align: left;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: var(--cream);
+        }
+
+        @media (max-width: 600px) {
+            .everyday-section { flex-direction: column; text-align: center; }
+            .mockup-header { padding: 2rem 1.5rem; }
+            .mockup-content { padding: 1.5rem; }
+            .comparison-table { font-size: 0.8rem; min-width: 500px; }
+            .comparison-table th,
+            .comparison-table td { padding: 0.5rem 0.25rem; }
+        }
+
+        /* Small phones (480px) */
+        @media (max-width: 480px) {
+            .hero {
+                padding: 4rem 1rem;
+                min-height: auto;
+                min-height: 100svh;
+            }
+
+            .hero-content h1 {
+                font-size: 1.75rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .hero-icon {
+                font-size: 2.5rem;
+            }
+
+            .hero-tease {
+                font-size: 0.85rem;
+            }
+
+            .features-section,
+            .preview-section,
+            .grief-section,
+            .audience-section,
+            .pricing-section {
+                padding: 3rem 1rem;
+            }
+
+            .section-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .section-header p {
+                font-size: 0.95rem;
+            }
+
+            .feature-card {
+                padding: 1.25rem;
+            }
+
+            .pricing-card {
+                padding: 1.5rem;
+            }
+
+            .page-header {
+                padding: 0.75rem 1rem;
+            }
+
+            .logo {
+                font-size: 1.1rem;
+            }
+
+            .header-cta .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+
+            .final-cta {
+                padding: 4rem 1rem;
+            }
+
+            .final-cta h2 {
+                font-size: 1.5rem;
+            }
+
+            .scroll-indicator {
+                display: none;
+            }
+        }
+
+        /* Extra small phones (360px) */
+        @media (max-width: 360px) {
+            .hero-content h1 {
+                font-size: 1.5rem;
+            }
+
+            .hero-buttons .btn {
+                padding: 0.75rem 1.25rem;
+                font-size: 0.9rem;
+                width: 100%;
+            }
+
+            .pricing-grid {
+                max-width: 100%;
+            }
+
+            .comparison-table {
+                font-size: 0.75rem;
+            }
+
+            .audience-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            color: var(--gray-dark);
+        }
+
+        @media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
+        /* Mobile Navigation Overlay */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--warm-white);
+            z-index: 200;
+            flex-direction: column;
+            padding: 2rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        .mobile-nav.open {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mobile-nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--sage-light);
+        }
+
+        .mobile-nav-close {
+            background: none;
+            border: none;
+            font-size: 1.75rem;
+            cursor: pointer;
+            color: var(--gray-dark);
+            padding: 0.25rem;
+        }
+
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .mobile-nav-links a {
+            padding: 1rem;
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: background 0.2s ease;
+        }
+
+        .mobile-nav-links a:hover,
+        .mobile-nav-links a:active {
+            background: var(--sage-pale);
+        }
+
+        .mobile-nav-cta {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--sage-light);
+        }
+
+        .mobile-nav-cta .btn {
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Touch-friendly tap targets */
+        @media (pointer: coarse) {
+            .btn {
+                min-height: 44px;
+            }
+
+            .nav-links a,
+            .footer-links a {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                min-height: 44px;
+            }
+        }
+
+        /* Reduce motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="page-header">
+        <div class="page-header-inner">
+            <a href="./" class="logo">
+                <span>🌿</span>
+                <span>Forever Fields</span>
+            </a>
+            <nav class="nav-links">
+                <a href="./how-it-works/">How It Works</a>
+                <a href="./for-families/">For Families</a>
+                <a href="./for-funeral-homes/">For Professionals</a>
+                <a href="./pricing/">Pricing</a>
+                <a href="./grief-support/">Grief Support</a>
+            </nav>
+            <div class="header-cta">
+                <a href="./login/" class="btn btn-secondary">Sign In</a>
+                <a href="./create/" class="btn btn-primary">Create Memorial</a>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">☰</button>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-header">
+            <a href="./" class="logo">
+                <span>🌿</span>
+                <span>Forever Fields</span>
+            </a>
+            <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">×</button>
+        </div>
+        <div class="mobile-nav-links">
+            <a href="./how-it-works/">How It Works</a>
+            <a href="./for-families/">For Families</a>
+            <a href="./for-funeral-homes/">For Professionals</a>
+            <a href="./pricing/">Pricing</a>
+            <a href="./grief-support/">Grief Support</a>
+        </div>
+        <div class="mobile-nav-cta">
+            <a href="./login/" class="btn btn-secondary">Sign In</a>
+            <a href="./create/" class="btn btn-primary">Create Memorial</a>
+        </div>
+    </nav>
+
+    <!-- Cursor Glow Effect -->
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <span class="hero-icon fade-in">🌿</span>
+            <h1 class="fade-in fade-in-delay-1">A place where their story lives on—and your healing begins</h1>
+            <p class="hero-subtitle fade-in fade-in-delay-2">
+                Forever Fields: Beautiful online memorials that preserve every detail of their life. Plus gentle tools to help you through grief, one day at a time.
+            </p>
+            <p class="hero-tease fade-in fade-in-delay-3">
+                From hometowns and favorite recipes to simple memories shared by family—keep it all alive for generations.
+            </p>
+            <div class="hero-buttons fade-in fade-in-delay-4">
+                <a href="#preview" class="btn btn-primary">See a Real Memorial</a>
+                <a href="#pricing" class="btn btn-secondary">Start for Free</a>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span>Discover more</span>
+            <span>↓</span>
+        </div>
+    </section>
+
+    <!-- Emotional Hook Section -->
+    <section class="emotional-hook">
+        <div class="container">
+            <blockquote class="fade-in">
+                Because grief doesn't end at the funeral. We're here with memorials that grow with your family—and resources to help you find peace along the way.
+            </blockquote>
+        </div>
+    </section>
+
+    <!-- Features Section (6 Cards) -->
+    <section class="features-section" id="features">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>What families can add</h2>
+                <p>Build a rich, beautiful story of their life—from the big moments to the little things that made them who they were</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card fade-in fade-in-delay-1">
+                    <span class="feature-icon">🏠</span>
+                    <h3>Born & Raised</h3>
+                    <p>Add their hometown, parents, siblings—build the roots of their story.</p>
+                </div>
+                <div class="feature-card fade-in fade-in-delay-2">
+                    <span class="feature-icon">⭐</span>
+                    <h3>Life Highlights</h3>
+                    <p>Weddings, careers, accomplishments—celebrate what made them shine.</p>
+                </div>
+                <div class="feature-card fade-in fade-in-delay-3">
+                    <span class="feature-icon">💝</span>
+                    <h3>Everyday Magic</h3>
+                    <p>Favorite foods, songs, simple joys—capture the little things that bring smiles through tears.</p>
+                </div>
+                <div class="feature-card fade-in fade-in-delay-4">
+                    <span class="feature-icon">📸</span>
+                    <h3>Photo & Video Albums</h3>
+                    <p>Unlimited uploads, organized by life chapters—revisit happy moments when you need them most.</p>
+                </div>
+                <div class="feature-card fade-in fade-in-delay-5">
+                    <span class="feature-icon">🎙️</span>
+                    <h3>Their Voice & Memories</h3>
+                    <p>Record voice notes or add short family stories—hear their laugh again, or share yours.</p>
+                </div>
+                <div class="feature-card fade-in fade-in-delay-6">
+                    <span class="feature-icon">🌱</span>
+                    <h3>Healing Prompts</h3>
+                    <p>Gentle guides like "What made them laugh?" to help you process and preserve—at your own pace.</p>
+                </div>
+            </div>
+            <p class="features-note fade-in">Adding details can be therapeutic. Start small, whenever you're ready.</p>
+        </div>
+    </section>
+
+    <!-- Memorial Preview Section -->
+    <section class="preview-section" id="preview">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>See how it looks</h2>
+                <p>A window into a real memorial—interactive, beautiful, and full of life</p>
+            </div>
+            <div class="memorial-mockup fade-in">
+                <div class="mockup-header">
+                    <div class="memorial-portrait">👵</div>
+                    <h2 class="memorial-name">Eleanor Rose Thompson</h2>
+                    <p class="memorial-dates">April 12, 1932 — September 3, 2023</p>
+                    <button class="play-song-btn" id="playSongBtn">
+                        <span>▶</span> Her Favorite Song: What a Wonderful World
+                    </button>
+                </div>
+                <div class="mockup-content">
+                    <!-- Timeline -->
+                    <div class="memorial-timeline">
+                        <h4 class="timeline-title">📜 Her Life Story</h4>
+                        <div class="timeline-events">
+                            <div class="timeline-event">
+                                <span class="timeline-year">1932</span>
+                                <span class="timeline-text">Born in Tulsa, OK to parents Mary & John. Siblings: 2 brothers, William and Robert.</span>
+                            </div>
+                            <div class="timeline-event">
+                                <span class="timeline-year">1954</span>
+                                <span class="timeline-text">Married the love of her life, Harold Thompson, in a small church ceremony.</span>
+                            </div>
+                            <div class="timeline-event">
+                                <span class="timeline-year">1971</span>
+                                <span class="timeline-text">Opened "Eleanor's Kitchen"—the bakery that became a neighborhood landmark.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Everyday Section -->
+                    <div class="everyday-section">
+                        <div class="everyday-image">🍑</div>
+                        <div class="everyday-content">
+                            <h4>Favorite Food: Peach Cobbler</h4>
+                            <p>"She made it every Sunday, and the whole house smelled like summer."</p>
+                            <a href="#" class="recipe-link">📖 See her recipe →</a>
+                        </div>
+                    </div>
+
+                    <!-- Memorial Actions -->
+                    <div class="memorial-actions">
+                        <button class="memorial-action-btn candle-btn" id="candleBtn">
+                            <span class="candle-flame">🕯️</span> Light a Candle
+                        </button>
+                        <button class="memorial-action-btn">💐 Leave Flowers</button>
+                        <button class="memorial-action-btn">✍️ Share a Memory</button>
+                        <button class="memorial-action-btn">🌳 View Family Tree</button>
+                    </div>
+
+                    <!-- Memories Feed -->
+                    <div class="memories-feed">
+                        <h4 class="memories-title">💝 Memories from Family</h4>
+                        <div class="memory-entry">
+                            <span class="memory-author">Sarah (Granddaughter)</span>
+                            <span class="memory-date">2 days ago</span>
+                            <p class="memory-text">"She always said 'Laughter is the best medicine'—and she proved it every time she told one of her terrible jokes. Miss you, Grandma. 💕"</p>
+                        </div>
+                        <div class="memory-entry">
+                            <span class="memory-author">Michael T.</span>
+                            <span class="memory-date">1 week ago</span>
+                            <p class="memory-text">"Mom taught me that hard work and a warm kitchen could solve almost anything. Her bakery wasn't just a business—it was where the whole neighborhood came to feel at home."</p>
+                        </div>
+                    </div>
+
+                    <!-- Healing Corner -->
+                    <div class="healing-corner">
+                        <div class="healing-corner-icon">🌸</div>
+                        <h4>Today's Gentle Reflection</h4>
+                        <p>What one memory of Eleanor brings you comfort today?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-cta fade-in">
+                <p>Create something just as beautiful for your loved one—in minutes.</p>
+                <a href="#pricing" class="btn btn-primary">Start Your Memorial</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Grief Support Section -->
+    <section class="grief-section" id="grief-support">
+        <div class="container">
+            <div class="grief-intro fade-in">
+                <h2>We're Here for Your Healing Journey</h2>
+                <p>Grief is personal, and it doesn't follow a timeline. That's why Forever Fields includes free resources to support you—curated by experts, shared by families who've been there.</p>
+            </div>
+            <div class="grief-features">
+                <div class="grief-card fade-in fade-in-delay-1">
+                    <span class="grief-card-icon">📝</span>
+                    <h3>Guided Reflections</h3>
+                    <p>Short, daily prompts to help you remember and release—integrated right into your memorial.</p>
+                </div>
+                <div class="grief-card fade-in fade-in-delay-2">
+                    <span class="grief-card-icon">📚</span>
+                    <h3>Resource Library</h3>
+                    <p>Articles on coping with loss, talking to kids about death, and finding joy again.</p>
+                </div>
+                <div class="grief-card fade-in fade-in-delay-3">
+                    <span class="grief-card-icon">💬</span>
+                    <h3>Community Stories</h3>
+                    <p>Anonymous shares from other families—read how preserving memories helped them heal.</p>
+                </div>
+                <div class="grief-card fade-in fade-in-delay-4">
+                    <span class="grief-card-icon">🤝</span>
+                    <h3>Partner Links</h3>
+                    <p>Connect to free counseling hotlines or books like "The Grief Recovery Handbook"—no upsell, just help.</p>
+                </div>
+            </div>
+            <div class="grief-cta fade-in">
+                <a href="#" class="btn btn-secondary">Explore Support Resources</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Audience Section -->
+    <section class="audience-section" id="audience">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>Built for families. Trusted by professionals.</h2>
+            </div>
+            <div class="audience-grid">
+                <div class="audience-card families fade-in fade-in-delay-1">
+                    <span class="audience-icon">👨‍👩‍👧‍👦</span>
+                    <h3>For Families</h3>
+                    <ul class="audience-features">
+                        <li>Visit anytime, from anywhere in the world</li>
+                        <li>Add history and memories as you heal</li>
+                        <li>Perfect for scattered families or ashes</li>
+                        <li>Keep children connected to grandparents</li>
+                        <li>Preserve stories for future generations</li>
+                    </ul>
+                </div>
+                <div class="audience-card professionals fade-in fade-in-delay-2">
+                    <span class="audience-icon">🏛️</span>
+                    <h3>For Funeral Homes</h3>
+                    <ul class="audience-features">
+                        <li>Offer memorials + grief tools as an easy upsell</li>
+                        <li>Increase revenue by $800–$2,000 per service</li>
+                        <li>We handle all technology—you focus on families</li>
+                        <li>Beautiful white-label options available</li>
+                    </ul>
+                    <div class="audience-highlight">
+                        Include our grief resources in your packages—families love the extra care.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing-section" id="pricing">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>Simple, transparent pricing</h2>
+                <p>Choose the plan that's right for your family. No hidden fees, no surprises.</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card fade-in">
+                    <h3>Free Preview</h3>
+                    <div class="pricing-amount">
+                        <span class="price-main">$0</span>
+                        <span class="price-suffix">forever</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>1 memorial page</li>
+                        <li>Up to 10 photos</li>
+                        <li>Basic timeline</li>
+                        <li>Public sharing only</li>
+                        <li>Community support</li>
+                    </ul>
+                    <a href="./create/" class="btn btn-secondary" style="width: 100%;">Start Free</a>
+                </div>
+                <div class="pricing-card fade-in fade-in-delay-1">
+                    <h3>Forever Plan</h3>
+                    <div class="pricing-amount">
+                        <span class="price-main">$299</span>
+                        <span class="price-suffix">one-time</span>
+                        <p class="price-recurring">+ $29/year</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>Unlimited photos, videos & history</li>
+                        <li>Family memories & guestbook</li>
+                        <li>Basic grief support tools</li>
+                        <li>Custom memorial URL</li>
+                        <li>Private sharing controls</li>
+                    </ul>
+                    <a href="#" class="btn btn-secondary" style="width: 100%;">Get Started</a>
+                </div>
+                <div class="pricing-card featured fade-in fade-in-delay-2">
+                    <span class="pricing-badge">Most Popular</span>
+                    <h3>Healing Bundle</h3>
+                    <div class="pricing-amount">
+                        <span class="price-main">$399</span>
+                        <span class="price-suffix">one-time</span>
+                        <p class="price-recurring">+ $39/year</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>Everything in Forever Plan</li>
+                        <li>Guided daily reflections</li>
+                        <li>Premium grief resources</li>
+                        <li>Advanced family tree features</li>
+                        <li>Time-capsule messages</li>
+                        <li>Priority family support</li>
+                    </ul>
+                    <a href="#" class="btn btn-gold" style="width: 100%;">Start Your Memorial</a>
+                </div>
+            </div>
+            <p class="pricing-note fade-in">
+                Many funeral homes cover this—ask yours! All plans include gentle grief support at no extra cost.
+            </p>
+
+            <!-- Feature Comparison Table -->
+            <div class="pricing-comparison fade-in">
+                <h3>Compare Plans</h3>
+                <div class="table-scroll-wrapper">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Free</th>
+                                <th>Forever</th>
+                                <th>Healing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Memorial pages</td><td>1</td><td>Unlimited</td><td>Unlimited</td></tr>
+                            <tr><td>Photos & videos</td><td>10</td><td>Unlimited</td><td>Unlimited</td></tr>
+                            <tr><td>Timeline & history</td><td>Basic</td><td>Full</td><td>Full</td></tr>
+                            <tr><td>Family memories</td><td>—</td><td>✓</td><td>✓</td></tr>
+                            <tr><td>Private sharing</td><td>—</td><td>✓</td><td>✓</td></tr>
+                            <tr><td>Custom URL</td><td>—</td><td>✓</td><td>✓</td></tr>
+                            <tr><td>Grief support tools</td><td>Basic</td><td>Basic</td><td>Premium</td></tr>
+                            <tr><td>Daily reflections</td><td>—</td><td>—</td><td>✓</td></tr>
+                            <tr><td>Family tree</td><td>—</td><td>Basic</td><td>Advanced</td></tr>
+                            <tr><td>Time-capsule messages</td><td>—</td><td>—</td><td>✓</td></tr>
+                            <tr><td>Priority support</td><td>—</td><td>—</td><td>✓</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="final-cta">
+        <div class="final-cta-content fade-in">
+            <h2>Preserve their story. Find your peace.</h2>
+            <p>Start today with a free preview—no commitment required.</p>
+            <a href="#" class="btn btn-gold">Create a Free Preview →</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">🌿</div>
+            <nav class="footer-links">
+                <a href="./about/">About</a>
+                <a href="./how-it-works/">How It Works</a>
+                <a href="./for-funeral-homes/">For Funeral Homes</a>
+                <a href="./grief-support/">Grief Resources</a>
+                <a href="mailto:hello@foreverfields.com">Contact</a>
+                <a href="./privacy/">Privacy</a>
+            </nav>
+            <p class="footer-tagline">Made with compassion, for moments that matter.</p>
+            <p class="footer-copyright">© 2025 Forever Fields. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Shared Scripts -->
+    <script src="js/script.js"></script>
+
+    <!-- Page-specific Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Candle Lighting Animation (homepage demo)
+            const candleBtn = document.getElementById('candleBtn');
+            let candleLit = false;
+
+            if (candleBtn) {
+                candleBtn.addEventListener('click', function() {
+                    if (!candleLit) {
+                        this.classList.add('lit');
+                        this.innerHTML = '<span class="candle-flame">🕯️</span> Candle Lit ✨';
+                        this.style.background = 'var(--gold-light)';
+                        this.style.borderColor = 'var(--gold-muted)';
+                        candleLit = true;
+                    } else {
+                        this.classList.remove('lit');
+                        this.innerHTML = '<span class="candle-flame">🕯️</span> Light a Candle';
+                        this.style.background = '';
+                        this.style.borderColor = '';
+                        candleLit = false;
+                    }
+                });
+            }
+
+            // Play Song Button (homepage demo)
+            const playSongBtn = document.getElementById('playSongBtn');
+            let isPlaying = false;
+
+            if (playSongBtn) {
+                playSongBtn.addEventListener('click', function() {
+                    if (!isPlaying) {
+                        this.innerHTML = '<span>⏸</span> Playing: What a Wonderful World';
+                        this.style.background = 'rgba(255,255,255,0.35)';
+                        isPlaying = true;
+                    } else {
+                        this.innerHTML = '<span>▶</span> Her Favorite Song: What a Wonderful World';
+                        this.style.background = '';
+                        isPlaying = false;
+                    }
+                });
+            }
+
+            // Memorial Action Buttons (homepage demo)
+            const actionButtons = document.querySelectorAll('.memorial-action-btn:not(#candleBtn)');
+            actionButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const originalText = this.textContent;
+                    const originalBg = this.style.background;
+                    this.textContent = '✨ Thank you!';
+                    this.style.background = 'var(--sage-light)';
+
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.style.background = originalBg || '';
+                    }, 2000);
+                });
+            });
+
+            // Subtle Parallax Effect for Hero
+            const hero = document.querySelector('.hero');
+            if (hero) {
+                window.addEventListener('scroll', () => {
+                    const scrolled = window.pageYOffset;
+                    const heroHeight = hero.offsetHeight;
+
+                    if (scrolled < heroHeight) {
+                        const parallaxValue = scrolled * 0.25;
+                        hero.style.transform = `translateY(${parallaxValue}px)`;
+                    }
+                });
+            }
+
+            // Mobile Navigation Toggle
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileNav = document.getElementById('mobileNav');
+            const mobileNavClose = document.getElementById('mobileNavClose');
+
+            if (mobileMenuBtn && mobileNav && mobileNavClose) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    mobileNav.classList.add('open');
+                    document.body.style.overflow = 'hidden';
+                });
+
+                mobileNavClose.addEventListener('click', function() {
+                    mobileNav.classList.remove('open');
+                    document.body.style.overflow = '';
+                });
+
+                // Close on link click
+                mobileNav.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileNav.classList.remove('open');
+                        document.body.style.overflow = '';
+                    });
+                });
+
+                // Close on escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && mobileNav.classList.contains('open')) {
+                        mobileNav.classList.remove('open');
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

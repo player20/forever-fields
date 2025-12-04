@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sign in to Forever Fields to manage your memorials and continue preserving memories.">
+    <title>Sign In - Forever Fields</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header - Minimal */
+        .login-header {
+            background: var(--warm-white);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--sage-light);
+        }
+
+        .login-header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            text-decoration: none;
+        }
+
+        /* Main Login Area */
+        .login-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            background: linear-gradient(180deg, var(--sage-pale) 0%, var(--cream) 50%, var(--warm-white) 100%);
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 10px 40px var(--shadow-soft);
+            border: 1px solid var(--sage-light);
+        }
+
+        .login-card h1 {
+            font-family: var(--font-serif);
+            font-size: 1.75rem;
+            color: var(--gray-dark);
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-card .subtitle {
+            text-align: center;
+            color: var(--gray-body);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        /* Form Styles */
+        .login-form {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 2px solid var(--sage-light);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            background: var(--warm-white);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--sage-primary);
+            background: white;
+        }
+
+        .form-group input::placeholder {
+            color: var(--gray-body);
+            opacity: 0.6;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--sage-primary), #7A8E72);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(167, 201, 162, 0.4);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Reassurance */
+        .reassurance {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            color: var(--gray-body);
+            font-size: 0.85rem;
+        }
+
+        .reassurance-icon {
+            color: var(--sage-primary);
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--gray-body);
+            font-size: 0.85rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--sage-light);
+        }
+
+        .divider span {
+            padding: 0 1rem;
+        }
+
+        /* Create Link */
+        .create-link {
+            text-align: center;
+        }
+
+        .create-link p {
+            color: var(--gray-body);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .create-link a {
+            color: var(--sage-primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .create-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Success State */
+        .success-state {
+            display: none;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .success-state.show {
+            display: block;
+        }
+
+        .success-state .success-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-state h2 {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .success-state p {
+            color: var(--gray-body);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .success-state .email-display {
+            font-weight: 600;
+            color: var(--gray-dark);
+        }
+
+        .resend-link {
+            color: var(--sage-primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .resend-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Hide form when success */
+        .login-card.sent .login-form,
+        .login-card.sent .divider,
+        .login-card.sent .create-link,
+        .login-card.sent h1,
+        .login-card.sent .subtitle {
+            display: none;
+        }
+
+        .login-card.sent .success-state {
+            display: block;
+        }
+
+        /* Footer */
+        .login-footer {
+            padding: 1.5rem;
+            text-align: center;
+            background: var(--warm-white);
+            border-top: 1px solid var(--sage-light);
+        }
+
+        .login-footer p {
+            color: var(--gray-body);
+            font-size: 0.85rem;
+        }
+
+        .login-footer a {
+            color: var(--sage-primary);
+            text-decoration: none;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="login-header">
+        <div class="login-header-inner">
+            <a href="../" class="logo">
+                <span>🌿</span>
+                <span>Forever Fields</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="login-main">
+        <div class="login-container">
+            <div class="login-card" id="loginCard">
+                <h1>Welcome Back</h1>
+                <p class="subtitle">Sign in to continue preserving memories</p>
+
+                <form class="login-form" id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="you@example.com"
+                            required
+                            autocomplete="email"
+                        >
+                    </div>
+                    <button type="submit" class="login-btn" id="submitBtn">
+                        Send Magic Link
+                    </button>
+                    <div class="reassurance">
+                        <span class="reassurance-icon">🔒</span>
+                        <span>No password needed. We'll email you a secure link.</span>
+                    </div>
+                </form>
+
+                <div class="divider"><span>or</span></div>
+
+                <div class="create-link">
+                    <p>New to Forever Fields?</p>
+                    <a href="../create/">Create a Memorial →</a>
+                </div>
+
+                <!-- Success State (hidden by default) -->
+                <div class="success-state">
+                    <div class="success-icon">✉️</div>
+                    <h2>Check Your Email</h2>
+                    <p>
+                        We've sent a magic link to<br>
+                        <span class="email-display" id="sentEmail"></span>
+                    </p>
+                    <p>Click the link in your email to sign in. It expires in 15 minutes.</p>
+                    <a href="#" class="resend-link" id="resendLink">Didn't receive it? Send again</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="login-footer">
+        <p>
+            Need help? <a href="mailto:hello@foreverfields.com">Contact support</a>
+            &nbsp;·&nbsp;
+            <a href="../grief-support/">Grief resources</a>
+        </p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/script.js"></script>
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const loginCard = document.getElementById('loginCard');
+        const submitBtn = document.getElementById('submitBtn');
+        const emailInput = document.getElementById('email');
+        const sentEmailDisplay = document.getElementById('sentEmail');
+        const resendLink = document.getElementById('resendLink');
+
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            if (!email) return;
+
+            // Show loading state
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                // Show success state
+                sentEmailDisplay.textContent = email;
+                loginCard.classList.add('sent');
+            }, 1500);
+        });
+
+        resendLink.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Reset to form
+            loginCard.classList.remove('sent');
+            submitBtn.textContent = 'Send Magic Link';
+            submitBtn.disabled = false;
+
+            // Re-submit after a moment
+            setTimeout(() => {
+                loginForm.dispatchEvent(new Event('submit'));
+            }, 100);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="See how a Forever Fields memorial looks and feels. Interactive demo with no login required.">
+    <title>Memorial Preview - Margaret Louise Carter - Forever Fields</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        /* Preview Page Specific Styles */
+        .preview-page {
+            background: var(--cream);
+            min-height: 100vh;
+        }
+
+        /* Demo Banner */
+        .demo-banner {
+            background: linear-gradient(135deg, var(--gold-muted), var(--gold-warm));
+            color: white;
+            padding: 0.75rem 1.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .demo-banner a {
+            color: white;
+            font-weight: 600;
+            text-decoration: underline;
+            margin-left: 0.5rem;
+        }
+
+        .demo-banner a:hover {
+            color: var(--cream);
+        }
+
+        /* Memorial Header */
+        .memorial-header {
+            background: linear-gradient(135deg, var(--sage-primary) 0%, #6B8E63 100%);
+            padding: 3rem 1.5rem 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .memorial-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(255,255,255,0.08) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .memorial-portrait {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold-light), var(--cream));
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            border: 5px solid rgba(255,255,255,0.5);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .memorial-name {
+            font-family: var(--font-serif);
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            color: white;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            position: relative;
+            z-index: 1;
+        }
+
+        .memorial-dates {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .memorial-epitaph {
+            font-family: var(--font-serif);
+            font-style: italic;
+            color: rgba(255,255,255,0.85);
+            font-size: 1.1rem;
+            max-width: 500px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .song-player {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .song-player:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .song-player.playing {
+            background: rgba(255,255,255,0.35);
+        }
+
+        .song-player-icon {
+            font-size: 1.25rem;
+        }
+
+        .song-player-text {
+            font-size: 0.9rem;
+        }
+
+        /* Main Content */
+        .memorial-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        /* Interactive Actions Bar */
+        .actions-bar {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: -2rem auto 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            background: var(--warm-white);
+            border: 2px solid var(--sage-light);
+            border-radius: 50px;
+            font-size: 0.95rem;
+            color: var(--gray-dark);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow-soft);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--shadow-soft);
+            border-color: var(--sage-primary);
+        }
+
+        .action-btn.active {
+            background: var(--sage-pale);
+            border-color: var(--sage-primary);
+        }
+
+        .action-icon {
+            font-size: 1.25rem;
+        }
+
+        .action-count {
+            background: var(--sage-primary);
+            color: white;
+            padding: 0.15rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Section Styling */
+        .memorial-section {
+            background: var(--warm-white);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px var(--shadow-medium);
+        }
+
+        .section-title {
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--sage-primary), var(--sage-light));
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -2rem;
+            top: 4px;
+            width: 14px;
+            height: 14px;
+            background: var(--sage-primary);
+            border: 3px solid var(--warm-white);
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px var(--sage-primary);
+        }
+
+        .timeline-year {
+            font-family: var(--font-serif);
+            font-weight: 600;
+            color: var(--sage-primary);
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-content {
+            color: var(--gray-body);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Recipe Card */
+        .recipe-card {
+            background: linear-gradient(135deg, var(--cream-warm), var(--gold-light));
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--gold-muted);
+        }
+
+        .recipe-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .recipe-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            background: var(--warm-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .recipe-title {
+            font-family: var(--font-serif);
+            font-size: 1.2rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .recipe-subtitle {
+            font-size: 0.9rem;
+            color: var(--gray-body);
+            font-style: italic;
+        }
+
+        .recipe-ingredients {
+            background: var(--warm-white);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .recipe-ingredients h5 {
+            font-size: 0.85rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .recipe-ingredients ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.25rem;
+        }
+
+        .recipe-ingredients li {
+            font-size: 0.85rem;
+            color: var(--gray-body);
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .recipe-ingredients li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--gold-muted);
+        }
+
+        @media (max-width: 500px) {
+            .recipe-ingredients ul {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Photo Gallery */
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        @media (max-width: 600px) {
+            .photo-gallery {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .gallery-item {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, var(--sage-pale), var(--cream));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery-item:first-child {
+            grid-column: span 2;
+            grid-row: span 2;
+            font-size: 4rem;
+        }
+
+        /* Memories Feed */
+        .memories-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .memory-card {
+            background: var(--sage-pale);
+            border-radius: 16px;
+            padding: 1.25rem;
+            border-left: 4px solid var(--gold-muted);
+        }
+
+        .memory-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .memory-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--sage-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .memory-author {
+            font-weight: 500;
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+        }
+
+        .memory-relation {
+            font-size: 0.8rem;
+            color: var(--gray-light);
+        }
+
+        .memory-date {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--gray-light);
+        }
+
+        .memory-text {
+            font-size: 0.95rem;
+            color: var(--gray-body);
+            line-height: 1.7;
+            font-style: italic;
+        }
+
+        .memory-text::before {
+            content: '"';
+        }
+
+        .memory-text::after {
+            content: '"';
+        }
+
+        /* Healing Corner */
+        .healing-corner {
+            background: linear-gradient(135deg, var(--lavender-subtle), var(--cream));
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(139, 159, 130, 0.2);
+        }
+
+        .healing-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .healing-title {
+            font-family: var(--font-serif);
+            font-size: 1.2rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .healing-prompt {
+            font-size: 1rem;
+            color: var(--gray-body);
+            font-style: italic;
+            max-width: 400px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.6;
+        }
+
+        .healing-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 1rem;
+            border: 1.5px solid var(--sage-light);
+            border-radius: 12px;
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            resize: none;
+            min-height: 80px;
+        }
+
+        .healing-input:focus {
+            outline: none;
+            border-color: var(--sage-primary);
+        }
+
+        .healing-note {
+            font-size: 0.8rem;
+            color: var(--gray-light);
+            margin-top: 0.75rem;
+        }
+
+        /* CTA Section */
+        .preview-cta {
+            background: linear-gradient(135deg, var(--twilight), var(--sage-primary));
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            color: white;
+            margin-top: 2rem;
+        }
+
+        .preview-cta h2 {
+            font-family: var(--font-serif);
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .preview-cta p {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .preview-cta .btn-gold {
+            font-size: 1rem;
+            padding: 1rem 2rem;
+        }
+
+        /* Candle/Flower Animations */
+        @keyframes flameFlicker {
+            0%, 100% { transform: scale(1) rotate(-1deg); }
+            50% { transform: scale(1.1) rotate(1deg); }
+        }
+
+        .candle-animation {
+            animation: flameFlicker 0.5s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes petalFall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100px) rotate(360deg); opacity: 0; }
+        }
+
+        .petal-animation {
+            position: absolute;
+            animation: petalFall 2s ease-in forwards;
+        }
+
+        /* Share button floating */
+        .share-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            background: var(--sage-primary);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px var(--shadow-soft);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .share-btn:hover {
+            transform: scale(1.1);
+            background: #7A8E72;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .memorial-header {
+                padding: 2rem 1rem 3rem;
+            }
+
+            .memorial-portrait {
+                width: 120px;
+                height: 120px;
+                font-size: 3.5rem;
+            }
+
+            .actions-bar {
+                gap: 0.5rem;
+            }
+
+            .action-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            .memorial-section {
+                padding: 1.5rem;
+            }
+
+            .recipe-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .share-btn {
+                bottom: 1rem;
+                right: 1rem;
+                width: 48px;
+                height: 48px;
+            }
+        }
+    </style>
+</head>
+<body class="preview-page">
+    <!-- Demo Banner -->
+    <div class="demo-banner">
+        This is a demo memorial. <a href="../create/">Create your own memorial →</a>
+    </div>
+
+    <!-- Memorial Header -->
+    <header class="memorial-header">
+        <div class="memorial-portrait">👵</div>
+        <h1 class="memorial-name">Margaret Louise Carter</h1>
+        <p class="memorial-dates">March 15, 1938 — November 22, 2024</p>
+        <p class="memorial-epitaph">"She filled every room with warmth and left it smelling like fresh-baked cookies."</p>
+        <button class="song-player" id="songPlayer">
+            <span class="song-player-icon">▶</span>
+            <span class="song-player-text">Her Favorite: Moon River</span>
+        </button>
+    </header>
+
+    <!-- Actions Bar -->
+    <div class="actions-bar">
+        <button class="action-btn" id="candleBtn" data-action="light-candle">
+            <span class="action-icon">🕯️</span>
+            <span>Light a Candle</span>
+            <span class="action-count" data-candle-count>247</span>
+        </button>
+        <button class="action-btn" id="flowerBtn" data-action="leave-flowers">
+            <span class="action-icon">🌸</span>
+            <span>Leave Flowers</span>
+            <span class="action-count" data-flower-count>89</span>
+        </button>
+        <button class="action-btn" id="memoryBtn">
+            <span class="action-icon">✍️</span>
+            <span>Share a Memory</span>
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="memorial-content">
+        <!-- Timeline Section -->
+        <section class="memorial-section fade-in">
+            <h2 class="section-title">📜 Her Life Story</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-year">1938</div>
+                    <div class="timeline-content">Born in Charleston, South Carolina to loving parents William and Rose Henderson. The youngest of four children.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-year">1960</div>
+                    <div class="timeline-content">Married Thomas James Carter in a small ceremony at First Baptist Church. They would spend 58 beautiful years together.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-year">1962 - 1968</div>
+                    <div class="timeline-content">Welcomed three children: Elizabeth (1962), Robert (1965), and Sarah (1968). Built their family home on Maple Street.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-year">1978</div>
+                    <div class="timeline-content">Opened "Margaret's Flower Shop" downtown—a dream she'd held since childhood. It became a beloved community landmark for 30 years.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-year">1990s - 2010s</div>
+                    <div class="timeline-content">Cherished her role as grandmother to seven grandchildren. Every Sunday was "Grandma's Kitchen Day" with her famous lemon pound cake.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-year">2024</div>
+                    <div class="timeline-content">Passed peacefully at home, surrounded by family, with Moon River playing softly in the background—just as she wanted.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recipe Card -->
+        <section class="memorial-section fade-in">
+            <h2 class="section-title">🍋 Her Famous Recipe</h2>
+            <div class="recipe-card">
+                <div class="recipe-header">
+                    <div class="recipe-image">🍰</div>
+                    <div>
+                        <h3 class="recipe-title">Grandma Margaret's Lemon Pound Cake</h3>
+                        <p class="recipe-subtitle">"The secret is the extra tablespoon of love."</p>
+                    </div>
+                </div>
+                <div class="recipe-ingredients">
+                    <h5>Ingredients</h5>
+                    <ul>
+                        <li>3 cups all-purpose flour</li>
+                        <li>1/2 tsp baking powder</li>
+                        <li>1/2 tsp salt</li>
+                        <li>1 cup butter, softened</li>
+                        <li>3 cups sugar</li>
+                        <li>6 large eggs</li>
+                        <li>1 cup sour cream</li>
+                        <li>Zest of 2 lemons</li>
+                        <li>1/4 cup fresh lemon juice</li>
+                        <li>1 tsp vanilla extract</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Photo Gallery -->
+        <section class="memorial-section fade-in">
+            <h2 class="section-title">📸 Cherished Moments</h2>
+            <div class="photo-gallery">
+                <div class="gallery-item" data-lightbox="gallery">👰</div>
+                <div class="gallery-item" data-lightbox="gallery">👶</div>
+                <div class="gallery-item" data-lightbox="gallery">🌺</div>
+                <div class="gallery-item" data-lightbox="gallery">🎂</div>
+                <div class="gallery-item" data-lightbox="gallery">🏡</div>
+                <div class="gallery-item" data-lightbox="gallery">👨‍👩‍👧‍👦</div>
+            </div>
+        </section>
+
+        <!-- Memories Feed -->
+        <section class="memorial-section fade-in">
+            <h2 class="section-title">💝 Memories from Loved Ones</h2>
+            <div class="memories-feed">
+                <div class="memory-card">
+                    <div class="memory-header">
+                        <div class="memory-avatar">E</div>
+                        <div>
+                            <div class="memory-author">Elizabeth Carter-Moore</div>
+                            <div class="memory-relation">Daughter</div>
+                        </div>
+                        <span class="memory-date">2 days ago</span>
+                    </div>
+                    <p class="memory-text">Mom always said the kitchen was where love was made, not just food. Every holiday, she'd wake up at 5am to start cooking, and by noon the whole neighborhood could smell her famous ham. I'll never walk into a kitchen without thinking of her humming Moon River.</p>
+                </div>
+
+                <div class="memory-card">
+                    <div class="memory-header">
+                        <div class="memory-avatar">J</div>
+                        <div>
+                            <div class="memory-author">Jennifer Williams</div>
+                            <div class="memory-relation">Granddaughter</div>
+                        </div>
+                        <span class="memory-date">1 week ago</span>
+                    </div>
+                    <p class="memory-text">Grandma taught me that fresh flowers can fix almost anything. A bad day? Flowers. A broken heart? Flowers and cookies. She turned her little shop into a place where people came not just for arrangements, but for her wisdom and warm hugs.</p>
+                </div>
+
+                <div class="memory-card">
+                    <div class="memory-header">
+                        <div class="memory-avatar">M</div>
+                        <div>
+                            <div class="memory-author">Mary Thompson</div>
+                            <div class="memory-relation">Neighbor & Friend (40 years)</div>
+                        </div>
+                        <span class="memory-date">1 week ago</span>
+                    </div>
+                    <p class="memory-text">Margaret brought me soup every single time I was sick. For forty years. Rain or shine, there she'd be at my door with her chicken noodle soup and a smile. That kind of consistent kindness is so rare in this world.</p>
+                </div>
+
+                <div class="memory-card">
+                    <div class="memory-header">
+                        <div class="memory-avatar">R</div>
+                        <div>
+                            <div class="memory-author">Robert Carter</div>
+                            <div class="memory-relation">Son</div>
+                        </div>
+                        <span class="memory-date">2 weeks ago</span>
+                    </div>
+                    <p class="memory-text">Dad always said he fell in love with Mom's laugh before anything else. Sixty years later, that laugh still filled our family gatherings. She found joy in the smallest things—a sunny morning, a child's drawing, the first bloom in her garden.</p>
+                </div>
+
+                <div class="memory-card">
+                    <div class="memory-header">
+                        <div class="memory-avatar">S</div>
+                        <div>
+                            <div class="memory-author">Sarah Carter-Blake</div>
+                            <div class="memory-relation">Daughter</div>
+                        </div>
+                        <span class="memory-date">2 weeks ago</span>
+                    </div>
+                    <p class="memory-text">She always told us: 'Life is too short for artificial flowers and fake smiles.' Mom lived authentically every single day. Real flowers, real feelings, real love. Miss you more than words can say.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Healing Corner -->
+        <section class="healing-corner fade-in">
+            <div class="healing-icon">🌸</div>
+            <h3 class="healing-title">Today's Gentle Reflection</h3>
+            <p class="healing-prompt">What's one small thing Margaret did that made you feel loved?</p>
+            <textarea class="healing-input" placeholder="Take a moment to reflect and write..."></textarea>
+            <p class="healing-note">Your reflection is private unless you choose to share it.</p>
+        </section>
+
+        <!-- CTA Section -->
+        <div class="preview-cta fade-in">
+            <h2>Create a Memorial Like This</h2>
+            <p>Honor your loved one with a beautiful, lasting tribute that brings family together.</p>
+            <a href="../create/" class="btn btn-gold">Start Creating →</a>
+        </div>
+    </main>
+
+    <!-- Share Button -->
+    <button class="share-btn" id="shareBtn" title="Share this memorial">
+        📤
+    </button>
+
+    <!-- Shared Scripts -->
+    <script src="../js/script.js"></script>
+
+    <!-- Page Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Song Player
+            const songPlayer = document.getElementById('songPlayer');
+            let isPlaying = false;
+
+            songPlayer.addEventListener('click', function() {
+                isPlaying = !isPlaying;
+                if (isPlaying) {
+                    this.classList.add('playing');
+                    this.querySelector('.song-player-icon').textContent = '⏸';
+                    this.querySelector('.song-player-text').textContent = 'Now Playing: Moon River';
+                } else {
+                    this.classList.remove('playing');
+                    this.querySelector('.song-player-icon').textContent = '▶';
+                    this.querySelector('.song-player-text').textContent = 'Her Favorite: Moon River';
+                }
+            });
+
+            // Candle Button
+            const candleBtn = document.getElementById('candleBtn');
+            const candleCount = candleBtn.querySelector('[data-candle-count]');
+
+            candleBtn.addEventListener('click', function() {
+                this.classList.add('active');
+                let count = parseInt(candleCount.textContent);
+                count++;
+                candleCount.textContent = count;
+
+                // Add candle animation
+                const icon = this.querySelector('.action-icon');
+                icon.classList.add('candle-animation');
+
+                if (typeof showToast === 'function') {
+                    showToast('Your candle has been lit in Margaret\'s memory', 'success');
+                }
+
+                setTimeout(() => {
+                    icon.classList.remove('candle-animation');
+                }, 2000);
+            });
+
+            // Flower Button
+            const flowerBtn = document.getElementById('flowerBtn');
+            const flowerCount = flowerBtn.querySelector('[data-flower-count]');
+
+            flowerBtn.addEventListener('click', function() {
+                this.classList.add('active');
+                let count = parseInt(flowerCount.textContent);
+                count++;
+                flowerCount.textContent = count;
+
+                // Create floating petals
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const petal = document.createElement('span');
+                        petal.className = 'petal-animation';
+                        petal.textContent = '🌸';
+                        petal.style.left = (Math.random() * 100) + 'px';
+                        petal.style.top = '0';
+                        this.style.position = 'relative';
+                        this.appendChild(petal);
+
+                        setTimeout(() => petal.remove(), 2000);
+                    }, i * 100);
+                }
+
+                if (typeof showToast === 'function') {
+                    showToast('Your flowers have been placed for Margaret', 'success');
+                }
+            });
+
+            // Memory Button
+            const memoryBtn = document.getElementById('memoryBtn');
+            memoryBtn.addEventListener('click', function() {
+                if (typeof showToast === 'function') {
+                    showToast('Memory sharing would open here. Create your own memorial to enable this!', 'info');
+                }
+            });
+
+            // Share Button
+            const shareBtn = document.getElementById('shareBtn');
+            shareBtn.addEventListener('click', function() {
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Margaret Louise Carter Memorial',
+                        text: 'Remembering Margaret Louise Carter (1938-2024)',
+                        url: window.location.href
+                    });
+                } else if (typeof copyToClipboard === 'function') {
+                    copyToClipboard(window.location.href);
+                } else {
+                    if (typeof showToast === 'function') {
+                        showToast('Link copied to clipboard!', 'success');
+                    }
+                }
+            });
+
+            // Animate counters on scroll
+            const counters = document.querySelectorAll('.action-count');
+            let animated = false;
+
+            function animateCounters() {
+                if (animated) return;
+
+                counters.forEach(counter => {
+                    const target = parseInt(counter.textContent);
+                    let current = 0;
+                    const increment = target / 30;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            counter.textContent = target;
+                            clearInterval(timer);
+                        } else {
+                            counter.textContent = Math.floor(current);
+                        }
+                    }, 30);
+                });
+
+                animated = true;
+            }
+
+            // Trigger counter animation when actions bar is visible
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animateCounters();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            const actionsBar = document.querySelector('.actions-bar');
+            if (actionsBar) {
+                observer.observe(actionsBar);
+            }
+        });
+    </script>
+</body>
+</html>
