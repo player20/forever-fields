@@ -5,6 +5,127 @@ All notable changes to the Forever Fields project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0-lang] - 2024-12-04
+
+### Added
+
+#### Multilingual Support System
+- **8 Language Support** (`js/language-switcher.js`)
+  - English (en) - Default
+  - Español (es) - Spanish
+  - Tiếng Việt (vi) - Vietnamese
+  - العربية (ar) - Arabic with RTL support
+  - Tagalog (tl) - Filipino
+  - Français (fr) - French
+  - Português (pt) - Portuguese
+  - 中文 (zh) - Chinese (Simplified)
+
+- **Auto-Detection** on First Visit
+  - Detects browser language using `navigator.language`
+  - Falls back to localStorage if previously set
+  - Defaults to English if language not supported
+  - Automatic language code extraction (e.g., es-ES → es)
+  - Smart detection for regional variants
+
+- **Translation Engine**
+  - Google Translate API integration (free tier)
+  - Batch translation for performance (50 items per batch)
+  - Intelligent text extraction (direct text only, preserves child elements)
+  - Placeholder, title, and aria-label translation
+  - CSS pseudo-element translation support
+  - Smooth transition effects during translation
+  - Fallback to English on API errors
+
+- **Language Switcher UI**
+  - Globe icon dropdown in header
+  - 8 language options with native names
+  - Current language code display
+  - Active language highlighting
+  - Smooth dropdown animations
+  - Mobile-responsive select menu
+  - Keyboard navigation (Arrow keys, Enter, Escape)
+  - Click-outside to close
+
+- **RTL (Right-to-Left) Support**
+  - Automatic direction switching for Arabic
+  - HTML `dir` attribute management
+  - RTL-specific class (`rtl-active`) for styling
+  - Preserved layout integrity for RTL languages
+
+- **Persistence & Storage**
+  - localStorage key: `ff_language`
+  - Language preference saved on selection
+  - Automatic restoration on page load
+  - Persists across sessions
+
+- **Dynamic Content Translation**
+  - MutationObserver for new content
+  - Auto-translates dynamically added elements
+  - Debounced translation (500ms) for performance
+  - Preserves original text in memory Map
+  - Restores original when switching back to English
+
+- **Smart Content Filtering**
+  - Skips user-generated content (memorials, names, dates)
+  - Preserves proper names and email addresses
+  - Skips code, scripts, and style elements
+  - Respects `data-no-translate` attribute
+  - Date format detection and preservation
+
+- **Accessibility Features**
+  - ARIA attributes (aria-expanded, aria-label)
+  - Full keyboard navigation
+  - Focus management
+  - Screen reader friendly
+  - Semantic HTML structure
+
+#### Testing
+- **Multilingual Test Suite** (`server/tests/multilingual.test.js`)
+  - 8 comprehensive test scenarios
+  - Test 1: Language switcher file check
+  - Test 2: HTML integration verification
+  - Test 3: Translation API connectivity
+  - Test 4: Browser language detection simulation
+  - Test 5: RTL support validation
+  - Test 6: localStorage persistence check
+  - Test 7: Dynamic content translation
+  - Test 8: Accessibility features audit
+  - Run with: `npm run test:lang`
+
+### Changed
+- **Server version**: `0.6.0-pwa` → `0.7.0-lang`
+- **All HTML pages**: Include language-switcher.js script
+- **Header**: Language switcher dropdown added
+- **html element**: Dynamic `lang` and `dir` attributes
+
+### User Experience
+- ✅ Auto-detect browser language on first visit
+- ✅ Dropdown with 8 language options
+- ✅ Native language names for easy recognition
+- ✅ Smooth translation transitions
+- ✅ Persistent language preference
+- ✅ RTL layout for Arabic
+- ✅ Dynamic content automatically translated
+- ✅ Keyboard navigation support
+- ✅ Mobile-friendly select menu
+
+### Browser Support
+- ✅ Chrome/Edge (Desktop & Mobile) - Full support
+- ✅ Firefox (Desktop & Mobile) - Full support
+- ✅ Safari (iOS & macOS) - Full support
+- ✅ Samsung Internet - Full support
+- ⚠️  Older browsers - May need polyfills for fetch API
+
+### Security & Privacy
+- ✅ No personal data sent to translation API
+- ✅ Client-side translation (no server logs)
+- ✅ Original text stored in memory only
+- ✅ No API key required (public endpoint)
+- ✅ Safe HTML injection (textContent only)
+- ✅ XSS prevention (no innerHTML usage)
+
+---
+
 ## [0.6.0-pwa] - 2024-12-04
 
 ### Added
