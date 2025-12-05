@@ -4,7 +4,11 @@
       "Bash(npm install:*)",
       "Bash(git add:*)",
       "Bash(git tag:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(node:*)",
+      "Bash(done)",
+      "Bash(ls:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
