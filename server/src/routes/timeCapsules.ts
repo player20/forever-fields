@@ -5,39 +5,37 @@
 
 import { Router } from 'express';
 import { prisma } from '../config/database';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth, optionalAuth } from '../middleware/auth';
 import { requireMemorialEditor } from '../middleware/authorization';
 import { validate } from '../middleware/validate';
 import { apiRateLimiter } from '../middleware/security';
 import { createTimeCapsuleSchema } from '../validators/schemas';
+import { checkMemorialAccess } from '../utils/permissions';
 
 const router = Router();
 
 /**
  * POST /api/time-capsules
- * Create a time capsule (goes to pending queue for approval, no auth required)
+ * Create a time capsule (requires auth, goes to pending queue for approval)
  */
 router.post(
   '/',
+  requireAuth,
   apiRateLimiter,
   validate(createTimeCapsuleSchema),
   async (req, res) => {
     try {
       const { memorialId, messageText, voiceUrl, videoUrl, unlockDate } = req.body;
 
-      // Verify memorial exists and is accessible
-      const memorial = await prisma.memorial.findUnique({
-        where: { id: memorialId },
-        select: { privacy: true, deceasedName: true },
-      });
+      // Check access using permissions utility (requires editor permission to create capsules)
+      const access = await checkMemorialAccess(
+        memorialId,
+        req.user!.id,
+        'editor'
+      );
 
-      if (!memorial) {
-        return res.status(404).json({ error: 'Memorial not found' });
-      }
-
-      // Only allow time capsules on public or link-accessible memorials
-      if (memorial.privacy === 'private') {
-        return res.status(403).json({ error: 'Cannot create time capsules on private memorials' });
+      if (!access.allowed) {
+        return res.status(403).json({ error: access.reason || 'Access denied' });
       }
 
       // Validate unlock date is in the future
@@ -77,22 +75,19 @@ router.post(
  * GET /api/time-capsules/:memorialId
  * Get unlocked and approved time capsules for a memorial
  */
-router.get('/:memorialId', async (req, res) => {
+router.get('/:memorialId', optionalAuth, async (req, res) => {
   try {
     const { memorialId } = req.params;
 
-    // Verify memorial exists
-    const memorial = await prisma.memorial.findUnique({
-      where: { id: memorialId },
-      select: { privacy: true },
-    });
+    // Check access using permissions utility
+    const access = await checkMemorialAccess(
+      memorialId,
+      req.user?.id || null,
+      'viewer'
+    );
 
-    if (!memorial) {
-      return res.status(404).json({ error: 'Memorial not found' });
-    }
-
-    if (memorial.privacy === 'private') {
-      return res.status(403).json({ error: 'Cannot view time capsules on private memorials' });
+    if (!access.allowed) {
+      return res.status(403).json({ error: access.reason || 'Access denied' });
     }
 
     // Get approved time capsule pending items

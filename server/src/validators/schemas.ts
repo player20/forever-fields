@@ -165,6 +165,58 @@ export const pushSubscribeSchema = z.object({
 });
 
 // ============================================
+// GUESTBOOK SCHEMAS
+// ============================================
+
+export const createGuestbookEntrySchema = z.object({
+  memorialId: z.string().uuid('Invalid memorial ID'),
+  name: z.string().min(1).max(100).optional().nullable(),
+  message: z.string().min(1).max(5000, 'Message is too long'),
+  relationship: z.string().max(100).optional().nullable(),
+});
+
+// ============================================
+// MEMORIES SCHEMAS
+// ============================================
+
+export const createMemorySchema = z.object({
+  memorialId: z.string().uuid('Invalid memorial ID'),
+  title: z.string().min(1).max(200).optional().nullable(),
+  content: z.string().min(1).max(10000, 'Content is too long'),
+  authorName: z.string().min(1).max(100).optional().nullable(),
+  authorRelationship: z.string().max(100).optional().nullable(),
+});
+
+// ============================================
+// VOICE NOTE SCHEMAS
+// ============================================
+
+export const createVoiceNoteSchema = z.object({
+  memorialId: z.string().uuid('Invalid memorial ID'),
+  url: z.string().url('Invalid voice note URL'),
+  publicId: z.string().max(500).optional().nullable(),
+  duration: z.number().int().min(0).max(300).optional(), // Max 5 minutes
+  authorName: z.string().max(100).optional().nullable(),
+});
+
+// ============================================
+// REPORTS SCHEMAS
+// ============================================
+
+export const createReportSchema = z.object({
+  memorialId: z.string().uuid('Invalid memorial ID'),
+  contentType: z.enum(['photo', 'memory', 'guestbook', 'voice_note', 'candle']),
+  contentId: z.string().uuid('Invalid content ID'),
+  reason: z.string().min(1).max(1000, 'Reason is too long'),
+  reporterName: z.string().max(100).optional().nullable(),
+  reporterEmail: z.string().email('Invalid email').optional().nullable(),
+});
+
+export const resolveReportSchema = z.object({
+  action: z.enum(['resolved', 'dismissed']),
+});
+
+// ============================================
 // HELPER TYPES (for TypeScript inference)
 // ============================================
 
@@ -180,3 +232,8 @@ export type UpdateSocialLinks = z.infer<typeof updateSocialLinksSchema>;
 export type CreateQRCode = z.infer<typeof createQRCodeSchema>;
 export type CreateInvitation = z.infer<typeof createInvitationSchema>;
 export type PushSubscribe = z.infer<typeof pushSubscribeSchema>;
+export type CreateGuestbookEntry = z.infer<typeof createGuestbookEntrySchema>;
+export type CreateMemory = z.infer<typeof createMemorySchema>;
+export type CreateVoiceNote = z.infer<typeof createVoiceNoteSchema>;
+export type CreateReport = z.infer<typeof createReportSchema>;
+export type ResolveReport = z.infer<typeof resolveReportSchema>;

@@ -5,12 +5,13 @@
 
 import { Router } from 'express';
 import { prisma } from '../config/database';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth, optionalAuth } from '../middleware/auth';
 import { requireMemorialEditor } from '../middleware/authorization';
 import { validate } from '../middleware/validate';
 import { uploadRateLimiter } from '../middleware/security';
 import { uploadSignSchema } from '../validators/schemas';
 import { cloudinary } from '../config/cloudinary';
+import { checkMemorialAccess } from '../utils/permissions';
 
 const router = Router();
 
@@ -215,9 +216,21 @@ router.post(
  */
 router.get(
   '/memorial/:memorialId',
+  optionalAuth,
   async (req, res) => {
     try {
       const { memorialId } = req.params;
+
+      // Check access using permissions utility
+      const access = await checkMemorialAccess(
+        memorialId,
+        req.user?.id || null,
+        'viewer'
+      );
+
+      if (!access.allowed) {
+        return res.status(403).json({ error: access.reason || 'Access denied' });
+      }
 
       // Get approved photo pending items
       const approvedPhotos = await prisma.pendingItem.findMany({

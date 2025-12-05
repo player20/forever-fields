@@ -6,12 +6,8 @@
 (function() {
     'use strict';
 
-    // Initialize API client
-    const api = new ForeverFieldsAPI(
-        window.location.hostname === 'localhost'
-            ? 'http://localhost:3000'
-            : 'https://your-api.onrender.com'
-    );
+    // Initialize API client (uses ApiConfig.getApiUrl() automatically)
+    const api = new ForeverFieldsAPI();
 
     // State
     let currentMemorial = null;

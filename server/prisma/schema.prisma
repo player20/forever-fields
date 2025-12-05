@@ -55,13 +55,18 @@ model Memorial {
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
-  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner         User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   pendingItems  PendingItem[]
   invitations   Invitation[]
   candles       Candle[]
   timeCapsules  TimeCapsule[]
   socialLinks   SocialLink?
   qrCode        QRCode?
+  photos        Photo[]
+  memories      Memory[]
+  guestbookEntries GuestbookEntry[]
+  voiceNotes    VoiceNote[]
+  reports       Report[]
 
   @@unique([deceasedNameLower, birthDate], name: "unique_memorial_birth")
   @@unique([deceasedNameLower, deathDate], name: "unique_memorial_death")
@@ -100,6 +105,8 @@ model PendingItem {
 enum PendingItemType {
   photo
   memory
+  guestbook
+  voice_note
   song
   social
   time_capsule
@@ -249,4 +256,102 @@ model MagicLink {
   @@index([token])
   @@index([email])
   @@map("magic_links")
+}
+
+// ============================================
+// PHOTOS TABLE (Memorial photos)
+// RLS Policy: Follows memorial privacy settings
+// ============================================
+model Photo {
+  id          String   @id @default(uuid())
+  memorialId  String   @map("memorial_id")
+  url         String
+  publicId    String?  @map("public_id") // Cloudinary public ID
+  caption     String?
+  uploadedBy  String   @default("Anonymous") @map("uploaded_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  memorial Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@index([memorialId])
+  @@map("photos")
+}
+
+// ============================================
+// MEMORIES TABLE (Stories and memories)
+// RLS Policy: Follows memorial privacy settings
+// ============================================
+model Memory {
+  id                  String   @id @default(uuid())
+  memorialId          String   @map("memorial_id")
+  title               String
+  content             String   @db.Text
+  authorName          String   @map("author_name")
+  authorRelationship  String?  @map("author_relationship")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  memorial Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@index([memorialId])
+  @@map("memories")
+}
+
+// ============================================
+// GUESTBOOK ENTRIES TABLE
+// RLS Policy: Follows memorial privacy settings
+// ============================================
+model GuestbookEntry {
+  id           String   @id @default(uuid())
+  memorialId   String   @map("memorial_id")
+  name         String
+  message      String   @db.Text
+  relationship String?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  memorial Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@index([memorialId])
+  @@map("guestbook_entries")
+}
+
+// ============================================
+// VOICE NOTES TABLE
+// RLS Policy: Follows memorial privacy settings
+// ============================================
+model VoiceNote {
+  id         String   @id @default(uuid())
+  memorialId String   @map("memorial_id")
+  url        String
+  publicId   String?  @map("public_id") // Cloudinary public ID
+  duration   Int      @default(0)
+  authorName String   @default("Anonymous") @map("author_name")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  memorial Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@index([memorialId])
+  @@map("voice_notes")
+}
+
+// ============================================
+// REPORTS TABLE (Content flagging)
+// RLS Policy: Owner can view reports for their memorials
+// ============================================
+model Report {
+  id            String    @id @default(uuid())
+  memorialId    String    @map("memorial_id")
+  contentType   String    @map("content_type") // 'photo', 'memory', 'guestbook', 'voice_note'
+  contentId     String    @map("content_id")
+  reason        String
+  reporterName  String?   @map("reporter_name")
+  reporterEmail String?   @map("reporter_email")
+  status        String    @default("pending") // 'pending', 'resolved', 'dismissed'
+  createdAt     DateTime  @default(now()) @map("created_at")
+  resolvedAt    DateTime? @map("resolved_at")
+
+  memorial Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@index([memorialId])
+  @@index([status])
+  @@map("reports")
 }

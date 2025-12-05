@@ -4,8 +4,9 @@
  */
 
 class ForeverFieldsAPI {
-    constructor(baseURL = 'http://localhost:3000') {
-        this.baseURL = baseURL;
+    constructor(baseURL = null) {
+        // Use ApiConfig if available, otherwise fall back to same origin
+        this.baseURL = baseURL || (typeof ApiConfig !== 'undefined' ? ApiConfig.getApiUrl() : window.location.origin);
         this.token = localStorage.getItem('ff_auth_token');
     }
 

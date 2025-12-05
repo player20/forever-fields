@@ -5,34 +5,32 @@
 
 import { Router } from 'express';
 import { prisma } from '../config/database';
+import { optionalAuth } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import { candleRateLimiter } from '../middleware/security';
 import { createCandleSchema } from '../validators/schemas';
 import { sendCandleLitNotification } from './push';
+import { checkMemorialAccess } from '../utils/permissions';
 
 const router = Router();
 
 /**
  * POST /api/candles
- * Light a candle on a memorial (no auth required, but rate limited)
+ * Light a candle on a memorial (optional auth, rate limited, privacy checked)
  */
-router.post('/', candleRateLimiter, validate(createCandleSchema), async (req, res) => {
+router.post('/', optionalAuth, candleRateLimiter, validate(createCandleSchema), async (req, res) => {
   try {
     const { memorialId, message, name } = req.body;
 
-    // Verify memorial exists and is accessible
-    const memorial = await prisma.memorial.findUnique({
-      where: { id: memorialId },
-      select: { privacy: true },
-    });
+    // Check access using permissions utility (handles all privacy modes correctly)
+    const access = await checkMemorialAccess(
+      memorialId,
+      req.user?.id || null,
+      'viewer'
+    );
 
-    if (!memorial) {
-      return res.status(404).json({ error: 'Memorial not found' });
-    }
-
-    // Only allow candles on public or link-accessible memorials
-    if (memorial.privacy === 'private') {
-      return res.status(403).json({ error: 'Cannot light candles on private memorials' });
+    if (!access.allowed) {
+      return res.status(403).json({ error: access.reason || 'Access denied' });
     }
 
     // Check if this is the first candle
@@ -72,22 +70,19 @@ router.post('/', candleRateLimiter, validate(createCandleSchema), async (req, re
  * GET /api/candles/:memorialId
  * Get all candles for a memorial
  */
-router.get('/:memorialId', async (req, res) => {
+router.get('/:memorialId', optionalAuth, async (req, res) => {
   try {
     const { memorialId } = req.params;
 
-    // Verify memorial exists
-    const memorial = await prisma.memorial.findUnique({
-      where: { id: memorialId },
-      select: { privacy: true },
-    });
+    // Check access using permissions utility
+    const access = await checkMemorialAccess(
+      memorialId,
+      req.user?.id || null,
+      'viewer'
+    );
 
-    if (!memorial) {
-      return res.status(404).json({ error: 'Memorial not found' });
-    }
-
-    if (memorial.privacy === 'private') {
-      return res.status(403).json({ error: 'Cannot view candles on private memorials' });
+    if (!access.allowed) {
+      return res.status(403).json({ error: access.reason || 'Access denied' });
     }
 
     const candles = await prisma.candle.findMany({

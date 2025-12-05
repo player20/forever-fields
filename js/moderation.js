@@ -1,13 +1,29 @@
 /**
- * Forever Fields - Content Moderation Module
+ * Forever Fields - Content Moderation Module (UI ONLY)
  * Gentle, grief-aware content safety checks
  *
+ * ⚠️ SECURITY NOTICE:
+ * This module handles DISPLAY LOGIC ONLY (showing/hiding buttons based on UI state).
+ * ALL ACTUAL PERMISSIONS are enforced server-side in the backend API.
+ *
+ * localStorage permissions are for UX only - they control what buttons
+ * users see, but the backend ALWAYS validates permissions before
+ * allowing any action.
+ *
+ * DO NOT rely on these checks for security. Users can modify localStorage,
+ * but they cannot bypass backend permission validation.
+ *
  * This module handles:
- * - Permission roles (Owner, Editor, Viewer)
- * - Content safety filters (text, images, voice)
- * - Pending approval queue management
- * - Report functionality
- * - Legacy contacts
+ * - Permission roles UI (Owner, Editor, Viewer) - DISPLAY ONLY
+ * - Content safety filters (text, images, voice) - CLIENT-SIDE HINTS
+ * - Pending approval queue management - UI STATE
+ * - Report functionality - UI DISPLAY
+ * - Legacy contacts - UI MANAGEMENT
+ *
+ * All server-side permission enforcement happens in:
+ * - server/src/utils/permissions.ts (permission checks)
+ * - server/src/middleware/auth.ts (authentication)
+ * - server/src/middleware/authorization.ts (authorization)
  */
 
 const ForeverFieldsModeration = {

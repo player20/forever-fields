@@ -22,6 +22,10 @@ import timeCapsuleRoutes from './routes/timeCapsules';
 import qrRoutes from './routes/qr';
 import prayerCardRoutes from './routes/prayer-card';
 import pushRoutes from './routes/push';
+import guestbookRoutes from './routes/guestbook';
+import memoriesRoutes from './routes/memories';
+import voiceNotesRoutes from './routes/voiceNotes';
+import reportsRoutes from './routes/reports';
 
 const app = express();
 
@@ -72,6 +76,10 @@ app.use('/api/time-capsules', timeCapsuleRoutes);
 app.use('/api/qr', qrRoutes);
 app.use('/api/prayer-card', prayerCardRoutes);
 app.use('/api/push', pushRoutes);
+app.use('/api/guestbook', guestbookRoutes);
+app.use('/api/memories', memoriesRoutes);
+app.use('/api/voice-notes', voiceNotesRoutes);
+app.use('/api/reports', reportsRoutes);
 
 // ============================================
 // 404 HANDLER
