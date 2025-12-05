@@ -532,13 +532,19 @@
                 message: document.getElementById('candle-message').value.trim() || null,
             };
 
-            await api.lightCandle(currentMemorial.id, candleData);
+            const response = await api.lightCandle(currentMemorial.id, candleData);
 
             // Close modal
             closeModal('candle-modal');
 
-            // Show success
-            showToast('🕯️', 'Your candle has been lit');
+            // Check if this was the first candle
+            if (response.isFirstCandle) {
+                // Show special first candle celebration
+                showFirstCandleCelebration(response.totalCandles);
+            } else {
+                // Show success
+                showToast('🕯️', 'Your candle has been lit');
+            }
 
             // Reload candles
             await loadCandles(currentMemorial.id);
@@ -831,6 +837,42 @@
         setTimeout(() => {
             elements.toast.style.display = 'none';
         }, duration);
+    }
+
+    /**
+     * Show first candle celebration with golden glow animation
+     */
+    function showFirstCandleCelebration(totalCandles) {
+        // Create celebration overlay
+        const celebrationOverlay = document.createElement('div');
+        celebrationOverlay.className = 'first-candle-celebration';
+        celebrationOverlay.innerHTML = `
+            <div class="celebration-content">
+                <div class="celebration-candle">🕯️</div>
+                <h2 class="celebration-title">First Candle Lit!</h2>
+                <p class="celebration-message">
+                    You just lit the first candle on ${currentMemorial.deceasedName}'s memorial.
+                    <br>
+                    Their light shines on forever.
+                </p>
+                <div class="golden-glow"></div>
+            </div>
+        `;
+
+        document.body.appendChild(celebrationOverlay);
+
+        // Trigger animation
+        setTimeout(() => {
+            celebrationOverlay.classList.add('show');
+        }, 100);
+
+        // Remove after animation
+        setTimeout(() => {
+            celebrationOverlay.classList.remove('show');
+            setTimeout(() => {
+                celebrationOverlay.remove();
+            }, 500);
+        }, 5000);
     }
 
     // ============================================

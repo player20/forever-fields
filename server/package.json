@@ -1,6 +1,6 @@
 {
   "name": "forever-fields-backend",
-  "version": "0.5.0-song",
+  "version": "0.4.0-wow",
   "description": "Production-ready backend for Forever Fields memorial platform",
   "main": "dist/index.js",
   "scripts": {
@@ -14,7 +14,8 @@
     "test:memorial": "node tests/memorial-crud.test.js",
     "test:photos": "node tests/photo-upload.test.js",
     "test:qr": "node tests/qr-prayer-card.test.js",
-    "test:song": "node tests/song-player.test.js"
+    "test:song": "node tests/song-player.test.js",
+    "test:wow": "node tests/time-capsule-first-candle.test.js"
   },
   "keywords": ["memorial", "express", "supabase", "prisma"],
   "author": "",

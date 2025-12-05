@@ -99,6 +99,125 @@ All security features from previous versions maintained:
 
 ---
 
+## [0.4.0-wow] - 2024-12-04
+
+### Added
+
+#### Time Capsule System
+- **Time capsule creation with delayed reveal**
+  - Users can create messages for future unlock dates
+  - Supports text messages, voice recordings, and video messages
+  - Automatic unlock on specified date
+  - All time capsules go through pending queue for approval
+
+- **Backend Time Capsule Routes** (`server/src/routes/timeCapsules.ts`)
+  - `POST /api/time-capsules` - Create new time capsule (public access)
+    - Validates unlock date is in the future
+    - Only allows time capsules on public/link-accessible memorials
+    - Creates pending item with type 'time_capsule'
+    - Rate limited for abuse prevention
+  - `GET /api/time-capsules/:memorialId` - Get unlocked time capsules
+    - Fetches approved time capsule pending items
+    - Filters by unlock date (only shows if unlockDate <= now)
+    - Returns transformed time capsule objects
+    - Public access (no auth required)
+  - `POST /api/time-capsules/:id/open` - Mark capsule as opened
+    - Records opened timestamp for statistics
+    - Validates capsule is unlocked before allowing open
+    - Rate limited
+
+- **Wizard Time Capsule UI** (`create/index.html`)
+  - New "Time Capsule" section in step 4 (Memories)
+  - Message textarea with 1000 character limit and live counter
+  - Unlock date picker with future date validation
+  - Voice recording upload button (50MB max)
+  - Video upload button (50MB max)
+  - Media preview showing attached file name and size
+  - Remove media button to clear selections
+  - Moderation reassurance message (approval required)
+
+- **API Client Methods** (`memorial-template/js/api-client.js`)
+  - `getTimeCapsules(memorialId)` - Fetch unlocked capsules
+  - `createTimeCapsule(capsuleData)` - Create new time capsule
+  - `openTimeCapsule(capsuleId)` - Mark capsule as opened
+  - All methods use noAuth for public access
+
+#### First Candle Celebration System
+- **First candle detection and celebration**
+  - Detects when the first candle is lit on a memorial
+  - Triggers special golden glow animation
+  - Personalized message with deceased's name
+  - Auto-dismisses after 5 seconds
+
+- **Enhanced Candle Route** (`server/src/routes/candles.ts`)
+  - Modified `POST /api/candles` to detect first candle
+  - Counts existing candles before creation
+  - Returns `isFirstCandle` boolean flag
+  - Returns `totalCandles` count
+  - Maintains existing rate limiting and validation
+
+- **First Candle Celebration Animation** (`memorial-template/js/memorial.js`)
+  - `showFirstCandleCelebration()` function
+  - Dynamically creates celebration overlay
+  - Shows large candle emoji with pulsing animation
+  - "First Candle Lit!" title
+  - Personalized message: "You just lit the first candle on [Name]'s memorial"
+  - Golden glow radial gradient background effect
+  - Smooth entrance/exit animations
+
+- **Celebration Styles** (`memorial-template/css/memorial.css`)
+  - `.first-candle-celebration` - Full-screen overlay with dark backdrop
+  - `.celebration-content` - Centered card with cream gradient
+  - `.celebration-candle` - Large emoji (5rem) with glow animation
+  - `@keyframes celebration-slide-up` - Entrance animation
+  - `@keyframes candle-glow` - Pulsing candle with drop-shadow
+  - `@keyframes glow-pulse` - Radial gradient background pulse
+  - `.celebration-title` - Gold serif title with text-shadow
+  - `.golden-glow` - Radial gradient overlay effect
+
+#### Testing
+- **Time Capsule & First Candle Test Suite** (`server/tests/time-capsule-first-candle.test.js`)
+  - 7 comprehensive test scenarios with colored console output
+  - Test 1: Create time capsule with future unlock date
+  - Test 2: Verify locked capsules don't show
+  - Test 3: Create time capsule with past date (already unlocked)
+  - Test 4: Light first candle (triggers celebration)
+  - Test 5: Light second candle (no celebration)
+  - Test 6: Retrieve all candles
+  - Test 7: Validation tests (past dates, private memorials)
+  - Run with: `npm run test:wow`
+
+### Changed
+- **Server version**: `0.3.0-qr` → `0.4.0-wow`
+- **Candle API response**: Now includes `isFirstCandle` and `totalCandles`
+- **Memorial wizard**: Enhanced step 4 with time capsule section
+- **Memorial template**: Added celebration animation for first candle
+
+### Database Schema
+Uses existing schema:
+- `pendingItem.type = 'time_capsule'` - Time capsules stored as pending items
+- `pendingItem.dataJson` - Stores messageText, voiceUrl, videoUrl, unlockDate
+- `candle` table - No changes required
+
+### Security
+All security features maintained:
+- ✅ Time capsules require approval (pending queue)
+- ✅ Unlock date validation (must be in future)
+- ✅ Privacy checks (no time capsules on private memorials)
+- ✅ Rate limiting on all endpoints
+- ✅ Zod validation for input data
+- ✅ File size limits (50MB for voice/video)
+
+### User Experience
+- ✅ First candle milestone celebrated with animation
+- ✅ Time capsules revealed automatically on unlock date
+- ✅ Clear feedback on time capsule approval process
+- ✅ Media upload previews with file info
+- ✅ Character counters for message fields
+- ✅ Visual validation for unlock dates
+
+---
+
 ## [0.3.0-qr] - 2024-12-04
 
 ### Added
