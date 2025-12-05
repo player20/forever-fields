@@ -56,6 +56,12 @@
             color: var(--sage-primary);
         }
 
+        .create-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
         .autosave-indicator {
             font-size: 0.85rem;
             color: var(--gray-light);
@@ -809,9 +815,32 @@
                 <span>🌿</span>
                 <span>Forever Fields</span>
             </a>
-            <div class="autosave-indicator" id="autosaveIndicator">
-                <span class="indicator-icon">✓</span>
-                <span class="indicator-text">All changes saved</span>
+            <div class="create-header-actions">
+                <!-- Language Switcher -->
+                <div class="language-switcher" id="languageSwitcher" data-no-translate>
+                    <button class="language-toggle" id="languageToggle" aria-label="Select language" aria-expanded="false" aria-haspopup="true">
+                        <svg class="globe-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <ellipse cx="12" cy="12" rx="4" ry="10"/>
+                            <path d="M2 12h20"/>
+                        </svg>
+                        <span class="current-lang-code">EN</span>
+                    </button>
+                    <div class="language-dropdown" id="languageDropdown" role="menu" aria-label="Available languages">
+                        <button class="language-option active" data-lang="en" role="menuitem"><span class="lang-name">English</span></button>
+                        <button class="language-option" data-lang="es" role="menuitem"><span class="lang-name">Español</span></button>
+                        <button class="language-option" data-lang="vi" role="menuitem"><span class="lang-name">Tiếng Việt</span></button>
+                        <button class="language-option" data-lang="ar" role="menuitem" dir="rtl"><span class="lang-name">العربية</span></button>
+                        <button class="language-option" data-lang="tl" role="menuitem"><span class="lang-name">Tagalog</span></button>
+                        <button class="language-option" data-lang="fr" role="menuitem"><span class="lang-name">Français</span></button>
+                        <button class="language-option" data-lang="pt" role="menuitem"><span class="lang-name">Português</span></button>
+                        <button class="language-option" data-lang="zh" role="menuitem"><span class="lang-name">中文</span></button>
+                    </div>
+                </div>
+                <div class="autosave-indicator" id="autosaveIndicator">
+                    <span class="indicator-icon">✓</span>
+                    <span class="indicator-text">All changes saved</span>
+                </div>
             </div>
         </div>
     </header>
@@ -829,6 +858,7 @@
                 <div class="wizard-progress-dot" data-step="3">4</div>
                 <div class="wizard-progress-dot" data-step="4">5</div>
                 <div class="wizard-progress-dot" data-step="5">6</div>
+                <div class="wizard-progress-dot" data-step="6">7</div>
             </div>
             <div class="wizard-progress-labels">
                 <span class="wizard-progress-label active">Welcome</span>
@@ -836,6 +866,7 @@
                 <span class="wizard-progress-label">About</span>
                 <span class="wizard-progress-label">History</span>
                 <span class="wizard-progress-label">Memories</span>
+                <span class="wizard-progress-label">Photos</span>
                 <span class="wizard-progress-label">Publish</span>
             </div>
         </div>
@@ -1082,14 +1113,67 @@
                     <button type="button" class="add-block-btn" data-add="memory">+ Add Another Memory</button>
                 </div>
 
+                <!-- Favorite Song -->
+                <div class="repeatable-section">
+                    <h3>🎵 Their Favorite Song</h3>
+                    <p style="color: var(--gray-body); font-size: 0.95rem; margin-bottom: 1rem;">
+                        Add a song that reminds you of them. Visitors can play a 30-second preview (or full song if logged into Spotify).
+                    </p>
+                    <div class="form-group">
+                        <label for="favoriteSongUrl">
+                            Song URL (Spotify or YouTube)
+                            <span class="optional">(optional)</span>
+                        </label>
+                        <input
+                            type="url"
+                            id="favoriteSongUrl"
+                            name="favoriteSongUrl"
+                            placeholder="Paste Spotify or YouTube link here..."
+                            pattern="https?://(open\.spotify\.com/(track|album)/[a-zA-Z0-9]+|www\.youtube\.com/watch\?v=[a-zA-Z0-9_-]+|youtu\.be/[a-zA-Z0-9_-]+).*"
+                        >
+                        <small style="color: var(--gray-light); display: block; margin-top: 0.5rem;">
+                            Examples:
+                            <br>• Spotify: https://open.spotify.com/track/...
+                            <br>• YouTube: https://www.youtube.com/watch?v=... or https://youtu.be/...
+                        </small>
+                    </div>
+                    <div id="songPreview" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--sage-pale); border-radius: 8px;">
+                        <p style="margin: 0; color: var(--gray-dark);">
+                            <strong>Song detected:</strong> <span id="songPreviewPlatform"></span>
+                        </p>
+                    </div>
+                </div>
+
                 <div class="reassurance">
                     <span class="reassurance-icon">→</span>
                     <span>You can always add more later. Family members can contribute their own memories too.</span>
                 </div>
             </div>
 
-            <!-- Step 6: Review, Preview & Publish -->
+            <!-- Step 5: Photos -->
             <div class="wizard-step" data-step="5">
+                <div class="step-header">
+                    <span class="step-icon">📷</span>
+                    <h1>Share photos that tell their story</h1>
+                    <p>Upload photos that capture who they were. All photos will be reviewed before appearing on the memorial.</p>
+                </div>
+
+                <div id="photo-uploader-container"></div>
+
+                <div class="reassurance">
+                    <span class="reassurance-icon">✓</span>
+                    <span>All photos go through our moderation queue to keep the memorial safe and beautiful.</span>
+                </div>
+
+                <div class="grief-support-link" style="margin-top: 1.5rem;">
+                    <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        <strong>Photo guidelines:</strong> Upload clear, respectful images in JPG, PNG, WebP, or GIF format. Maximum 10MB per photo, up to 20 photos total.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 6: Review, Preview & Publish -->
+            <div class="wizard-step" data-step="6">
                 <div class="step-header">
                     <span class="step-icon">✓</span>
                     <h1>Review & Publish</h1>
@@ -1130,10 +1214,30 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="inviteEmails">Invite family members <span class="optional">(optional)</span></label>
-                    <input type="text" id="inviteEmails" name="inviteEmails" placeholder="Enter email addresses, separated by commas">
-                    <span class="field-hint">They'll receive a gentle invitation to view and contribute to the memorial.</span>
+                <!-- MODERATION: Invite Family & Friends Section -->
+                <div class="invite-section">
+                    <h3 class="invite-section-title">Invite Family & Friends</h3>
+                    <p class="invite-section-desc">
+                        We review every addition so this stays a safe, beautiful space forever.
+                    </p>
+
+                    <div class="invite-row">
+                        <input type="email" id="inviteEmail" placeholder="Enter email address" class="invite-email-input">
+                        <select id="inviteRole" class="invite-role-select">
+                            <option value="viewer">Viewer - can light candles & leave messages</option>
+                            <option value="editor">Editor - can add photos & memories (you'll approve first)</option>
+                        </select>
+                        <button type="button" id="addInviteBtn" class="btn btn-secondary btn-sm" onclick="addInvite()">+ Invite</button>
+                    </div>
+
+                    <div id="inviteList" class="invite-list">
+                        <!-- Dynamically populated -->
+                    </div>
+
+                    <div class="reassurance">
+                        <span class="reassurance-icon">&#128737;</span>
+                        <span>You're in complete control - nothing shows without your okay.</span>
+                    </div>
                 </div>
 
                 <div class="grief-support-link">
@@ -1156,13 +1260,20 @@
     </div>
 
     <!-- Shared Scripts -->
+    <script src="../js/moderation.js"></script>
     <script src="../js/script.js"></script>
+
+    <!-- Memorial Template Scripts -->
+    <link rel="stylesheet" href="../memorial-template/css/memorial.css">
+    <script src="../memorial-template/js/api-client.js"></script>
+    <script src="../memorial-template/js/photo-uploader.js"></script>
 
     <!-- Wizard Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const totalSteps = 6;
+            const totalSteps = 7;
             let currentStep = 0;
+            let photoUploader = null;
 
             const steps = document.querySelectorAll('.wizard-step');
             const dots = document.querySelectorAll('.wizard-progress-dot');
@@ -1217,11 +1328,42 @@
                 updateNavButtons();
                 updatePreview();
 
+                // Initialize photo uploader on step 5
+                if (step === 5 && !photoUploader) {
+                    initializePhotoUploader();
+                }
+
                 // Scroll to top of wizard
                 document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                 // Simulate autosave
                 simulateAutosave();
+            }
+
+            function initializePhotoUploader() {
+                // Get memorial ID from form (would be generated after step 2 in real app)
+                const memorialId = sessionStorage.getItem('memorial_draft_id') || 'demo-memorial-id';
+
+                // Initialize API client
+                const api = new ForeverFieldsAPI(
+                    window.location.hostname === 'localhost'
+                        ? 'http://localhost:3000'
+                        : 'https://your-api.onrender.com'
+                );
+
+                // Initialize photo uploader
+                photoUploader = new PhotoUploader('photo-uploader-container', {
+                    memorialId: memorialId,
+                    api: api,
+                    maxFiles: 20,
+                    maxSizeMB: 10,
+                    onUploadComplete: (file, result) => {
+                        console.log('Photo uploaded successfully:', file.file.name);
+                    },
+                    onError: (error, file) => {
+                        console.error('Upload error for', file.file.name, error);
+                    }
+                });
             }
 
             function updateProgress() {
@@ -1442,7 +1584,7 @@
 
             // Update preview
             function updatePreview() {
-                if (currentStep !== 5) return;
+                if (currentStep !== 6) return;
 
                 const name = document.getElementById('deceasedName').value || 'Their Name';
                 const birthDate = document.getElementById('birthDate').value;
@@ -1512,7 +1654,61 @@
                     // window.location.href = '../memorial/';
                 }, 2000);
             });
+
+            // ============================================
+            // SONG URL VALIDATION
+            // ============================================
+
+            const songUrlInput = document.getElementById('favoriteSongUrl');
+            const songPreview = document.getElementById('songPreview');
+            const songPreviewPlatform = document.getElementById('songPreviewPlatform');
+
+            if (songUrlInput) {
+                songUrlInput.addEventListener('input', function() {
+                    const url = this.value.trim();
+
+                    if (!url) {
+                        songPreview.style.display = 'none';
+                        return;
+                    }
+
+                    // Detect platform
+                    let platform = null;
+                    let songId = null;
+
+                    // Spotify detection
+                    const spotifyMatch = url.match(/spotify\.com\/(track|album)\/([a-zA-Z0-9]+)/);
+                    if (spotifyMatch) {
+                        platform = 'Spotify';
+                        songId = spotifyMatch[2];
+                    }
+
+                    // YouTube detection
+                    const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+                    if (youtubeMatch) {
+                        platform = 'YouTube';
+                        songId = youtubeMatch[1];
+                    }
+
+                    // Show preview if valid
+                    if (platform && songId) {
+                        songPreviewPlatform.textContent = `${platform} song will play on the memorial page`;
+                        songPreview.style.display = 'block';
+                        this.style.borderColor = 'var(--sage-primary)';
+                    } else if (url.length > 10) {
+                        songPreviewPlatform.textContent = 'Invalid URL. Please use a Spotify or YouTube link.';
+                        songPreview.style.display = 'block';
+                        this.style.borderColor = '#dc2626';
+                    } else {
+                        songPreview.style.display = 'none';
+                        this.style.borderColor = '';
+                    }
+                });
+            }
         });
     </script>
+
+    <!-- Language Switcher -->
+    <script src="../js/language-switcher.js"></script>
 </body>
 </html>

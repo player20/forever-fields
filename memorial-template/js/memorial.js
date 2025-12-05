@@ -217,9 +217,14 @@
 
         // Song
         if (memorial.songYoutubeUrl || memorial.songSpotifyUri) {
-            const songName = extractSongName(memorial.songYoutubeUrl || memorial.songSpotifyUri);
+            const songUrl = memorial.songYoutubeUrl || memorial.songSpotifyUri;
+            const songName = extractSongName(songUrl);
             elements.songTitle.textContent = songName || 'Their Favorite Song';
             elements.songContainer.style.display = 'block';
+
+            // Store song URL for playback
+            currentMemorial.songUrl = songUrl;
+            currentMemorial.songPlatform = detectSongPlatform(songUrl);
         }
     }
 
@@ -641,16 +646,165 @@
     // SONG PLAYBACK
     // ============================================
 
-    function toggleSong() {
-        // This is a placeholder - actual implementation would use YouTube/Spotify embeds
-        const isPlaying = elements.playSongBtn.innerHTML.includes('⏸');
+    let songPlayerModal = null;
 
-        if (!isPlaying) {
-            elements.playSongBtn.innerHTML = '<span>⏸</span> <span id="song-title">Pause</span>';
-            showToast('🎵', 'Music playback coming soon!');
-        } else {
-            elements.playSongBtn.innerHTML = '<span>▶</span> <span id="song-title">Play Their Song</span>';
+    function toggleSong() {
+        if (!currentMemorial || !currentMemorial.songUrl) {
+            showToast('🎵', 'No song available');
+            return;
         }
+
+        // Check if player modal already exists
+        songPlayerModal = document.getElementById('song-player-modal');
+
+        if (!songPlayerModal) {
+            // Create song player modal
+            createSongPlayerModal();
+        }
+
+        // Show modal
+        songPlayerModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        // Load player
+        loadSongPlayer(currentMemorial.songUrl, currentMemorial.songPlatform);
+    }
+
+    /**
+     * Create song player modal
+     */
+    function createSongPlayerModal() {
+        const modal = document.createElement('div');
+        modal.id = 'song-player-modal';
+        modal.className = 'modal';
+        modal.style.display = 'none';
+
+        modal.innerHTML = `
+            <div class="modal-overlay" id="song-player-modal-close"></div>
+            <div class="modal-content song-player-modal-content">
+                <button class="modal-close" id="song-player-modal-x">×</button>
+                <h3 class="modal-title">
+                    <span>🎵</span>
+                    <span id="song-player-title">Their Favorite Song</span>
+                </h3>
+                <div id="song-player-container" class="song-player-container"></div>
+                <p style="text-align: center; color: var(--gray-body); font-size: 0.9rem; margin-top: 1rem;">
+                    <span id="song-player-platform-info"></span>
+                </p>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        songPlayerModal = modal;
+
+        // Add close handlers
+        modal.querySelector('#song-player-modal-close').addEventListener('click', closeSongPlayer);
+        modal.querySelector('#song-player-modal-x').addEventListener('click', closeSongPlayer);
+
+        // ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && songPlayerModal && songPlayerModal.style.display === 'flex') {
+                closeSongPlayer();
+            }
+        });
+    }
+
+    /**
+     * Load song player (Spotify or YouTube)
+     */
+    function loadSongPlayer(songUrl, platform) {
+        const container = document.getElementById('song-player-container');
+        const platformInfo = document.getElementById('song-player-platform-info');
+
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (platform === 'spotify') {
+            const spotifyId = extractSpotifyId(songUrl);
+            if (spotifyId) {
+                container.innerHTML = `
+                    <iframe
+                        src="https://open.spotify.com/embed/track/${spotifyId}"
+                        width="100%"
+                        height="380"
+                        frameborder="0"
+                        allowtransparency="true"
+                        allow="encrypted-media"
+                        loading="lazy"
+                        style="border-radius: 12px;"
+                    ></iframe>
+                `;
+                platformInfo.textContent = '30-second preview (or full song if logged into Spotify)';
+            }
+        } else if (platform === 'youtube') {
+            const youtubeId = extractYoutubeId(songUrl);
+            if (youtubeId) {
+                container.innerHTML = `
+                    <iframe
+                        width="100%"
+                        height="380"
+                        src="https://www.youtube.com/embed/${youtubeId}"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        loading="lazy"
+                        style="border-radius: 12px;"
+                    ></iframe>
+                `;
+                platformInfo.textContent = 'Full song on YouTube';
+            }
+        } else {
+            container.innerHTML = '<p style="text-align: center; color: var(--gray-light);">Song format not supported</p>';
+            platformInfo.textContent = '';
+        }
+    }
+
+    /**
+     * Close song player
+     */
+    function closeSongPlayer() {
+        if (songPlayerModal) {
+            songPlayerModal.style.display = 'none';
+            document.body.style.overflow = '';
+
+            // Clear iframe to stop playback
+            const container = document.getElementById('song-player-container');
+            if (container) {
+                container.innerHTML = '';
+            }
+        }
+    }
+
+    /**
+     * Detect song platform from URL
+     */
+    function detectSongPlatform(url) {
+        if (!url) return null;
+
+        if (url.includes('spotify.com')) {
+            return 'spotify';
+        } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            return 'youtube';
+        }
+
+        return null;
+    }
+
+    /**
+     * Extract Spotify track ID from URL
+     */
+    function extractSpotifyId(url) {
+        const match = url.match(/spotify\.com\/(track|album)\/([a-zA-Z0-9]+)/);
+        return match ? match[2] : null;
+    }
+
+    /**
+     * Extract YouTube video ID from URL
+     */
+    function extractYoutubeId(url) {
+        const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+        return match ? match[1] : null;
     }
 
     // ============================================

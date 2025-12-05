@@ -1,6 +1,6 @@
 {
   "name": "forever-fields-backend",
-  "version": "0.3.0-qr",
+  "version": "0.5.0-song",
   "description": "Production-ready backend for Forever Fields memorial platform",
   "main": "dist/index.js",
   "scripts": {
@@ -13,7 +13,8 @@
     "test": "node tests/integration.test.js",
     "test:memorial": "node tests/memorial-crud.test.js",
     "test:photos": "node tests/photo-upload.test.js",
-    "test:qr": "node tests/qr-prayer-card.test.js"
+    "test:qr": "node tests/qr-prayer-card.test.js",
+    "test:song": "node tests/song-player.test.js"
   },
   "keywords": ["memorial", "express", "supabase", "prisma"],
   "author": "",

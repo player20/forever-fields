@@ -5,6 +5,100 @@ All notable changes to the Forever Fields project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0-song] - 2024-12-04
+
+### Added
+
+#### Favorite Song Player System
+- **Song player with Spotify and YouTube support**
+  - Spotify iframe embeds for 30-second previews (or full song if logged in)
+  - YouTube iframe embeds for full song playback
+  - Automatic platform detection from URLs
+  - Modal-based player with clean UI
+
+- **Wizard Integration** (`create/index.html`)
+  - New "Their Favorite Song" section in step 4 (Memories)
+  - Single URL input field accepting Spotify or YouTube links
+  - Real-time URL validation with platform detection
+  - Visual feedback showing which platform was detected
+  - Pattern validation for correct URL formats
+
+- **Memorial Page Player** (`memorial-template/js/memorial.js`)
+  - Play button shows when song is available
+  - Modal player with embedded Spotify or YouTube iframe
+  - Automatic song ID extraction from URLs
+  - Stop playback when modal closes
+  - Keyboard support (ESC to close)
+  - Toast notifications for feedback
+
+- **URL Validation**
+  - Supports Spotify track URLs: `https://open.spotify.com/track/[ID]`
+  - Supports YouTube full URLs: `https://www.youtube.com/watch?v=[ID]`
+  - Supports YouTube short URLs: `https://youtu.be/[ID]`
+  - Client-side validation with regex patterns
+  - Visual feedback (green border for valid, red for invalid)
+
+#### UI Components
+- **Song URL Field** with validation
+  - Placeholder examples for both platforms
+  - Real-time platform detection
+  - Character validation with regex
+  - Help text with URL format examples
+
+- **Song Player Modal** (`memorial-template/css/memorial.css`)
+  - Responsive design (max-width: 600px)
+  - 380px height for optimal embed size
+  - Cream background with rounded corners
+  - Platform info text (30-sec preview vs. full song)
+  - Smooth animations and transitions
+
+- **JavaScript Handlers**
+  - `toggleSong()` - Opens song player modal
+  - `createSongPlayerModal()` - Dynamically creates modal
+  - `loadSongPlayer(url, platform)` - Loads appropriate embed
+  - `closeSongPlayer()` - Closes modal and stops playback
+  - `detectSongPlatform(url)` - Detects Spotify or YouTube
+  - `extractSpotifyId(url)` - Extracts Spotify track ID
+  - `extractYoutubeId(url)` - Extracts YouTube video ID
+
+#### Testing
+- **Song Player Test Suite** (`server/tests/song-player.test.js`)
+  - 8 comprehensive test scenarios
+  - Tests Spotify URL creation and retrieval
+  - Tests YouTube URL creation and retrieval
+  - Tests YouTube short URL (youtu.be) format
+  - Tests updating song URLs
+  - Tests memorials with both URLs present
+  - Tests ID extraction for both platforms
+  - Verifies embed URL generation
+  - Run with: `npm run test:song`
+
+### Changed
+- **Server version**: `0.3.0-qr` → `0.5.0-song`
+- **Memorial wizard**: Enhanced step 4 with song URL field
+- **Memorial template**: Replaced placeholder song button with functional player
+
+### Database Schema
+No database changes required - uses existing fields:
+- `memorial.songSpotifyUri` - Spotify track URL
+- `memorial.songYoutubeUrl` - YouTube video URL
+
+### Security
+All security features from previous versions maintained:
+- ✅ URL validation (client-side regex patterns)
+- ✅ Iframe sandboxing for embeds
+- ✅ No sensitive data in song URLs
+- ✅ Role checks on memorial updates (existing)
+
+### Testing
+- ✅ 8 new song player tests
+- ✅ Tests both Spotify and YouTube integrations
+- ✅ Tests URL parsing and ID extraction
+- ✅ Tests both URL formats (full and short)
+- ✅ Verifies embed URL generation
+
+---
+
 ## [0.3.0-qr] - 2024-12-04
 
 ### Added
