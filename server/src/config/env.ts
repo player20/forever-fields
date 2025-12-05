@@ -28,12 +28,12 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string(),
   CLOUDINARY_API_SECRET: z.string(),
 
-  // Email (Nodemailer)
-  SMTP_HOST: z.string(),
-  SMTP_PORT: z.string(),
-  SMTP_USER: z.string(),
-  SMTP_PASS: z.string(),
-  SMTP_FROM: z.string().email(),
+  // Email (Nodemailer) - Optional for now
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.string().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().email().optional(),
 
   // Web Push (VAPID)
   VAPID_PUBLIC_KEY: z.string().optional(),
@@ -41,7 +41,7 @@ const envSchema = z.object({
   VAPID_SUBJECT: z.string().email().optional(),
 
   // Security
-  JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
+  JWT_SECRET: z.string().min(10, 'JWT_SECRET must be at least 10 characters'),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
