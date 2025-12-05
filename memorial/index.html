@@ -811,6 +811,136 @@
             background: var(--sage-pale);
         }
 
+        /* Report Button */
+        .report-btn {
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: var(--gray-body);
+        }
+
+        .memory-item:hover .report-btn,
+        .photo-item:hover .report-btn,
+        .voice-note:hover .report-btn,
+        .recipe-card:hover .report-btn {
+            opacity: 0.6;
+        }
+
+        .report-btn:hover {
+            opacity: 1 !important;
+            background: #fff0f0;
+            color: #c77;
+        }
+
+        /* Pending State */
+        .content-pending {
+            position: relative;
+            opacity: 0.85;
+        }
+
+        .content-pending::after {
+            content: 'Awaiting approval';
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255,255,255,0.95);
+            color: var(--gray-body);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            border: 1px solid var(--sage-light);
+        }
+
+        .content-pending-own::after {
+            content: 'Submitted - waiting for family approval';
+            background: var(--sage-pale);
+            color: var(--gray-dark);
+        }
+
+        .content-reported {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.3s ease;
+        }
+
+        /* Role-based visibility */
+        .owner-only,
+        .editor-only {
+            display: none;
+        }
+
+        .role-owner .owner-only {
+            display: block;
+        }
+
+        .role-editor .editor-only,
+        .role-owner .editor-only {
+            display: block;
+        }
+
+        /* Viewer notice */
+        .viewer-notice {
+            background: var(--cream);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            color: var(--gray-body);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* User role badge in nav */
+        .user-role-badge {
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .role-owner {
+            background: var(--gold-light);
+            color: #8a7a4a;
+        }
+
+        .role-editor {
+            background: var(--sage-pale);
+            color: var(--sage-primary);
+        }
+
+        .role-viewer {
+            background: var(--cream);
+            color: var(--gray-body);
+        }
+
+        .role-visitor {
+            background: var(--warm-white);
+            color: var(--gray-light);
+        }
+
+        /* Position relative for items that can be reported */
+        .memory-item,
+        .voice-note,
+        .recipe-card {
+            position: relative;
+        }
+
         /* Mobile Adjustments */
         @media (max-width: 600px) {
             .memorial-hero {
@@ -848,7 +978,7 @@
         }
     </style>
 </head>
-<body class="memorial-page">
+<body class="memorial-page" data-memorial-id="margaret-carter-1938" data-is-pet="false">
     <!-- Navigation -->
     <nav class="memorial-nav">
         <div class="memorial-nav-inner">
@@ -857,7 +987,29 @@
                 <span>Forever Fields</span>
             </a>
             <div class="memorial-nav-actions">
-                <button class="nav-btn nav-btn-edit">✏️ Edit</button>
+                <!-- Language Switcher -->
+                <div class="language-switcher" id="languageSwitcher" data-no-translate>
+                    <button class="language-toggle" id="languageToggle" aria-label="Select language" aria-expanded="false" aria-haspopup="true">
+                        <svg class="globe-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <ellipse cx="12" cy="12" rx="4" ry="10"/>
+                            <path d="M2 12h20"/>
+                        </svg>
+                        <span class="current-lang-code">EN</span>
+                    </button>
+                    <div class="language-dropdown" id="languageDropdown" role="menu" aria-label="Available languages">
+                        <button class="language-option active" data-lang="en" role="menuitem"><span class="lang-name">English</span></button>
+                        <button class="language-option" data-lang="es" role="menuitem"><span class="lang-name">Español</span></button>
+                        <button class="language-option" data-lang="vi" role="menuitem"><span class="lang-name">Tiếng Việt</span></button>
+                        <button class="language-option" data-lang="ar" role="menuitem" dir="rtl"><span class="lang-name">العربية</span></button>
+                        <button class="language-option" data-lang="tl" role="menuitem"><span class="lang-name">Tagalog</span></button>
+                        <button class="language-option" data-lang="fr" role="menuitem"><span class="lang-name">Français</span></button>
+                        <button class="language-option" data-lang="pt" role="menuitem"><span class="lang-name">Português</span></button>
+                        <button class="language-option" data-lang="zh" role="menuitem"><span class="lang-name">中文</span></button>
+                    </div>
+                </div>
+                <span class="user-role-badge" id="roleBadge">Visitor</span>
+                <button class="nav-btn nav-btn-edit" data-role-show="owner">✏️ Edit</button>
                 <button class="nav-btn nav-btn-share" id="shareBtn">📤 Share</button>
             </div>
         </div>
@@ -866,9 +1018,9 @@
     <!-- Hero -->
     <header class="memorial-hero">
         <div class="hero-portrait">👵</div>
-        <h1 class="hero-name">Margaret Louise Carter</h1>
-        <p class="hero-dates">March 15, 1938 — November 22, 2024</p>
-        <p class="hero-epitaph">"She filled every room with warmth and left it smelling like fresh-baked cookies. A life of love, laughter, and lemon pound cake."</p>
+        <h1 class="hero-name" data-no-translate>Margaret Louise Carter</h1>
+        <p class="hero-dates" data-no-translate>March 15, 1938 — November 22, 2024</p>
+        <p class="hero-epitaph" data-user-content data-no-translate>"She filled every room with warmth and left it smelling like fresh-baked cookies. A life of love, laughter, and lemon pound cake."</p>
 
         <div class="song-widget">
             <div class="song-info">
@@ -889,16 +1041,16 @@
                     <h2 class="section-title">📜 Life Timeline</h2>
                     <span class="section-action">+ Add Event</span>
                 </div>
-                <div class="timeline-vertical">
+                <div class="timeline-vertical" data-user-content>
                     <div class="timeline-entry">
                         <div class="timeline-marker"></div>
-                        <span class="timeline-year-tag">1938</span>
+                        <span class="timeline-year-tag" data-no-translate>1938</span>
                         <h4 class="timeline-title">Born in Charleston, SC</h4>
                         <p class="timeline-desc">Born to William and Rose Henderson, the youngest of four children. Her love of flowers began in her mother's garden.</p>
                     </div>
                     <div class="timeline-entry expandable">
                         <div class="timeline-marker"></div>
-                        <span class="timeline-year-tag">1960</span>
+                        <span class="timeline-year-tag" data-no-translate>1960</span>
                         <h4 class="timeline-title">Married Thomas Carter</h4>
                         <p class="timeline-desc">A small ceremony at First Baptist Church began 58 years of partnership and love.</p>
                         <div class="timeline-expand">
@@ -1036,8 +1188,8 @@
                     <button class="filter-btn">Family</button>
                     <button class="filter-btn">Friends</button>
                 </div>
-                <div class="memories-list">
-                    <div class="memory-item">
+                <div class="memories-list" data-user-content>
+                    <div class="memory-item" data-item-id="memory_001">
                         <div class="memory-header">
                             <div class="memory-avatar">E</div>
                             <div class="memory-meta">
@@ -1049,8 +1201,9 @@
                             </div>
                         </div>
                         <p class="memory-text">Mom always said the kitchen was where love was made, not just food. Every holiday, she'd wake up at 5am to start cooking. I'll never walk into a kitchen without thinking of her humming Moon River.</p>
+                        <button class="report-btn" onclick="reportItem('memory_001', 'memory')" title="Report this item">&#9872;</button>
                     </div>
-                    <div class="memory-item">
+                    <div class="memory-item" data-item-id="memory_002">
                         <div class="memory-header">
                             <div class="memory-avatar">J</div>
                             <div class="memory-meta">
@@ -1062,8 +1215,9 @@
                             </div>
                         </div>
                         <p class="memory-text">Grandma taught me that fresh flowers can fix almost anything. A bad day? Flowers. A broken heart? Flowers and cookies. She turned her little shop into a place where people came not just for arrangements, but for her wisdom.</p>
+                        <button class="report-btn" onclick="reportItem('memory_002', 'memory')" title="Report this item">&#9872;</button>
                     </div>
-                    <div class="memory-item">
+                    <div class="memory-item" data-item-id="memory_003">
                         <div class="memory-header">
                             <div class="memory-avatar">M</div>
                             <div class="memory-meta">
@@ -1075,6 +1229,7 @@
                             </div>
                         </div>
                         <p class="memory-text">Margaret brought me soup every single time I was sick. For forty years. Rain or shine, there she'd be at my door with her chicken noodle soup and a smile. That kind of kindness is rare.</p>
+                        <button class="report-btn" onclick="reportItem('memory_003', 'memory')" title="Report this item">&#9872;</button>
                     </div>
                 </div>
                 <button class="add-memory-btn">+ Share Your Memory</button>
@@ -1137,11 +1292,75 @@
     </div>
 
     <!-- Shared Scripts -->
+    <script src="../js/moderation.js"></script>
     <script src="../js/script.js"></script>
 
     <!-- Page Scripts -->
     <script>
+        // Report item function
+        function reportItem(itemId, itemType) {
+            const memorialId = document.body.getAttribute('data-memorial-id');
+            const FFMod = window.FFMod || window.ForeverFieldsModeration;
+
+            if (FFMod) {
+                const confirmed = confirm(
+                    'Would you like to report this item?\n\n' +
+                    'It will be hidden and sent to the family for review. ' +
+                    'Thank you for helping keep this space safe.'
+                );
+
+                if (!confirmed) return;
+
+                // Hide the item with animation
+                const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
+                if (itemElement) {
+                    itemElement.classList.add('content-reported');
+                    setTimeout(() => {
+                        itemElement.style.display = 'none';
+                    }, 300);
+                }
+
+                // Add to pending queue as report
+                FFMod.reportContent(memorialId, itemId, itemType);
+            }
+        }
+
+        // Update UI based on user role
+        function updateRoleUI() {
+            const memorialId = document.body.getAttribute('data-memorial-id');
+            const FFMod = window.FFMod || window.ForeverFieldsModeration;
+
+            if (!FFMod) return;
+
+            const role = FFMod.getCurrentUserRole(memorialId);
+            const roleBadge = document.getElementById('roleBadge');
+
+            // Update role badge
+            if (roleBadge) {
+                const roleLabels = {
+                    owner: 'Owner',
+                    editor: 'Editor',
+                    viewer: 'Viewer',
+                    visitor: 'Visitor'
+                };
+                roleBadge.textContent = roleLabels[role] || 'Visitor';
+                roleBadge.className = 'user-role-badge role-' + role;
+            }
+
+            // Show/hide elements based on role
+            document.querySelectorAll('[data-role-show]').forEach(el => {
+                const allowedRoles = el.getAttribute('data-role-show').split(',');
+                el.style.display = allowedRoles.includes(role) ? '' : 'none';
+            });
+
+            // Add role class to body for CSS-based visibility
+            document.body.classList.remove('role-owner', 'role-editor', 'role-viewer', 'role-visitor');
+            document.body.classList.add('role-' + role);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize role-based UI
+            setTimeout(updateRoleUI, 100);
             // Play button
             const playBtn = document.getElementById('playBtn');
             let isPlaying = false;
@@ -1227,5 +1446,11 @@
             });
         });
     </script>
+
+    <!-- Language Switcher -->
+    <script src="../js/language-switcher.js"></script>
+
+    <!-- Pet Mode -->
+    <script src="../js/pet-mode.js"></script>
 </body>
 </html>

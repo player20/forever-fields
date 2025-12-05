@@ -1,0 +1,252 @@
+// Forever Fields - Production Database Schema
+// Prisma ORM with Supabase PostgreSQL
+// RLS (Row Level Security) enabled on all tables
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USERS TABLE
+// RLS Policy: Users can only read/update their own record
+// ============================================
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  memorials         Memorial[]
+  pushSubscriptions PushSubscription[]
+
+  @@map("users")
+}
+
+// ============================================
+// MEMORIALS TABLE
+// RLS Policy:
+//   - Owner has full access
+//   - Public memorials readable by anyone (even unauthenticated)
+//   - Link-only memorials readable with direct URL
+//   - Private memorials only visible to owner + invited editors/viewers
+// ============================================
+model Memorial {
+  id                String    @id @default(uuid())
+  ownerId           String    @map("owner_id")
+  deceasedName      String    @map("deceased_name")
+  deceasedNameLower String    @map("deceased_name_lower") // For duplicate detection
+  birthDate         DateTime? @map("birth_date")
+  deathDate         DateTime? @map("death_date")
+  gotchaDate        DateTime? @map("gotcha_date") // For pets (adoption date)
+  portraitUrl       String?   @map("portrait_url")
+  shortBio          String?   @map("short_bio") @db.Text
+  isPet             Boolean   @default(false) @map("is_pet")
+  privacy           Privacy   @default(private)
+  songSpotifyUri    String?   @map("song_spotify_uri")
+  songYoutubeUrl    String?   @map("song_youtube_url")
+  restingType       String?   @map("resting_type") // 'buried', 'cremated', 'at_sea', etc.
+  restingLocation   Json?     @map("resting_location") // {lat, lng, address, name}
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  pendingItems  PendingItem[]
+  invitations   Invitation[]
+  candles       Candle[]
+  timeCapsules  TimeCapsule[]
+  socialLinks   SocialLink?
+  qrCode        QRCode?
+
+  @@unique([deceasedNameLower, birthDate], name: "unique_memorial_birth")
+  @@unique([deceasedNameLower, deathDate], name: "unique_memorial_death")
+  @@index([ownerId])
+  @@index([privacy])
+  @@index([deceasedNameLower])
+  @@map("memorials")
+}
+
+enum Privacy {
+  private // Only owner + invited can view
+  link    // Anyone with link can view
+  public  // Listed publicly, searchable
+
+  @@map("privacy")
+}
+
+// ============================================
+// PENDING ITEMS TABLE (Moderation Queue)
+// RLS Policy: Only memorial owner can read/approve/reject
+// ============================================
+model PendingItem {
+  id         String            @id @default(uuid())
+  memorialId String            @map("memorial_id")
+  type       PendingItemType
+  dataJson   Json              @map("data_json") // Flexible storage for photo URLs, memory text, etc.
+  status     PendingItemStatus @default(pending)
+  createdAt  DateTime          @default(now()) @map("created_at")
+
+  memorial Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@index([memorialId, status])
+  @@map("pending_items")
+}
+
+enum PendingItemType {
+  photo
+  memory
+  song
+  social
+  time_capsule
+
+  @@map("pending_item_type")
+}
+
+enum PendingItemStatus {
+  pending
+  approved
+  rejected
+
+  @@map("pending_item_status")
+}
+
+// ============================================
+// INVITATIONS TABLE
+// RLS Policy: Memorial owner can create/revoke, invitee can view their own
+// ============================================
+model Invitation {
+  id         String     @id @default(uuid())
+  memorialId String     @map("memorial_id")
+  email      String
+  role       InviteRole
+  token      String     @unique // 32-char secure token
+  expiresAt  DateTime   @map("expires_at")
+  usedAt     DateTime?  @map("used_at")
+
+  memorial Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([memorialId])
+  @@map("invitations")
+}
+
+enum InviteRole {
+  editor // Can add content, approve pending items
+  viewer // Read-only access
+
+  @@map("invite_role")
+}
+
+// ============================================
+// CANDLES TABLE (Public virtual tributes)
+// RLS Policy: Anyone can create (rate-limited), all readable
+// ============================================
+model Candle {
+  id         String   @id @default(uuid())
+  memorialId String   @map("memorial_id")
+  message    String?  @db.Text
+  name       String? // Optional: who lit the candle
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  memorial Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@index([memorialId, createdAt])
+  @@map("candles")
+}
+
+// ============================================
+// TIME CAPSULES TABLE
+// RLS Policy: Owner + editors can create, recipients can view after unlock_date
+// ============================================
+model TimeCapsule {
+  id          String    @id @default(uuid())
+  memorialId  String    @map("memorial_id")
+  messageText String?   @map("message_text") @db.Text
+  voiceUrl    String?   @map("voice_url")
+  videoUrl    String?   @map("video_url")
+  unlockDate  DateTime  @map("unlock_date")
+  openedAt    DateTime? @map("opened_at")
+
+  memorial Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@index([memorialId, unlockDate])
+  @@map("time_capsules")
+}
+
+// ============================================
+// SOCIAL LINKS TABLE (1:1 with Memorial)
+// RLS Policy: Follows memorial privacy settings
+// ============================================
+model SocialLink {
+  memorialId String  @id @map("memorial_id")
+  facebook   String?
+  instagram  String?
+  tiktok     String?
+
+  memorial Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@map("social_links")
+}
+
+// ============================================
+// QR CODES TABLE (1:1 with Memorial)
+// RLS Policy: Owner can create/update, public read
+// ============================================
+model QRCode {
+  memorialId String      @id @map("memorial_id")
+  design     QRDesign    @default(minimalist)
+  createdAt  DateTime    @default(now()) @map("created_at")
+
+  memorial Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@map("qrcodes")
+}
+
+enum QRDesign {
+  marble
+  garden
+  gold
+  minimalist
+
+  @@map("qr_design")
+}
+
+// ============================================
+// PUSH SUBSCRIPTIONS TABLE (Web Push Notifications)
+// RLS Policy: Users can only manage their own subscriptions
+// ============================================
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  endpoint  String   @unique
+  keysJson  Json     @map("keys_json") // {p256dh, auth}
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+// ============================================
+// MAGIC LINKS TABLE (Single-use auth tokens)
+// Not in original spec but REQUIRED for secure magic link implementation
+// RLS Policy: System-managed only
+// ============================================
+model MagicLink {
+  id        String    @id @default(uuid())
+  email     String
+  token     String    @unique // 32-char secure token
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([token])
+  @@index([email])
+  @@map("magic_links")
+}

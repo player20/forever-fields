@@ -1,0 +1,59 @@
+/**
+ * Forever Fields Backend
+ * Entry point - starts the Express server
+ */
+
+import app from './app';
+import { env, isDev } from './config/env';
+import { prisma } from './config/database';
+
+const PORT = parseInt(env.PORT);
+
+// Start server
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log('🚀 Forever Fields Backend');
+  console.log(`📍 Environment: ${env.NODE_ENV}`);
+  console.log(`🌐 Server: ${env.API_URL}`);
+  console.log(`🎯 Port: ${PORT}`);
+  console.log(`✅ Ready to serve requests`);
+  console.log('');
+});
+
+// Graceful shutdown
+const shutdown = async () => {
+  console.log('\n🛑 Shutting down gracefully...');
+
+  server.close(async () => {
+    console.log('📡 HTTP server closed');
+
+    // Disconnect Prisma
+    await prisma.$disconnect();
+    console.log('🗄️  Database disconnected');
+
+    process.exit(0);
+  });
+
+  // Force shutdown after 10 seconds
+  setTimeout(() => {
+    console.error('⚠️  Forced shutdown after timeout');
+    process.exit(1);
+  }, 10000);
+};
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  if (!isDev) {
+    shutdown();
+  }
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  if (!isDev) {
+    shutdown();
+  }
+});

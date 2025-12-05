@@ -1,6 +1,6 @@
 {
   "name": "forever-fields-backend",
-  "version": "0.7.0-lang",
+  "version": "0.8.0-pet",
   "description": "Production-ready backend for Forever Fields memorial platform",
   "main": "dist/index.js",
   "scripts": {
@@ -17,7 +17,8 @@
     "test:song": "node tests/song-player.test.js",
     "test:wow": "node tests/time-capsule-first-candle.test.js",
     "test:pwa": "node tests/pwa-push.test.js",
-    "test:lang": "node tests/multilingual.test.js"
+    "test:lang": "node tests/multilingual.test.js",
+    "test:pet": "node tests/pet-mode.test.js"
   },
   "keywords": ["memorial", "express", "supabase", "prisma"],
   "author": "",

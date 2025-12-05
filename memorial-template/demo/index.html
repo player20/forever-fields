@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memorial Template Demo | Forever Fields</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sage-primary: #8B9F82;
+            --sage-light: #C5D1BC;
+            --cream: #F5F1E8;
+            --warm-white: #FDFBF7;
+            --gray-dark: #2C3338;
+            --gray-body: #4A5568;
+            --font-serif: 'Playfair Display', Georgia, serif;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            color: var(--gray-body);
+            background: var(--warm-white);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        h1, h2 {
+            font-family: var(--font-serif);
+            color: var(--gray-dark);
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--sage-primary);
+            font-style: italic;
+            margin-bottom: 3rem;
+        }
+
+        .demo-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--sage-light);
+        }
+
+        .demo-section h2 {
+            margin-top: 0;
+        }
+
+        .demo-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .demo-link {
+            display: block;
+            padding: 1.5rem;
+            background: var(--cream);
+            border: 2px solid var(--sage-light);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--gray-dark);
+            transition: all 0.3s ease;
+        }
+
+        .demo-link:hover {
+            background: var(--sage-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .demo-link-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .demo-link-desc {
+            font-size: 0.9rem;
+            color: var(--gray-body);
+        }
+
+        code {
+            background: var(--cream);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        pre {
+            background: var(--gray-dark);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: white;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--sage-primary);
+            font-weight: 600;
+        }
+
+        .note {
+            background: var(--sage-light);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--sage-primary);
+        }
+
+        .note strong {
+            color: var(--gray-dark);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌿 Forever Fields Memorial Template</h1>
+        <p class="subtitle">Beautiful, responsive memorial pages with API integration</p>
+
+        <!-- Demo Links -->
+        <div class="demo-section">
+            <h2>Try the Demo</h2>
+            <p>View memorial pages with different configurations:</p>
+
+            <div class="demo-links">
+                <a href="../index.html?id=demo-public" class="demo-link">
+                    <div class="demo-link-title">
+                        <span>🌐</span>
+                        Public Memorial
+                    </div>
+                    <div class="demo-link-desc">
+                        Accessible to everyone, full features
+                    </div>
+                </a>
+
+                <a href="../index.html?id=demo-link" class="demo-link">
+                    <div class="demo-link-title">
+                        <span>🔗</span>
+                        Link-Only Memorial
+                    </div>
+                    <div class="demo-link-desc">
+                        Accessible with direct link
+                    </div>
+                </a>
+
+                <a href="../index.html?id=demo-pet" class="demo-link">
+                    <div class="demo-link-title">
+                        <span>🐾</span>
+                        Pet Memorial
+                    </div>
+                    <div class="demo-link-desc">
+                        Special memorial for beloved pets
+                    </div>
+                </a>
+            </div>
+
+            <div class="note">
+                <strong>Note:</strong> These demos require a running backend server. Start your server with <code>npm run dev</code> in the server directory.
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="demo-section">
+            <h2>Features</h2>
+            <ul class="feature-list">
+                <li>Beautiful, warm design matching Forever Fields brand</li>
+                <li>Responsive layout (mobile, tablet, desktop)</li>
+                <li>Full API integration with backend</li>
+                <li>Public candle lighting (no auth required)</li>
+                <li>Time capsule display (unlocked only)</li>
+                <li>Social media links</li>
+                <li>Resting place information</li>
+                <li>Song playback (YouTube/Spotify integration)</li>
+                <li>Privacy-aware rendering (public/link/private)</li>
+                <li>Accessible keyboard navigation</li>
+                <li>Reduced motion support</li>
+            </ul>
+        </div>
+
+        <!-- Usage -->
+        <div class="demo-section">
+            <h2>Usage</h2>
+            <p>To use this memorial template in your application:</p>
+
+            <h3 style="margin-top: 2rem;">1. Include the Files</h3>
+            <pre><code>&lt;!-- In your HTML head --&gt;
+&lt;link rel="stylesheet" href="memorial-template/css/memorial.css"&gt;
+
+&lt;!-- Before closing body tag --&gt;
+&lt;script src="memorial-template/js/api-client.js"&gt;&lt;/script&gt;
+&lt;script src="memorial-template/js/memorial.js"&gt;&lt;/script&gt;</code></pre>
+
+            <h3 style="margin-top: 2rem;">2. Configure API URL</h3>
+            <p>Update the API base URL in <code>memorial.js</code>:</p>
+            <pre><code>const api = new ForeverFieldsAPI('https://your-api.onrender.com');</code></pre>
+
+            <h3 style="margin-top: 2rem;">3. Pass Memorial ID</h3>
+            <p>The template reads the memorial ID from URL parameters:</p>
+            <pre><code>https://yoursite.com/memorial?id=memorial-id-here</code></pre>
+
+            <h3 style="margin-top: 2rem;">4. Customize Styles</h3>
+            <p>Modify CSS variables in <code>memorial.css</code> to match your brand:</p>
+            <pre><code>:root {
+  --sage-primary: #8B9F82;
+  --gold-primary: #C9A962;
+  --cream: #F5F1E8;
+  /* ... */
+}</code></pre>
+        </div>
+
+        <!-- API Integration -->
+        <div class="demo-section">
+            <h2>API Integration</h2>
+            <p>The template automatically handles:</p>
+            <ul class="feature-list">
+                <li>Loading memorial data from <code>GET /api/memorials/:id</code></li>
+                <li>Fetching candles from <code>GET /api/candles/:memorialId</code></li>
+                <li>Lighting candles via <code>POST /api/candles</code></li>
+                <li>Loading time capsules from <code>GET /api/time-capsules/:memorialId</code></li>
+                <li>Privacy checks (public/link/private)</li>
+                <li>Error handling and loading states</li>
+            </ul>
+
+            <div class="note">
+                <strong>Privacy Modes:</strong>
+                <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                    <li><strong>Public:</strong> Anyone can view</li>
+                    <li><strong>Link:</strong> Anyone with the URL can view</li>
+                    <li><strong>Private:</strong> Only owner + invited users can view</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Testing -->
+        <div class="demo-section">
+            <h2>Testing</h2>
+            <p>Test the full memorial CRUD flow:</p>
+            <pre><code># Set your access token (from magic link auth)
+export ACCESS_TOKEN="your-token-here"
+
+# Run memorial CRUD tests
+npm run test:memorial
+
+# Or directly:
+node tests/memorial-crud.test.js</code></pre>
+
+            <p style="margin-top: 1rem;">Tests include:</p>
+            <ul class="feature-list">
+                <li>Create memorial</li>
+                <li>Get user's memorials</li>
+                <li>View memorial publicly</li>
+                <li>Update memorial</li>
+                <li>Unauthorized access prevention</li>
+                <li>Privacy settings enforcement</li>
+                <li>Duplicate prevention</li>
+                <li>Input validation</li>
+                <li>Candle lighting</li>
+                <li>Memorial deletion</li>
+            </ul>
+        </div>
+
+        <!-- File Structure -->
+        <div class="demo-section">
+            <h2>File Structure</h2>
+            <pre><code>memorial-template/
+├── index.html              # Memorial page template
+├── css/
+│   └── memorial.css        # Styles (Forever Fields design)
+├── js/
+│   ├── api-client.js       # API communication layer
+│   └── memorial.js         # Page controller & interactions
+└── demo/
+    └── index.html          # This demo page</code></pre>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 4rem; color: var(--sage-primary);">
+            <p>🌿 Forever Fields - v0.1-memorial</p>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem;">
+                Made with compassion, for moments that matter.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

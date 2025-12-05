@@ -5,6 +5,186 @@ All notable changes to the Forever Fields project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0-pet] - 2024-12-04
+
+### Added
+
+#### Pet Memorial Mode System
+- **Soft name-triggered prompt** (`js/pet-mode.js`)
+  - Detects common pet names (60+ names: dogs, cats, other pets)
+  - Luna, Max, Bella, Charlie, Cooper, Daisy, Bailey, Molly, etc.
+  - 1-second debounce on name input to avoid annoying prompts
+  - Case-insensitive matching with prefix detection (e.g., "Luna the Cat")
+  - Friendly modal prompt asking "Creating a Pet Memorial?"
+  - Shows benefits: paw print accents, Rainbow Bridge wording, pet songs, pet candle animations
+  - 30-day dismissal cooldown to prevent re-prompting too frequently
+  - localStorage-based dismissal tracking (key: `ff_pet_mode_dismissed`)
+
+- **Pet Mode Theming** (`css/style.css`)
+  - **Paw print decorations** throughout the interface
+  - body.pet-mode class triggers pet-specific styling
+  - Paw prints before/after content (🐾 emoji)
+  - Pet-specific color scheme with warm tones
+  - Softer animations and friendlier visual language
+
+- **Pet-Specific Wording**
+  - "Date of Birth" → "Gotcha Day (Adoption Date)"
+  - "Date of Passing" → "Rainbow Bridge Date"
+  - "Born:" → "Gotcha Day:"
+  - "Passed:" → "Rainbow Bridge:"
+  - "About Them" → "About Your Beloved Pet"
+  - Context-aware wording updates in wizard and memorial pages
+
+- **Pet Candle Animation** (`css/style.css`)
+  - Custom candle flame animation for pet memorials
+  - @keyframes petCandleFlame - Gentle, warm glow
+  - Softer color palette (warm yellows and oranges)
+  - Applied automatically when body.pet-mode is active
+
+- **Rainbow Bridge Theme** (`css/style.css`)
+  - Rainbow gradient for date labels in pet mode
+  - Linear gradient: red → orange → yellow → green → blue → purple
+  - Applied to .hero-dates with text gradient clipping
+  - Warm, comforting visual representation
+
+- **Pet Mode Toggle** (`js/pet-mode.js`)
+  - Toggle switch in memorial settings to enable/disable pet mode
+  - enablePetMode() - Activates pet theme and wording
+  - disablePetMode() - Reverts to human memorial mode
+  - togglePetMode() - Switches between modes
+  - localStorage persistence (key: `ff_pet_mode_active`)
+  - Dispatches petModeChanged custom event for other modules
+
+- **Wizard Integration** (`create/index.html`)
+  - Pet mode prompt appears in step 2 (Memorial Basics)
+  - Triggers after user types common pet name
+  - Hidden input field (isPet) added to form on enable
+  - Label and placeholder updates for pet-specific fields
+  - Section header changes to "🐾 About Your Beloved Pet"
+
+- **Memorial Page Integration** (`memorial/index.html`)
+  - data-is-pet attribute on body element
+  - Automatic pet mode initialization on page load
+  - Date label updates (Born/Passed → Gotcha Day/Rainbow Bridge)
+  - Paw print decorations added via CSS
+  - Pet mode indicator in settings
+
+#### Database & Backend
+- **isPet field** already in Prisma schema (line 49)
+  - Boolean field with default value of false
+  - Stored in memorials table as is_pet column
+  - Automatically handled by existing CRUD routes
+  - Included in memorial creation (POST /api/memorials)
+  - Included in memorial updates (PUT /api/memorials/:id)
+  - Returned in memorial GET responses
+
+#### Pet Mode Styles
+- **Pet Mode Prompt Modal** (`css/style.css`)
+  - .pet-mode-prompt-modal - Full-screen overlay
+  - .pet-mode-prompt-content - Centered card with rounded corners
+  - .pet-mode-prompt-icon - Large paw print emoji (🐾)
+  - .pet-mode-features - Bulleted list of pet mode benefits
+  - .pet-mode-prompt-actions - Yes/No button group
+  - @keyframes petModeBounce - Gentle bounce animation on entry
+  - Cream and sage green color scheme matching Forever Fields
+
+- **Pet Mode Body Class** (`css/style.css`)
+  - body.pet-mode triggers all pet-specific styling
+  - Paw print decorations via ::before and ::after pseudo-elements
+  - Positioned at top-right and bottom-left corners
+  - Font size: 4rem with opacity: 0.1 for subtle effect
+  - Z-index: 0 to stay behind content
+
+- **Pet Candle Styles** (`css/style.css`)
+  - body.pet-mode .candle-flame - Custom animation
+  - @keyframes petCandleFlame - Warm, gentle glow
+  - Softer colors (gold to light yellow)
+  - Slower animation speed for calming effect
+
+- **Rainbow Bridge Gradient** (`css/style.css`)
+  - body.pet-mode .hero-dates
+  - 6-color rainbow gradient (90deg linear)
+  - #ff6b6b → #ffa500 → #ffd700 → #90ee90 → #87ceeb → #9370db
+  - -webkit-background-clip: text for gradient text effect
+  - -webkit-text-fill-color: transparent for proper rendering
+
+- **Pet Mode Toggle Switch** (`css/style.css`)
+  - .pet-mode-toggle - Switch control for settings
+  - Matches Forever Fields design system
+  - Smooth transitions and hover effects
+  - Mobile responsive with touch-friendly size
+
+#### Testing
+- **Pet Mode Test Suite** (`server/tests/pet-mode.test.js`)
+  - 8 comprehensive test scenarios
+  - Test 1: Pet mode JS file check (features, functions, pet names)
+  - Test 2: Pet mode CSS check (styles, animations, themes)
+  - Test 3: Pet name detection logic (60+ names, case-insensitive)
+  - Test 4: Pet mode wording changes (Gotcha Day, Rainbow Bridge)
+  - Test 5: localStorage persistence (dismissal, active state)
+  - Test 6: Pet mode toggle (enable, disable, toggle methods)
+  - Test 7: Pet mode animations (bounce, candle, paw prints)
+  - Test 8: Integration check (script inclusion in HTML pages)
+  - Manual testing checklist included
+  - Run with: `npm run test:pet`
+
+### Changed
+- **Server version**: `0.7.0-lang` → `0.8.0-pet`
+- **Create wizard** (`create/index.html`): Includes pet-mode.js script
+- **Memorial page** (`memorial/index.html`): Includes pet-mode.js script and data-is-pet attribute
+- **CSS styles** (`css/style.css`): Added 200+ lines of pet mode styling
+- **Package.json**: Added test:pet script
+
+### User Experience
+- ✅ Soft, name-based pet detection (no forced prompts)
+- ✅ Friendly modal with clear benefits list
+- ✅ Paw print accents throughout interface
+- ✅ "Gotcha Day" and "Rainbow Bridge" wording
+- ✅ Rainbow gradient theme for dates
+- ✅ Pet-specific candle animations
+- ✅ Toggle on/off in settings
+- ✅ 30-day dismissal cooldown (respects user preference)
+- ✅ Persistent pet mode preference (localStorage)
+- ✅ Automatic theme activation on memorial load
+
+### Pet Mode Features
+- 🐾 Common Pet Names (60+):
+  - Dogs: Max, Bella, Charlie, Lucy, Cooper, Daisy, Bailey, Sadie, Lola, Buddy, Molly, Stella, Tucker, Bear, Zoey, Duke, Maggie, Jack, Sophie, Riley, Chloe, Buster, Penny, Rocky, Ginger, Shadow, Pepper, Oliver, Ruby, Milo
+  - Cats: Luna, Oliver, Leo, Milo, Charlie, Simba, Max, Jack, Loki, Tiger, Smokey, Shadow, Kitty, Mittens, Oreo, Whiskers, Felix, Chloe, Sophie, Misty
+  - Other: Snowball, Midnight, Patches, Peanut, Cookie, Fluffy, Angel, Princess, Buddy, Gizmo
+
+- 🌈 Rainbow Bridge Theming:
+  - Six-color gradient for memorial dates
+  - Warm, comforting visual representation
+  - Automatically applied when pet mode is active
+
+- 🕯️ Pet Candle Animations:
+  - Softer, gentler flame animation
+  - Warm color palette (gold to light yellow)
+  - Slower animation speed for calming effect
+
+- 🐾 Paw Print Accents:
+  - Subtle decorations at corners of page
+  - Low opacity (0.1) to avoid distraction
+  - Scalable (4rem font size) for visibility
+  - Behind content (z-index: 0)
+
+### Security
+All security features from previous versions maintained:
+- ✅ isPet field validated in Zod schemas
+- ✅ Role checks on memorial updates (existing)
+- ✅ No new security concerns introduced
+- ✅ Client-side only pet mode logic (no API changes)
+- ✅ localStorage safely stores user preferences
+
+### Browser Support
+- ✅ Chrome/Edge (Desktop & Mobile) - Full support
+- ✅ Firefox (Desktop & Mobile) - Full support
+- ✅ Safari (iOS & macOS) - Full support
+- ✅ All modern browsers with localStorage and CSS3 support
+
+---
+
 ## [0.7.0-lang] - 2024-12-04
 
 ### Added

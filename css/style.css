@@ -2264,3 +2264,262 @@ html[dir="rtl"] .footer-nav a::after {
         width: 100%;
     }
 }
+
+/* ============================================
+   PET MODE THEME
+   ============================================ */
+
+/* Pet Mode Prompt Modal */
+.pet-mode-prompt-modal .modal-content {
+    max-width: 500px;
+    text-align: center;
+}
+
+.pet-mode-prompt-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: petModeBounce 0.6s ease;
+}
+
+@keyframes petModeBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+.pet-mode-prompt-text {
+    font-size: 1.05rem;
+    color: var(--gray-body);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.pet-mode-features {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+    text-align: left;
+    background: var(--sage-pale);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+}
+
+.pet-mode-features li {
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+    color: var(--gray-dark);
+}
+
+.pet-mode-prompt-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.pet-mode-prompt-actions .btn {
+    flex: 1;
+    max-width: 200px;
+}
+
+.pet-mode-prompt-note {
+    font-size: 0.85rem;
+    color: var(--gray-light);
+    margin: 0;
+}
+
+/* Pet Mode Active Styles */
+body.pet-mode {
+    --accent-emoji: '🐾';
+}
+
+/* Paw print accents */
+body.pet-mode::before {
+    content: '🐾';
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 3rem;
+    opacity: 0.1;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Hero section pet theme */
+body.pet-mode .hero {
+    background: linear-gradient(135deg, var(--sage-pale) 0%, var(--warm-white) 100%);
+}
+
+body.pet-mode .hero-name::after {
+    content: ' 🐾';
+    opacity: 0.6;
+}
+
+/* Candle animations for pets */
+body.pet-mode .candle-flame {
+    animation: petCandleFlame 2s ease-in-out infinite;
+}
+
+@keyframes petCandleFlame {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        filter: drop-shadow(0 0 10px rgba(201, 169, 98, 0.6));
+    }
+    50% {
+        transform: translateY(-2px) scale(1.05);
+        filter: drop-shadow(0 0 15px rgba(201, 169, 98, 0.8));
+    }
+}
+
+/* Pet-specific button styles */
+body.pet-mode .btn-primary {
+    background: linear-gradient(135deg, var(--sage-primary), var(--sage-dark));
+}
+
+body.pet-mode .btn-primary:hover {
+    background: linear-gradient(135deg, var(--sage-dark), var(--sage-primary));
+}
+
+/* Memorial card pet theme */
+body.pet-mode .memorial-card {
+    border-top: 3px solid var(--sage-primary);
+}
+
+body.pet-mode .memorial-card::before {
+    content: '🐾';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    opacity: 0.2;
+}
+
+/* Pet mode toggle in settings */
+.pet-mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--sage-pale);
+    border-radius: 12px;
+    margin: 1rem 0;
+}
+
+.pet-mode-toggle-info {
+    flex: 1;
+}
+
+.pet-mode-toggle-info h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    color: var(--gray-dark);
+}
+
+.pet-mode-toggle-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--gray-body);
+}
+
+.pet-mode-toggle-switch {
+    position: relative;
+    width: 60px;
+    height: 32px;
+    background: var(--gray-light);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.pet-mode-toggle-switch.active {
+    background: var(--sage-primary);
+}
+
+.pet-mode-toggle-switch::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+.pet-mode-toggle-switch.active::before {
+    transform: translateX(28px);
+}
+
+/* Paw print decorations */
+body.pet-mode .section-divider::after {
+    content: ' 🐾 ';
+    opacity: 0.3;
+}
+
+/* Pet-themed photo grid */
+body.pet-mode .photo-grid::before {
+    content: '🐾';
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    opacity: 0.2;
+}
+
+/* First candle celebration for pets */
+body.pet-mode .first-candle-celebration .celebration-title::after {
+    content: ' 🐾';
+}
+
+body.pet-mode .first-candle-celebration .celebration-message {
+    font-style: italic;
+}
+
+/* Pet mode wizard steps */
+body.pet-mode .wizard-step h2::before {
+    content: '🐾 ';
+    opacity: 0.6;
+}
+
+/* Rainbow Bridge theme */
+body.pet-mode .hero-dates {
+    background: linear-gradient(90deg, 
+        #ff6b6b 0%, 
+        #ffa500 20%, 
+        #ffd700 40%, 
+        #90ee90 60%, 
+        #87ceeb 80%, 
+        #9370db 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+}
+
+/* Pet-specific toast notifications */
+body.pet-mode .toast {
+    border-left: 4px solid var(--sage-primary);
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+    body.pet-mode::before {
+        font-size: 2rem;
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .pet-mode-prompt-modal .modal-content {
+        padding: 1.5rem 1rem;
+    }
+
+    .pet-mode-prompt-actions {
+        flex-direction: column;
+    }
+
+    .pet-mode-prompt-actions .btn {
+        max-width: 100%;
+    }
+}
