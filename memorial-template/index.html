@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A beautiful memorial page on Forever Fields">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/memorial.css">
+
+    <title id="memorial-title">Memorial | Forever Fields</title>
+</head>
+<body>
+    <!-- Loading State -->
+    <div id="loading" class="loading-overlay">
+        <div class="loading-spinner">
+            <span>🌿</span>
+            <p>Loading memorial...</p>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="error-container" style="display: none;">
+        <div class="error-content">
+            <span class="error-icon">🌸</span>
+            <h2>Memorial Not Found</h2>
+            <p id="error-message">This memorial may be private or no longer available.</p>
+            <a href="/" class="btn btn-primary">Return Home</a>
+        </div>
+    </div>
+
+    <!-- Memorial Content -->
+    <div id="memorial-content" style="display: none;">
+        <!-- Header -->
+        <header class="memorial-header">
+            <div class="memorial-header-overlay"></div>
+            <div class="memorial-header-content">
+                <div class="memorial-portrait-container">
+                    <div id="memorial-portrait" class="memorial-portrait">
+                        <span class="portrait-placeholder">🌿</span>
+                    </div>
+                </div>
+                <h1 id="memorial-name" class="memorial-name">Loading...</h1>
+                <p id="memorial-dates" class="memorial-dates">
+                    <span id="birth-date"></span> — <span id="death-date"></span>
+                </p>
+                <div id="memorial-age" class="memorial-age"></div>
+
+                <!-- Song Button -->
+                <div id="song-container" class="song-container" style="display: none;">
+                    <button id="play-song-btn" class="play-song-btn">
+                        <span>▶</span> <span id="song-title">Play Their Song</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Back to Forever Fields -->
+            <a href="/" class="back-home">← Forever Fields</a>
+        </header>
+
+        <!-- Main Content -->
+        <main class="memorial-main">
+            <div class="memorial-container">
+                <!-- Biography Section -->
+                <section id="bio-section" class="memorial-section" style="display: none;">
+                    <h2 class="section-title">
+                        <span class="section-icon">📖</span>
+                        Their Story
+                    </h2>
+                    <div id="memorial-bio" class="memorial-bio"></div>
+                </section>
+
+                <!-- Resting Place Section -->
+                <section id="resting-section" class="memorial-section" style="display: none;">
+                    <h2 class="section-title">
+                        <span class="section-icon">🏛️</span>
+                        Resting Place
+                    </h2>
+                    <div class="resting-place-card">
+                        <div id="resting-type" class="resting-type"></div>
+                        <div id="resting-location" class="resting-location"></div>
+                    </div>
+                </section>
+
+                <!-- Social Links Section -->
+                <section id="social-section" class="memorial-section" style="display: none;">
+                    <h2 class="section-title">
+                        <span class="section-icon">🔗</span>
+                        Stay Connected
+                    </h2>
+                    <div id="social-links" class="social-links"></div>
+                </section>
+
+                <!-- Memorial Actions -->
+                <section class="memorial-actions-section">
+                    <h2 class="section-title">
+                        <span class="section-icon">💝</span>
+                        Leave a Tribute
+                    </h2>
+                    <div class="memorial-actions">
+                        <button class="memorial-action-btn" id="candle-btn" data-action="candle">
+                            <span class="action-icon">🕯️</span>
+                            <span class="action-label">Light a Candle</span>
+                        </button>
+                        <button class="memorial-action-btn" id="memory-btn" data-action="memory">
+                            <span class="action-icon">✍️</span>
+                            <span class="action-label">Share a Memory</span>
+                        </button>
+                        <button class="memorial-action-btn" id="flowers-btn" data-action="flowers">
+                            <span class="action-icon">💐</span>
+                            <span class="action-label">Send Flowers</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Share & Download Section -->
+                <section class="memorial-section">
+                    <h2 class="section-title">
+                        <span class="section-icon">📥</span>
+                        Share & Download
+                    </h2>
+                    <div class="download-actions">
+                        <button class="download-action-btn" id="qr-btn">
+                            <span class="action-icon">📱</span>
+                            <div class="action-content">
+                                <span class="action-label">QR Code</span>
+                                <span class="action-desc">Download scannable QR code</span>
+                            </div>
+                        </button>
+                        <button class="download-action-btn" id="prayer-card-btn">
+                            <span class="action-icon">🙏</span>
+                            <div class="action-content">
+                                <span class="action-label">Prayer Card</span>
+                                <span class="action-desc">Printable memorial card (PDF)</span>
+                            </div>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Candles Section -->
+                <section id="candles-section" class="memorial-section" style="display: none;">
+                    <h2 class="section-title">
+                        <span class="section-icon">🕯️</span>
+                        Candles Lit <span id="candles-count" class="count-badge">0</span>
+                    </h2>
+                    <div id="candles-grid" class="candles-grid"></div>
+                </section>
+
+                <!-- Photo Gallery Section -->
+                <section id="photos-section" class="memorial-section" style="display: none;">
+                    <h2 class="section-title">
+                        <span class="section-icon">📷</span>
+                        Photos <span id="photos-count" class="count-badge">0</span>
+                    </h2>
+                    <div id="photos-gallery" class="photo-gallery"></div>
+                </section>
+
+                <!-- Time Capsules Section -->
+                <section id="time-capsules-section" class="memorial-section" style="display: none;">
+                    <h2 class="section-title">
+                        <span class="section-icon">⏰</span>
+                        Time Capsules
+                    </h2>
+                    <div id="time-capsules-grid" class="time-capsules-grid"></div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="memorial-footer">
+            <div class="memorial-footer-content">
+                <div class="footer-logo">
+                    <span>🌿</span>
+                    <span>Forever Fields</span>
+                </div>
+                <p class="footer-text">A place where their story lives on</p>
+                <p class="footer-copyright">© 2025 Forever Fields. Created with love.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Candle Modal -->
+    <div id="candle-modal" class="modal" style="display: none;">
+        <div class="modal-overlay" id="candle-modal-close"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="candle-modal-x">×</button>
+            <h3 class="modal-title">
+                <span>🕯️</span>
+                Light a Candle
+            </h3>
+            <form id="candle-form">
+                <div class="form-group">
+                    <label for="candle-name">Your Name (optional)</label>
+                    <input type="text" id="candle-name" placeholder="Anonymous" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="candle-message">Message (optional)</label>
+                    <textarea id="candle-message" rows="3" placeholder="Share a thought or memory..." maxlength="500"></textarea>
+                    <div class="char-count">
+                        <span id="candle-message-count">0</span>/500
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="candle-submit">
+                    Light Candle
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Memory Modal -->
+    <div id="memory-modal" class="modal" style="display: none;">
+        <div class="modal-overlay" id="memory-modal-close"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="memory-modal-x">×</button>
+            <h3 class="modal-title">
+                <span>✍️</span>
+                Share a Memory
+            </h3>
+            <form id="memory-form">
+                <div class="form-group">
+                    <label for="memory-name">Your Name</label>
+                    <input type="text" id="memory-name" required maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="memory-text">Your Memory</label>
+                    <textarea id="memory-text" rows="6" required placeholder="Share a special memory..." maxlength="2000"></textarea>
+                    <div class="char-count">
+                        <span id="memory-text-count">0</span>/2000
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="memory-submit">
+                    Share Memory
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- QR Code Design Modal -->
+    <div id="qr-modal" class="modal" style="display: none;">
+        <div class="modal-overlay" id="qr-modal-close"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="qr-modal-x">×</button>
+            <h3 class="modal-title">
+                <span>📱</span>
+                Choose QR Code Design
+            </h3>
+            <div class="qr-designs">
+                <div class="qr-design-option" data-design="minimalist">
+                    <div class="qr-design-preview minimalist">
+                        <span>◻️</span>
+                    </div>
+                    <div class="qr-design-name">Minimalist</div>
+                    <div class="qr-design-desc">Clean & simple</div>
+                </div>
+                <div class="qr-design-option" data-design="marble">
+                    <div class="qr-design-preview marble">
+                        <span>🏛️</span>
+                    </div>
+                    <div class="qr-design-name">Marble</div>
+                    <div class="qr-design-desc">Elegant texture</div>
+                </div>
+                <div class="qr-design-option" data-design="garden">
+                    <div class="qr-design-preview garden">
+                        <span>🌿</span>
+                    </div>
+                    <div class="qr-design-name">Garden</div>
+                    <div class="qr-design-desc">Natural pattern</div>
+                </div>
+                <div class="qr-design-option" data-design="gold">
+                    <div class="qr-design-preview gold">
+                        <span>✨</span>
+                    </div>
+                    <div class="qr-design-name">Gold Filigree</div>
+                    <div class="qr-design-desc">Ornate & classic</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prayer Card Design Modal -->
+    <div id="prayer-card-modal" class="modal" style="display: none;">
+        <div class="modal-overlay" id="prayer-card-modal-close"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="prayer-card-modal-x">×</button>
+            <h3 class="modal-title">
+                <span>🙏</span>
+                Download Prayer Card
+            </h3>
+            <p style="text-align: center; margin-bottom: 1.5rem; color: var(--gray-body);">
+                A printable 4x6" card with their photo, dates, and a QR code to their memorial.
+            </p>
+            <button type="button" class="btn btn-primary" id="download-prayer-card-btn" style="width: 100%;">
+                Download PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div id="toast" class="toast" style="display: none;">
+        <span id="toast-icon">✨</span>
+        <span id="toast-message">Success!</span>
+    </div>
+
+    <!-- Photo Modal (full-size viewing) -->
+    <div id="photo-modal" class="photo-modal" style="display: none;">
+        <div class="photo-modal-content">
+            <img id="photo-modal-image" src="" alt="">
+            <button class="photo-modal-close" id="photo-modal-close">×</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api-client.js"></script>
+    <script src="js/photo-uploader.js"></script>
+    <script src="js/memorial.js"></script>
+</body>
+</html>
