@@ -4,27 +4,39 @@
  */
 
 import nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 import { env } from '../config/env';
 
-// Create reusable transporter
-const transporter = nodemailer.createTransport({
-  host: env.SMTP_HOST,
-  port: parseInt(env.SMTP_PORT),
-  secure: parseInt(env.SMTP_PORT) === 465, // true for 465, false for other ports
-  auth: {
-    user: env.SMTP_USER,
-    pass: env.SMTP_PASS,
-  },
-});
+// Create reusable transporter (only if SMTP is configured)
+let transporter: Transporter | null = null;
+
+if (env.SMTP_HOST && env.SMTP_PORT && env.SMTP_USER && env.SMTP_PASS) {
+  transporter = nodemailer.createTransport({
+    host: env.SMTP_HOST,
+    port: parseInt(env.SMTP_PORT),
+    secure: parseInt(env.SMTP_PORT) === 465, // true for 465, false for other ports
+    auth: {
+      user: env.SMTP_USER,
+      pass: env.SMTP_PASS,
+    },
+  });
+} else {
+  console.warn('⚠️  SMTP not configured - email features disabled');
+}
 
 /**
  * Send magic link email
  */
 export const sendMagicLink = async (email: string, token: string): Promise<void> => {
+  if (!transporter) {
+    console.warn('⚠️  Cannot send magic link email - SMTP not configured');
+    throw new Error('Email service not configured. Please contact support.');
+  }
+
   const magicLink = `${env.API_URL}/api/auth/callback?token=${token}`;
 
   const mailOptions = {
-    from: env.SMTP_FROM,
+    from: env.SMTP_FROM || 'noreply@foreverfields.app',
     to: email,
     subject: 'Your Forever Fields Sign-In Link',
     html: `
@@ -99,12 +111,17 @@ export const sendInvitationEmail = async (
   role: 'editor' | 'viewer',
   token: string
 ): Promise<void> => {
+  if (!transporter) {
+    console.warn('⚠️  Cannot send invitation email - SMTP not configured');
+    throw new Error('Email service not configured. Please contact support.');
+  }
+
   const inviteLink = `${env.FRONTEND_URL}/invitations/${token}`;
 
   const roleText = role === 'editor' ? 'collaborate on' : 'view';
 
   const mailOptions = {
-    from: env.SMTP_FROM,
+    from: env.SMTP_FROM || 'noreply@foreverfields.app',
     to: email,
     subject: `You've been invited to ${roleText} a memorial on Forever Fields`,
     html: `
