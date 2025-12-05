@@ -129,7 +129,7 @@ router.post('/send', requireAuth, apiRateLimiter, async (req, res) => {
   try {
     const { memorialId, userId, title, body, url, type } = req.body;
 
-    let subscriptions = [];
+    let subscriptions: any[] = [];
 
     if (userId) {
       // Send to specific user
@@ -253,7 +253,7 @@ export async function sendCandleLitNotification(memorialId: string, candleData: 
     if (!memorial) return;
 
     const subscriptions = await prisma.pushSubscription.findMany({
-      where: { userId: memorial.creatorId },
+      where: { userId: memorial.ownerId },
     });
 
     if (subscriptions.length === 0) return;
@@ -287,7 +287,7 @@ export async function sendMemoryAddedNotification(memorialId: string, memoryData
     if (!memorial) return;
 
     const subscriptions = await prisma.pushSubscription.findMany({
-      where: { userId: memorial.creatorId },
+      where: { userId: memorial.ownerId },
     });
 
     if (subscriptions.length === 0) return;
@@ -321,7 +321,7 @@ export async function sendAnniversaryNotification(memorialId: string) {
     if (!memorial) return;
 
     const subscriptions = await prisma.pushSubscription.findMany({
-      where: { userId: memorial.creatorId },
+      where: { userId: memorial.ownerId },
     });
 
     if (subscriptions.length === 0) return;

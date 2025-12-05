@@ -66,9 +66,9 @@ export async function checkMemorialAccess(
       }
 
       // Check role permission
-      const roleHierarchy = { owner: 3, editor: 2, viewer: 1 };
+      const roleHierarchy: Record<string, number> = { owner: 3, editor: 2, viewer: 1 };
       const userRole = (invitation as any).role || 'viewer';
-      if (roleHierarchy[userRole] < roleHierarchy[requiredRole]) {
+      if ((roleHierarchy[userRole] || 0) < (roleHierarchy[requiredRole] || 0)) {
         return { allowed: false, reason: 'Insufficient permissions' };
       }
 

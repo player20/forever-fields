@@ -245,7 +245,7 @@ router.get(
       // Extract photo data
       const photos = approvedPhotos.map((item) => ({
         id: item.id,
-        ...item.dataJson,
+        ...(typeof item.dataJson === 'object' && item.dataJson !== null ? item.dataJson : {}),
         approvedAt: item.createdAt,
       }));
 

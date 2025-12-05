@@ -95,7 +95,7 @@ router.get('/:memorialId', apiRateLimiter, async (req, res) => {
       pageMargins: [20, 20, 20, 20],
       content: [
         // FRONT SIDE
-        {
+        ({
           stack: [
             // Border decoration
             {
@@ -190,7 +190,7 @@ router.get('/:memorialId', apiRateLimiter, async (req, res) => {
               italics: true,
             },
           ],
-        },
+        } as any),
         // PAGE BREAK
         { text: '', pageBreak: 'after' },
         // BACK SIDE
