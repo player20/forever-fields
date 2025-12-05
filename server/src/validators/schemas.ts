@@ -21,7 +21,7 @@ export const authCallbackSchema = z.object({
 // MEMORIAL SCHEMAS
 // ============================================
 
-export const createMemorialSchema = z.object({
+const baseMemorialSchema = z.object({
   deceasedName: z.string().min(1, 'Name required').max(200),
   birthDate: z.string().datetime().optional().nullable(),
   deathDate: z.string().datetime().optional().nullable(),
@@ -42,7 +42,9 @@ export const createMemorialSchema = z.object({
     })
     .optional()
     .nullable(),
-}).refine(
+});
+
+export const createMemorialSchema = baseMemorialSchema.refine(
   (data) => {
     // Must have at least birthDate OR deathDate for duplicate detection
     return data.birthDate || data.deathDate;
@@ -52,7 +54,7 @@ export const createMemorialSchema = z.object({
   }
 );
 
-export const updateMemorialSchema = createMemorialSchema.partial();
+export const updateMemorialSchema = baseMemorialSchema.partial();
 
 export const memorialIdSchema = z.object({
   id: z.string().uuid('Invalid memorial ID'),

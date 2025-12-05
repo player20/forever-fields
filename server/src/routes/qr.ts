@@ -176,16 +176,11 @@ router.get('/:memorialId', apiRateLimiter, async (req, res) => {
       });
     }
 
-    // Update QR code record with URL
+    // Update QR code record with design
     await prisma.qRCode.update({
-      where: { id: qrCodeRecord.id },
+      where: { memorialId },
       data: {
         design: designKey,
-        dataJson: {
-          url: finalQrUrl,
-          memorialUrl,
-          generatedAt: new Date().toISOString(),
-        },
       },
     });
 
@@ -196,7 +191,6 @@ router.get('/:memorialId', apiRateLimiter, async (req, res) => {
 
     return res.status(200).json({
       qrCode: {
-        id: qrCodeRecord.id,
         memorialId,
         design: designKey,
         url: finalQrUrl,

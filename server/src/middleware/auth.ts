@@ -51,8 +51,12 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
       return res.status(401).json({ error: 'User not found' });
     }
 
-    // Attach user to request
-    req.user = user;
+    // Attach user to request (convert null to undefined for TypeScript)
+    req.user = {
+      id: user.id,
+      email: user.email,
+      name: user.name ?? undefined,
+    };
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
@@ -83,7 +87,11 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
       });
 
       if (user) {
-        req.user = user;
+        req.user = {
+          id: user.id,
+          email: user.email,
+          name: user.name ?? undefined,
+        };
       }
     }
 

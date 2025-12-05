@@ -140,12 +140,12 @@ router.post('/send', requireAuth, apiRateLimiter, async (req, res) => {
       // Send to memorial owner
       const memorial = await prisma.memorial.findUnique({
         where: { id: memorialId },
-        select: { creatorId: true },
+        select: { ownerId: true },
       });
 
       if (memorial) {
         subscriptions = await prisma.pushSubscription.findMany({
-          where: { userId: memorial.creatorId },
+          where: { userId: memorial.ownerId },
         });
       }
     } else {
@@ -247,7 +247,7 @@ export async function sendCandleLitNotification(memorialId: string, candleData: 
   try {
     const memorial = await prisma.memorial.findUnique({
       where: { id: memorialId },
-      select: { creatorId: true, deceasedName: true },
+      select: { ownerId: true, deceasedName: true },
     });
 
     if (!memorial) return;
@@ -281,7 +281,7 @@ export async function sendMemoryAddedNotification(memorialId: string, memoryData
   try {
     const memorial = await prisma.memorial.findUnique({
       where: { id: memorialId },
-      select: { creatorId: true, deceasedName: true },
+      select: { ownerId: true, deceasedName: true },
     });
 
     if (!memorial) return;
@@ -315,7 +315,7 @@ export async function sendAnniversaryNotification(memorialId: string) {
   try {
     const memorial = await prisma.memorial.findUnique({
       where: { id: memorialId },
-      select: { creatorId: true, deceasedName: true, passingDate: true },
+      select: { ownerId: true, deceasedName: true, deathDate: true },
     });
 
     if (!memorial) return;
@@ -326,8 +326,10 @@ export async function sendAnniversaryNotification(memorialId: string) {
 
     if (subscriptions.length === 0) return;
 
-    const passingDate = new Date(memorial.passingDate);
-    const years = new Date().getFullYear() - passingDate.getFullYear();
+    if (!memorial.deathDate) return;
+
+    const deathDateObj = new Date(memorial.deathDate);
+    const years = new Date().getFullYear() - deathDateObj.getFullYear();
 
     const title = `🕊️ Anniversary Reminder`;
     const body = `Today marks ${years} ${years === 1 ? 'year' : 'years'} since ${memorial.deceasedName} passed away`;
