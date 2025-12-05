@@ -22,6 +22,13 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
 
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#A7C9A2">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Forever Fields">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -926,6 +933,27 @@
                 <a href="./grief-support/">Grief Support</a>
             </nav>
             <div class="header-cta">
+                <!-- Language Switcher -->
+                <div class="language-switcher" id="languageSwitcher" data-no-translate>
+                    <button class="language-toggle" id="languageToggle" aria-label="Select language" aria-expanded="false" aria-haspopup="true">
+                        <svg class="globe-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <ellipse cx="12" cy="12" rx="4" ry="10"/>
+                            <path d="M2 12h20"/>
+                        </svg>
+                        <span class="current-lang-code">EN</span>
+                    </button>
+                    <div class="language-dropdown" id="languageDropdown" role="menu" aria-label="Available languages">
+                        <button class="language-option active" data-lang="en" role="menuitem"><span class="lang-name">English</span></button>
+                        <button class="language-option" data-lang="es" role="menuitem"><span class="lang-name">Español</span></button>
+                        <button class="language-option" data-lang="vi" role="menuitem"><span class="lang-name">Tiếng Việt</span></button>
+                        <button class="language-option" data-lang="ar" role="menuitem" dir="rtl"><span class="lang-name">العربية</span></button>
+                        <button class="language-option" data-lang="tl" role="menuitem"><span class="lang-name">Tagalog</span></button>
+                        <button class="language-option" data-lang="fr" role="menuitem"><span class="lang-name">Français</span></button>
+                        <button class="language-option" data-lang="pt" role="menuitem"><span class="lang-name">Português</span></button>
+                        <button class="language-option" data-lang="zh" role="menuitem"><span class="lang-name">中文</span></button>
+                    </div>
+                </div>
                 <a href="./login/" class="btn btn-secondary">Sign In</a>
                 <a href="./create/" class="btn btn-primary">Create Memorial</a>
             </div>
@@ -1419,5 +1447,11 @@
             }
         });
     </script>
+
+    <!-- Language Switcher -->
+    <script src="./js/language-switcher.js"></script>
+
+    <!-- PWA Functionality -->
+    <script src="./js/pwa.js"></script>
 </body>
 </html>

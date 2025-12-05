@@ -8,6 +8,7 @@ import { prisma } from '../config/database';
 import { validate } from '../middleware/validate';
 import { candleRateLimiter } from '../middleware/security';
 import { createCandleSchema } from '../validators/schemas';
+import { sendCandleLitNotification } from './push';
 
 const router = Router();
 
@@ -49,6 +50,12 @@ router.post('/', candleRateLimiter, validate(createCandleSchema), async (req, re
         name: name || 'Anonymous',
       },
     });
+
+    // Send push notification to memorial owner
+    sendCandleLitNotification(memorialId, {
+      name: name || 'Anonymous',
+      message: message || null,
+    }).catch((err) => console.error('Failed to send candle notification:', err));
 
     return res.status(201).json({
       candle,

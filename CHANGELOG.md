@@ -5,6 +5,151 @@ All notable changes to the Forever Fields project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0-pwa] - 2024-12-04
+
+### Added
+
+#### Progressive Web App (PWA) Features
+- **PWA Manifest** (`manifest.json`)
+  - Complete manifest with name, icons, and theme colors
+  - App shortcuts for Create Memorial and Dashboard
+  - Share target integration for memorial creation
+  - Optimized for mobile and desktop installation
+  - Forever Fields branding (sage green theme color)
+
+- **Service Worker** (`service-worker.js`)
+  - Offline caching strategy for core assets
+  - Cache-first with network fallback for pages
+  - Network-first for API requests
+  - Automatic cache versioning and cleanup
+  - Push notification handling
+  - Background sync support (for future features)
+  - Update detection and user prompts
+
+- **Smart Install Banner** (`js/pwa.js`)
+  - Appears after 10 seconds on mobile devices
+  - Deferred prompt handling for better UX
+  - Dismissal with 7-day cooldown period
+  - Smooth slide-up animation
+  - Install/Close actions with analytics
+  - Respects user preferences (localStorage)
+
+- **PWA Install Styles** (`css/style.css`)
+  - Branded install banner with sage green gradient
+  - Responsive design for mobile and tablet
+  - Update available notification banner
+  - Smooth animations and transitions
+  - Accessibility-friendly (keyboard navigation, ARIA labels)
+
+#### Push Notification System
+- **Web Push Integration** (`server/src/routes/push.ts`)
+  - Full web-push npm package integration
+  - VAPID key configuration and validation
+  - Subscription management (create, read, delete)
+  - GET `/api/push/vapid-public-key` - Public key for subscriptions
+  - POST `/api/push/subscribe` - Save push subscription (auth required)
+  - DELETE `/api/push/unsubscribe` - Remove subscription (auth required)
+  - GET `/api/push/subscriptions` - List user subscriptions (auth required)
+  - POST `/api/push/send` - Send notification to user or memorial (auth required)
+
+- **Push Notification Triggers**
+  - `sendCandleLitNotification()` - Notify when candle is lit
+  - `sendMemoryAddedNotification()` - Notify when memory is shared
+  - `sendAnniversaryNotification()` - Notify on memorial anniversaries
+  - Automatic cleanup of expired/invalid subscriptions (410 Gone)
+  - Retry logic with exponential backoff
+  - Error handling and logging
+
+- **Enhanced Candle Route** (`server/src/routes/candles.ts`)
+  - Integrated push notification trigger
+  - Sends notification to memorial owner on candle lit
+  - Non-blocking async notification dispatch
+  - Graceful error handling (doesn't block candle creation)
+
+- **Push Notification Client** (`js/pwa.js`)
+  - `subscribeToPushNotifications()` - Request permission and subscribe
+  - `unsubscribeFromPushNotifications()` - Unsubscribe from push
+  - `isPushNotificationsEnabled()` - Check subscription status
+  - VAPID public key fetching
+  - Subscription persistence in localStorage
+  - Auto-sync when user logs in
+
+- **Service Worker Push Handlers** (`service-worker.js`)
+  - Push event handler with JSON payload parsing
+  - Rich notifications with title, body, icon, badge
+  - Custom actions (View, Dismiss)
+  - Notification click handling (open memorial page)
+  - Notification close tracking
+  - Vibration patterns for mobile devices
+
+#### HTML Integration
+- **PWA Meta Tags** (added to all HTML pages)
+  - `<link rel="manifest" href="/manifest.json">`
+  - `<meta name="theme-color" content="#A7C9A2">`
+  - Apple mobile web app meta tags
+  - Service worker script inclusion
+
+#### Testing
+- **PWA & Push Test Suite** (`server/tests/pwa-push.test.js`)
+  - 8 comprehensive test scenarios
+  - Test 1: Get VAPID public key
+  - Test 2: Subscribe to push notifications
+  - Test 3: Get user subscriptions
+  - Test 4: Send test push notification
+  - Test 5: Light candle (trigger push)
+  - Test 6: Unsubscribe from push
+  - Test 7: PWA manifest check
+  - Test 8: Service worker check
+  - Manual testing checklist included
+  - Run with: `npm run test:pwa`
+
+### Changed
+- **Server version**: `0.4.0-wow` → `0.6.0-pwa` (skipped v0.5 chronologically, but v0.5-song exists)
+- **Candles API**: Now triggers push notifications to memorial owners
+- **HTML pages**: All pages now include PWA manifest and service worker
+- **API Client**: Enhanced with push subscription methods
+
+### Security
+All security features maintained plus:
+- ✅ VAPID keys for authenticated push (requires configuration)
+- ✅ Push subscription requires authentication
+- ✅ Push sending requires authentication
+- ✅ Rate limiting on all push endpoints
+- ✅ Endpoint validation and sanitization
+- ✅ Automatic cleanup of invalid subscriptions
+- ✅ No sensitive data in push payloads
+- ✅ Service worker scope restricted to origin
+
+### User Experience
+- ✅ Install app to home screen (iOS and Android)
+- ✅ Works offline (cached pages load)
+- ✅ Push notifications for new candles
+- ✅ Push notifications for new memories
+- ✅ Anniversary reminders (scheduled)
+- ✅ Smart install prompt (appears after engagement)
+- ✅ Update notifications (new version available)
+- ✅ Standalone app mode (no browser UI)
+
+### Configuration Required
+To enable push notifications, you must:
+1. Generate VAPID keys: `npx web-push generate-vapid-keys`
+2. Add to `.env` file:
+   ```
+   VAPID_PUBLIC_KEY=<your-public-key>
+   VAPID_PRIVATE_KEY=<your-private-key>
+   VAPID_SUBJECT=mailto:support@foreverfields.com
+   ```
+3. Restart server
+
+### Browser Support
+- ✅ Chrome/Edge (Desktop & Mobile) - Full support
+- ✅ Firefox (Desktop & Mobile) - Full support
+- ✅ Safari (iOS 16.4+) - Full support (PWA + Push)
+- ✅ Samsung Internet - Full support
+- ⚠️  Safari (macOS) - PWA install manual, push supported
+
+---
+
 ## [0.5.0-song] - 2024-12-04
 
 ### Added
