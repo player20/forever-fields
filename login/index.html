@@ -375,7 +375,7 @@
 
         async function sendMagicLink(email) {
             try {
-                const response = await api.request('POST', '/auth/magic-link', { email });
+                const response = await api.post('/api/auth/magic-link', { email });
 
                 // Show success state
                 sentEmailDisplay.textContent = email;
