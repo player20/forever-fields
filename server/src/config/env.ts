@@ -28,17 +28,17 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string(),
   CLOUDINARY_API_SECRET: z.string(),
 
-  // Email (Nodemailer) - Optional for now
+  // Email (Nodemailer) - Optional
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.string().optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  SMTP_FROM: z.string().email().optional(),
+  SMTP_FROM: z.string().optional(),
 
-  // Web Push (VAPID)
+  // Web Push (VAPID) - Optional
   VAPID_PUBLIC_KEY: z.string().optional(),
   VAPID_PRIVATE_KEY: z.string().optional(),
-  VAPID_SUBJECT: z.string().email().optional(),
+  VAPID_SUBJECT: z.string().optional(),
 
   // Security
   JWT_SECRET: z.string().min(10, 'JWT_SECRET must be at least 10 characters'),
