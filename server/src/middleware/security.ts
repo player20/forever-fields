@@ -71,6 +71,7 @@ export const authRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: false,
+  validate: { trustProxy: false }, // Disable trust proxy validation for Render
   handler: (req, res) => {
     res.status(429).json({
       error: 'Too many requests',
@@ -86,6 +87,7 @@ export const apiRateLimiter = rateLimit({
   message: 'Too many requests, please slow down',
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false }, // Disable trust proxy validation for Render
   handler: (req, res) => {
     res.status(429).json({
       error: 'Rate limit exceeded',
@@ -101,6 +103,7 @@ export const candleRateLimiter = rateLimit({
   message: 'Please wait before lighting another candle',
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false }, // Disable trust proxy validation for Render
   handler: (req, res) => {
     res.status(429).json({
       error: 'Too many candles lit',
@@ -116,6 +119,7 @@ export const uploadRateLimiter = rateLimit({
   message: 'Too many upload requests',
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false }, // Disable trust proxy validation for Render
   handler: (req, res) => {
     res.status(429).json({
       error: 'Upload rate limit exceeded',
