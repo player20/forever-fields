@@ -20,7 +20,12 @@
     "test:lang": "node tests/multilingual.test.js",
     "test:pet": "node tests/pet-mode.test.js"
   },
-  "keywords": ["memorial", "express", "supabase", "prisma"],
+  "keywords": [
+    "memorial",
+    "express",
+    "supabase",
+    "prisma"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
@@ -38,6 +43,7 @@
     "nodemailer": "^6.9.15",
     "pdfmake": "^0.2.10",
     "qrcode": "^1.5.3",
+    "resend": "^6.5.2",
     "web-push": "^3.6.7",
     "zod": "^3.23.8"
   },
