@@ -15,11 +15,6 @@
      * 3. Fallback to localhost
      */
     function getApiUrl() {
-        // Check if environment variable is set (Vite/Webpack)
-        if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) {
-            return import.meta.env.VITE_API_URL;
-        }
-
         // Auto-detect based on current hostname
         const hostname = window.location.hostname;
 
