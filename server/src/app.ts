@@ -29,6 +29,9 @@ import reportsRoutes from './routes/reports';
 
 const app = express();
 
+// Trust proxy for Render/Cloudflare (required for rate limiting, IP detection)
+app.set('trust proxy', true);
+
 // ============================================
 // SECURITY MIDDLEWARE
 // ============================================
