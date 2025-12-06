@@ -359,6 +359,8 @@
     </footer>
 
     <!-- Scripts -->
+    <script src="../js/api-config.js"></script>
+    <script src="../js/api-client.js"></script>
     <script src="../js/script.js"></script>
     <script>
         const loginForm = document.getElementById('loginForm');
@@ -368,7 +370,25 @@
         const sentEmailDisplay = document.getElementById('sentEmail');
         const resendLink = document.getElementById('resendLink');
 
-        loginForm.addEventListener('submit', function(e) {
+        // Initialize API client
+        const api = new ForeverFieldsAPI();
+
+        async function sendMagicLink(email) {
+            try {
+                const response = await api.request('POST', '/auth/magic-link', { email });
+
+                // Show success state
+                sentEmailDisplay.textContent = email;
+                loginCard.classList.add('sent');
+            } catch (error) {
+                console.error('Magic link error:', error);
+                alert('Failed to send magic link. Please try again or contact support.');
+                submitBtn.textContent = 'Send Magic Link';
+                submitBtn.disabled = false;
+            }
+        }
+
+        loginForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const email = emailInput.value.trim();
@@ -378,12 +398,8 @@
             submitBtn.textContent = 'Sending...';
             submitBtn.disabled = true;
 
-            // Simulate API call
-            setTimeout(() => {
-                // Show success state
-                sentEmailDisplay.textContent = email;
-                loginCard.classList.add('sent');
-            }, 1500);
+            // Actually send the magic link
+            await sendMagicLink(email);
         });
 
         resendLink.addEventListener('click', function(e) {
@@ -393,6 +409,7 @@
             loginCard.classList.remove('sent');
             submitBtn.textContent = 'Send Magic Link';
             submitBtn.disabled = false;
+            emailInput.value = sentEmailDisplay.textContent;
 
             // Re-submit after a moment
             setTimeout(() => {
