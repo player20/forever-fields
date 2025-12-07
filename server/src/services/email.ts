@@ -190,7 +190,7 @@ export const sendInvitationEmail = async (
     throw new Error('Email service not configured. Please contact support.');
   }
 
-  const inviteLink = `${env.FRONTEND_URL}/invitations/${token}`;
+  const inviteLink = `${env.API_URL}/api/invitations/${token}`;
   const roleText = role === 'editor' ? 'collaborate on' : 'view';
   const fromEmail = env.SMTP_FROM || 'noreply@foreverfields.app';
 

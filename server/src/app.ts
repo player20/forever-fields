@@ -34,6 +34,7 @@ import voiceNotesRoutes from './routes/voiceNotes';
 import reportsRoutes from './routes/reports';
 import affiliateRoutes from './routes/affiliate';
 import socialLinksRoutes from './routes/social-links';
+import invitationRoutes from './routes/invitations';
 
 const app = express();
 
@@ -115,6 +116,7 @@ app.use('/api/voice-notes', voiceNotesRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/affiliate', affiliateRoutes); // Affiliate partnerships (flowers, etc.)
 app.use('/api/social-links', socialLinksRoutes); // Social media links for memorials
+app.use('/api', invitationRoutes); // Memorial collaboration invitations (handles both /invitations and /memorials routes)
 
 // ============================================
 // 404 HANDLER
