@@ -97,10 +97,10 @@ export const corsMiddleware = cors({
 // RATE LIMITING
 // ============================================
 
-// Auth endpoints: 5 requests per 15 minutes
+// Auth endpoints: Stricter in production, relaxed in development
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5,
+  max: isProd ? 10 : 100, // Production: 10 attempts, Development: 100 attempts
   message: 'Too many authentication attempts, please try again later',
   standardHeaders: true,
   legacyHeaders: false,
@@ -108,7 +108,7 @@ export const authRateLimiter = rateLimit({
   validate: { trustProxy: true }, // Trust proxy headers (matches app.ts config)
   handler: (req, res) => {
     res.status(429).json({
-      error: 'Too many requests',
+      error: 'Too many authentication requests. Please try again in a few minutes.',
       retryAfter: '15 minutes',
     });
   },
