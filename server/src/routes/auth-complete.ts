@@ -197,8 +197,8 @@ router.get(
         path: '/api/auth',
       });
 
-      // Redirect to dashboard
-      return res.redirect(302, `${env.FRONTEND_URL}/dashboard`);
+      // Redirect to login with success flag (allows frontend to check cookies on same domain)
+      return res.redirect(302, `${env.FRONTEND_URL}/login?auth=success`);
     } catch (error) {
       console.error('[AUTH] Callback error:', error);
       return res.redirect(`${env.FRONTEND_URL}/login?error=auth_failed`);
@@ -534,8 +534,8 @@ router.get(
 
       console.log(`[AUTH] Password reset successful: ${user.email}`);
 
-      // Redirect to dashboard
-      return res.redirect(302, `${env.FRONTEND_URL}/dashboard`);
+      // Redirect to login with success flag (allows frontend to check cookies on same domain)
+      return res.redirect(302, `${env.FRONTEND_URL}/login?auth=success`);
     } catch (error) {
       console.error('[AUTH] Password reset error:', error);
       return res.redirect(`${env.FRONTEND_URL}/login?error=reset_failed`);

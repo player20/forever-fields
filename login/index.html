@@ -573,6 +573,19 @@
             emailInput.value = decodeURIComponent(prefillEmail);
         }
 
+        // Check if user just completed authentication (magic link or password reset)
+        const authSuccess = urlParams.get('auth');
+        if (authSuccess === 'success') {
+            // Check if user is now authenticated
+            api.isAuthenticated().then(isAuthenticated => {
+                if (isAuthenticated) {
+                    // Cookies are set, redirect to destination
+                    const destination = redirectUrl || '/dashboard';
+                    window.location.href = destination;
+                }
+            });
+        }
+
         // Current authentication mode
         let authMode = 'magic-link';
 

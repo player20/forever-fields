@@ -12,6 +12,8 @@ import { authRateLimiter } from '../middleware/security';
 import { sendInvitationEmail } from '../services/email';
 import { generateSecureToken, getMagicLinkExpiration } from '../utils/tokens';
 import { z } from 'zod';
+import { supabaseAdmin } from '../config/supabase';
+import { env } from '../config/env';
 
 const router = Router();
 
@@ -192,23 +194,46 @@ router.get(
         data: { usedAt: new Date() },
       });
 
+      // Generate session for the invited user
+      const { data: sessionData, error: sessionError } =
+        await supabaseAdmin.auth.admin.generateLink({
+          type: 'magiclink',
+          email: invitation.email,
+        });
+
+      if (sessionError || !sessionData) {
+        console.error('[INVITATION] Session generation error:', sessionError);
+        return res.status(500).json({ error: 'Failed to create session' });
+      }
+
+      // Set httpOnly cookies for authentication
+      const sessionToken = sessionData.properties.hashed_token;
+
+      res.cookie('ff_access_token', sessionToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 3600000, // 1 hour
+        path: '/',
+      });
+
+      res.cookie('ff_refresh_token', sessionToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 3600000, // 7 days
+        path: '/api/auth',
+      });
+
       console.log(
         `[INVITATION] Successfully accepted for ${user.email} to memorial ${invitation.memorial.id}`
       );
 
-      // TODO: In the future, implement proper collaboration permissions
-      // For now, we'll redirect them to the memorial page
-      // They can view it and sign in to manage it
-
-      return res.status(200).json({
-        message: 'Invitation accepted successfully',
-        memorial: {
-          id: invitation.memorial.id,
-          name: invitation.memorial.deceasedName,
-        },
-        role: invitation.role,
-        redirectTo: `/memorial/${invitation.memorial.id}`,
-      });
+      // Redirect to login with auth=success and memorial redirect
+      return res.redirect(
+        302,
+        `${env.FRONTEND_URL}/login?auth=success&redirect=/memorial/${invitation.memorial.id}`
+      );
     } catch (error) {
       console.error('[INVITATION] Accept error:', error);
       return res.status(500).json({ error: 'Failed to accept invitation' });
