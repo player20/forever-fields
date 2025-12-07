@@ -106,22 +106,23 @@ router.get('/callback', validate(authCallbackSchema, 'query'), async (req, res) 
       });
     }
 
-    // Try to create Supabase user (ignore if already exists)
-    const { error: authError } = await supabaseAdmin.auth.admin.createUser({
+    // Ensure Supabase auth user exists (create on first login only)
+    // We try to create - if user exists, Supabase will skip creation gracefully
+    await supabaseAdmin.auth.admin.createUser({
       email: magicLink.email,
       email_confirm: true,
       user_metadata: {
         name: user.name,
       },
+    }).catch((error) => {
+      // Ignore "user already exists" - this is expected for returning users
+      if (!error.message?.includes('already been registered')) {
+        throw error; // Re-throw other errors
+      }
     });
 
-    // Ignore "user already exists" error - that's fine
-    if (authError && !authError.message.includes('already been registered')) {
-      console.error('Supabase auth error:', authError);
-      return res.status(500).json({ error: 'Authentication failed' });
-    }
-
-    // Generate session token for the user
+    // Generate session tokens for this email
+    // This works whether user was just created or already existed
     const { data: sessionData, error: sessionError } =
       await supabaseAdmin.auth.admin.generateLink({
         type: 'magiclink',
@@ -133,8 +134,9 @@ router.get('/callback', validate(authCallbackSchema, 'query'), async (req, res) 
       return res.status(500).json({ error: 'Session creation failed' });
     }
 
-    // Redirect to frontend with token
-    const redirectUrl = `${process.env.FRONTEND_URL}/auth/callback?access_token=${sessionData.properties.hashed_token}&refresh_token=${sessionData.properties.hashed_token}`;
+    // Redirect with session tokens
+    const accessToken = sessionData.properties.hashed_token;
+    const redirectUrl = `${process.env.FRONTEND_URL}/auth/callback?access_token=${accessToken}&refresh_token=${accessToken}`;
 
     return res.redirect(302, redirectUrl);
   } catch (error) {
