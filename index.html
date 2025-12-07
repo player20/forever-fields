@@ -1448,6 +1448,38 @@
                     }
                 });
             }
+
+            // Check authentication status
+            function checkAuthStatus() {
+                const authToken = localStorage.getItem('ff_auth_token');
+
+                if (authToken) {
+                    // User is logged in - update UI
+                    const signInLinks = document.querySelectorAll('a[href="./login/"]');
+                    signInLinks.forEach(link => {
+                        // Change to sign out button
+                        link.textContent = 'Sign Out';
+                        link.href = '#';
+                        link.classList.remove('btn-secondary');
+                        link.classList.add('btn-outline');
+
+                        // Add sign out handler
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+
+                            // Clear auth tokens
+                            localStorage.removeItem('ff_auth_token');
+                            localStorage.removeItem('ff_refresh_token');
+
+                            // Reload page to show logged-out state
+                            window.location.reload();
+                        });
+                    });
+                }
+            }
+
+            // Run on page load
+            checkAuthStatus();
         });
     </script>
 
