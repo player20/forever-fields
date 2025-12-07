@@ -23,15 +23,9 @@
             return 'http://localhost:3000';
         }
 
-        // Production environment - use same origin
-        // This works when frontend and backend are on same domain
-        if (window.location.protocol === 'https:') {
-            return window.location.origin;
-        }
-
-        // If custom backend domain, detect from meta tag
+        // Check for custom backend domain from meta tag (HIGHEST PRIORITY for production)
         const apiMetaTag = document.querySelector('meta[name="api-url"]');
-        if (apiMetaTag) {
+        if (apiMetaTag && apiMetaTag.content) {
             return apiMetaTag.content;
         }
 
