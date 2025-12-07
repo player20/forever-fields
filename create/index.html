@@ -2009,19 +2009,99 @@
                 }
             });
 
-            document.getElementById('publishNowBtn').addEventListener('click', function() {
-                // Clear the draft since memorial is being published
-                clearDraft();
+            document.getElementById('publishNowBtn').addEventListener('click', async function() {
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<h4>⏳ Publishing...</h4><p>Creating your memorial</p>';
 
-                if (typeof showToast === 'function') {
-                    showToast('Your memorial has been published! Redirecting...', 'success');
-                } else {
-                    alert('Memorial published!');
+                try {
+                    // Collect all form data
+                    const memorialData = {
+                        // Step 1: User info
+                        userEmail: document.getElementById('userEmail')?.value,
+                        userName: document.getElementById('userName')?.value,
+                        relationship: document.getElementById('relationship')?.value,
+
+                        // Step 2: About them
+                        deceasedName: document.getElementById('deceasedName')?.value,
+                        preferredName: document.getElementById('preferredName')?.value,
+                        nameTitle: document.getElementById('nameTitle')?.value,
+                        birthDate: document.getElementById('birthDate')?.value,
+                        passingDate: document.getElementById('passingDate')?.value,
+                        shortBio: document.getElementById('shortBio')?.value,
+
+                        // Step 3: Privacy
+                        privacy: document.querySelector('input[name="privacy"]:checked')?.value || 'public',
+                        allowInteractions: document.querySelector('[data-toggle="allowInteractions"]')?.classList.contains('active') ?? true,
+                        enableHealingPrompts: document.querySelector('[data-toggle="enableHealingPrompts"]')?.classList.contains('active') ?? true,
+
+                        // Step 4: Family history
+                        birthCity: document.getElementById('birthCity')?.value,
+                        birthState: document.getElementById('birthState')?.value,
+                        parentsNames: document.getElementById('parentsNames')?.value,
+                        siblings: document.getElementById('siblings')?.value,
+
+                        // Step 5: Memories, achievements, etc.
+                        favoriteSongUrl: document.getElementById('favoriteSongUrl')?.value,
+                        timeCapsuleMessage: document.getElementById('timeCapsuleMessage')?.value,
+                        timeCapsuleUnlockDate: document.getElementById('timeCapsuleUnlockDate')?.value,
+                    };
+
+                    // Initialize API client
+                    const api = new ForeverFieldsAPI(
+                        window.location.hostname === 'localhost'
+                            ? 'http://localhost:3000'
+                            : 'https://forever-fields.onrender.com'
+                    );
+
+                    // Check if user is logged in
+                    const isLoggedIn = await api.isAuthenticated();
+
+                    // Create the memorial
+                    const result = await api.post('/api/memorials', memorialData);
+                    const memorialId = result.id || result.memorial?.id;
+
+                    if (!memorialId) {
+                        throw new Error('Memorial created but no ID returned');
+                    }
+
+                    // Clear the draft since memorial is being published
+                    clearDraft();
+
+                    // Show success message
+                    if (typeof showToast === 'function') {
+                        showToast('Memorial created successfully!', 'success');
+                    }
+
+                    // If not logged in, prompt to sign up to claim the memorial
+                    if (!isLoggedIn) {
+                        const shouldSignUp = confirm(
+                            `Your memorial has been created!\n\n` +
+                            `To manage this memorial and invite family members, please create an account.\n\n` +
+                            `Click OK to sign up now, or Cancel to view the memorial.`
+                        );
+
+                        if (shouldSignUp) {
+                            // Redirect to login/signup page with return URL
+                            window.location.href = `/login/?redirect=/memorial/${memorialId}&email=${encodeURIComponent(memorialData.userEmail || '')}`;
+                            return;
+                        }
+                    }
+
+                    // Redirect to the created memorial page
+                    window.location.href = `/memorial/?id=${memorialId}`;
+
+                } catch (error) {
+                    console.error('Failed to publish memorial:', error);
+                    btn.disabled = false;
+                    btn.innerHTML = '<h4>🌟 Publish Now</h4><p>Make it live for visitors</p>';
+
+                    if (typeof showToast === 'function') {
+                        showToast('Failed to publish memorial. Please try again.', 'error');
+                    } else {
+                        alert(`Failed to publish memorial: ${error.message}`);
+                    }
                 }
-                // In a real app, this would redirect to the memorial page
-                setTimeout(() => {
-                    // window.location.href = '../memorial/';
-                }, 2000);
             });
 
             // ============================================

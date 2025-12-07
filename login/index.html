@@ -563,6 +563,16 @@
         // Initialize API client
         const api = new ForeverFieldsAPI();
 
+        // Check URL parameters for redirect and email
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlParams.get('redirect');
+        const prefillEmail = urlParams.get('email');
+
+        // Pre-fill email if provided
+        if (prefillEmail && emailInput) {
+            emailInput.value = decodeURIComponent(prefillEmail);
+        }
+
         // Current authentication mode
         let authMode = 'magic-link';
 
@@ -647,8 +657,9 @@
 
                 Logger.log('Login successful');
 
-                // Redirect to dashboard
-                window.location.href = '/dashboard';
+                // Redirect to specified URL or dashboard
+                const destination = redirectUrl || '/dashboard';
+                window.location.href = destination;
             } catch (error) {
                 Logger.error('Password login failed', Logger.sanitize({
                     message: error.message,

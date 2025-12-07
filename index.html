@@ -960,7 +960,7 @@
                         <button class="language-option" data-lang="zh" role="menuitem"><span class="lang-name">中文</span></button>
                     </div>
                 </div>
-                <a href="./login/" class="btn btn-secondary">Sign In</a>
+                <a href="./login/" class="btn btn-secondary" id="authButton">Sign In</a>
                 <a href="./create/" class="btn btn-primary">Create Memorial</a>
             </div>
             <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">☰</button>
@@ -1464,26 +1464,21 @@
                 const isAuthenticated = await api.isAuthenticated();
 
                 if (isAuthenticated) {
-                    // User is logged in - update UI
-                    const signInLinks = document.querySelectorAll('a[href="./login/"]');
-                    signInLinks.forEach(link => {
-                        // Change to sign out button
-                        link.textContent = 'Sign Out';
-                        link.href = '#';
-                        link.classList.remove('btn-secondary');
-                        link.classList.add('btn-outline');
+                    // User is logged in - change "Sign In" to "Dashboard"
+                    const authButton = document.getElementById('authButton');
+                    if (authButton) {
+                        authButton.textContent = 'Dashboard';
+                        authButton.href = './dashboard/';
+                        authButton.classList.remove('btn-secondary');
+                        authButton.classList.add('btn-primary');
+                    }
 
-                        // Add sign out handler
-                        link.addEventListener('click', async function(e) {
-                            e.preventDefault();
-
-                            // Call logout API (clears httpOnly cookies)
-                            await api.logout();
-
-                            // Reload page to show logged-out state
-                            window.location.reload();
-                        });
-                    });
+                    // Update mobile nav as well
+                    const mobileSignIn = document.querySelector('.mobile-nav-links a[href="./login/"]');
+                    if (mobileSignIn) {
+                        mobileSignIn.textContent = 'Dashboard';
+                        mobileSignIn.href = './dashboard/';
+                    }
                 }
             }
 
