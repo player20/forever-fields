@@ -106,21 +106,34 @@ router.get('/callback', validate(authCallbackSchema, 'query'), async (req, res) 
       });
     }
 
-    // Create Supabase session
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: magicLink.email,
-      email_confirm: true,
-      user_metadata: {
-        name: user.name,
-      },
-    });
+    // Try to get or create Supabase user
+    let supabaseUserId;
 
-    if (authError) {
-      console.error('Supabase auth error:', authError);
-      return res.status(500).json({ error: 'Authentication failed' });
+    // First, try to get existing user by email
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+    const existingUser = existingUsers?.users.find(u => u.email === magicLink.email);
+
+    if (existingUser) {
+      supabaseUserId = existingUser.id;
+    } else {
+      // Create new user if they don't exist
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email: magicLink.email,
+        email_confirm: true,
+        user_metadata: {
+          name: user.name,
+        },
+      });
+
+      if (authError) {
+        console.error('Supabase auth error:', authError);
+        return res.status(500).json({ error: 'Authentication failed' });
+      }
+
+      supabaseUserId = authData.user.id;
     }
 
-    // Generate session token
+    // Generate session token for the user
     const { data: sessionData, error: sessionError } =
       await supabaseAdmin.auth.admin.generateLink({
         type: 'magiclink',
