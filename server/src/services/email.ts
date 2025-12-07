@@ -20,12 +20,21 @@ if (env.SMTP_PASS) {
  * Send magic link email
  */
 export const sendMagicLink = async (email: string, token: string): Promise<void> => {
-  if (!resend) {
-    console.warn('⚠️  Cannot send magic link email - Resend not configured');
-    throw new Error('Email service not configured. Please contact support.');
+  const magicLink = `${env.API_URL}/api/auth/callback?token=${token}`;
+
+  // Development mode: Log magic link instead of sending email
+  if (!resend || env.NODE_ENV === 'development') {
+    console.log('=====================================');
+    console.log('🔗 MAGIC LINK (DEV MODE - Copy to browser):');
+    console.log(magicLink);
+    console.log('=====================================');
+
+    if (!resend) {
+      console.warn('⚠️  Resend not configured - magic link logged to console');
+      return; // Success - just log the link
+    }
   }
 
-  const magicLink = `${env.API_URL}/api/auth/callback?token=${token}`;
   const fromEmail = env.SMTP_FROM || 'noreply@foreverfields.app';
 
   try {
@@ -99,12 +108,21 @@ If you didn't request this link, you can safely ignore this email.
  * Send password reset email
  */
 export const sendPasswordResetEmail = async (email: string, token: string): Promise<void> => {
-  if (!resend) {
-    console.warn('⚠️  Cannot send password reset email - Resend not configured');
-    throw new Error('Email service not configured. Please contact support.');
+  const resetLink = `${env.API_URL}/api/auth/reset-password?token=${token}`;
+
+  // Development mode: Log reset link instead of sending email
+  if (!resend || env.NODE_ENV === 'development') {
+    console.log('=====================================');
+    console.log('🔑 PASSWORD RESET LINK (DEV MODE - Copy to browser):');
+    console.log(resetLink);
+    console.log('=====================================');
+
+    if (!resend) {
+      console.warn('⚠️  Resend not configured - reset link logged to console');
+      return; // Success - just log the link
+    }
   }
 
-  const resetLink = `${env.API_URL}/api/auth/reset-password?token=${token}`;
   const fromEmail = env.SMTP_FROM || 'noreply@foreverfields.app';
 
   try {
@@ -185,13 +203,24 @@ export const sendInvitationEmail = async (
   role: 'editor' | 'viewer',
   token: string
 ): Promise<void> => {
-  if (!resend) {
-    console.warn('⚠️  Cannot send invitation email - Resend not configured');
-    throw new Error('Email service not configured. Please contact support.');
-  }
-
   const inviteLink = `${env.API_URL}/api/invitations/${token}`;
   const roleText = role === 'editor' ? 'collaborate on' : 'view';
+
+  // Development mode: Log invitation link instead of sending email
+  if (!resend || env.NODE_ENV === 'development') {
+    console.log('=====================================');
+    console.log(`📧 INVITATION LINK (DEV MODE - Copy to browser):`);
+    console.log(`Memorial: ${memorialName}`);
+    console.log(`Role: ${role}`);
+    console.log(inviteLink);
+    console.log('=====================================');
+
+    if (!resend) {
+      console.warn('⚠️  Resend not configured - invitation link logged to console');
+      return; // Success - just log the link
+    }
+  }
+
   const fromEmail = env.SMTP_FROM || 'noreply@foreverfields.app';
 
   try {
