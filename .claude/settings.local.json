@@ -10,7 +10,9 @@
       "Bash(ls:*)",
       "Bash(cat:*)",
       "Bash(git push:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(wc:*)",
+      "Bash(npx prisma migrate:*)"
     ],
     "deny": [],
     "ask": []
