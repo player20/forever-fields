@@ -3,14 +3,19 @@
  * Main app configuration with all middleware and routes
  */
 
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
+import cookieParser from 'cookie-parser';
 import { env, isProd } from './config/env';
 import {
   helmetMiddleware,
+  permissionsPolicyMiddleware,
   corsMiddleware,
   httpsRedirect,
   apiRateLimiter,
 } from './middleware/security';
+import { errorHandler, notFoundHandler } from './middleware/error-handler';
+import { inputSanitizer, blockAttackPatterns } from './middleware/input-sanitizer';
+import { requestLogger } from './middleware/request-logger';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -26,6 +31,11 @@ import guestbookRoutes from './routes/guestbook';
 import memoriesRoutes from './routes/memories';
 import voiceNotesRoutes from './routes/voiceNotes';
 import reportsRoutes from './routes/reports';
+import familyTreeRoutes from './routes/family-tree';
+import adminRoutes from './routes/admin';
+import userRoutes from './routes/user';
+import affiliateRoutes from './routes/affiliate';
+import socialLinksRoutes from './routes/social-links';
 
 const app = express();
 
@@ -44,15 +54,36 @@ if (isProd) {
 // Helmet - Security headers
 app.use(helmetMiddleware);
 
+// Permissions-Policy header for additional security
+app.use(permissionsPolicyMiddleware);
+
 // CORS - Cross-origin resource sharing
 app.use(corsMiddleware);
 
 // ============================================
-// BODY PARSING
+// BODY PARSING & COOKIES
 // ============================================
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser()); // Parse cookies for httpOnly auth tokens
+
+// ============================================
+// REQUEST LOGGING
+// ============================================
+
+// Log all HTTP requests (structured logging)
+app.use(requestLogger);
+
+// ============================================
+// INPUT SANITIZATION
+// ============================================
+
+// Sanitize all user input (defense in depth)
+app.use(inputSanitizer);
+
+// Block obvious attack patterns
+app.use(blockAttackPatterns);
 
 // ============================================
 // HEALTH CHECK
@@ -71,6 +102,7 @@ app.get('/health', (req, res) => {
 // ============================================
 
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/memorials', memorialRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/pending', pendingRoutes);
@@ -83,37 +115,21 @@ app.use('/api/guestbook', guestbookRoutes);
 app.use('/api/memories', memoriesRoutes);
 app.use('/api/voice-notes', voiceNotesRoutes);
 app.use('/api/reports', reportsRoutes);
+app.use('/api/family-tree', familyTreeRoutes);
+app.use('/api/admin', adminRoutes); // Admin-only routes
+app.use('/api/affiliate', affiliateRoutes); // Affiliate partnerships (flowers, etc.)
+app.use('/api/social-links', socialLinksRoutes); // Social media links for memorials
 
 // ============================================
 // 404 HANDLER
 // ============================================
 
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Not found',
-    path: req.path,
-  });
-});
+app.use(notFoundHandler);
 
 // ============================================
 // ERROR HANDLER
 // ============================================
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error('Unhandled error:', err);
-
-  // Never leak error details in production
-  if (isProd) {
-    return res.status(500).json({
-      error: 'Internal server error',
-    });
-  }
-
-  return res.status(500).json({
-    error: 'Internal server error',
-    message: err.message,
-    stack: err.stack,
-  });
-});
+app.use(errorHandler);
 
 export default app;

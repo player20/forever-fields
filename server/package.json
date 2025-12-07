@@ -1,6 +1,6 @@
 {
   "name": "forever-fields-backend",
-  "version": "0.8.0-pet",
+  "version": "1.1.0",
   "description": "Production-ready backend for Forever Fields memorial platform",
   "main": "dist/index.js",
   "scripts": {
@@ -33,6 +33,7 @@
     "@supabase/supabase-js": "^2.45.4",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.5.1",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
@@ -40,7 +41,7 @@
     "helmet": "^8.0.0",
     "html2canvas": "^1.4.1",
     "nanoid": "^3.3.7",
-    "nodemailer": "^6.9.15",
+    "nodemailer": "^7.0.11",
     "pdfmake": "^0.2.10",
     "qrcode": "^1.5.3",
     "resend": "^6.5.2",
@@ -49,6 +50,7 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^22.7.5",
