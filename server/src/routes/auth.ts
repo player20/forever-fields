@@ -106,31 +106,19 @@ router.get('/callback', validate(authCallbackSchema, 'query'), async (req, res) 
       });
     }
 
-    // Try to get or create Supabase user
-    let supabaseUserId;
+    // Try to create Supabase user (ignore if already exists)
+    const { error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: magicLink.email,
+      email_confirm: true,
+      user_metadata: {
+        name: user.name,
+      },
+    });
 
-    // First, try to get existing user by email
-    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-    const existingUser = existingUsers?.users.find(u => u.email === magicLink.email);
-
-    if (existingUser) {
-      supabaseUserId = existingUser.id;
-    } else {
-      // Create new user if they don't exist
-      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-        email: magicLink.email,
-        email_confirm: true,
-        user_metadata: {
-          name: user.name,
-        },
-      });
-
-      if (authError) {
-        console.error('Supabase auth error:', authError);
-        return res.status(500).json({ error: 'Authentication failed' });
-      }
-
-      supabaseUserId = authData.user.id;
+    // Ignore "user already exists" error - that's fine
+    if (authError && !authError.message.includes('already been registered')) {
+      console.error('Supabase auth error:', authError);
+      return res.status(500).json({ error: 'Authentication failed' });
     }
 
     // Generate session token for the user
