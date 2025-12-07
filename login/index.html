@@ -351,7 +351,7 @@
         /* Hide form when success */
         .login-card.sent .login-form,
         .login-card.sent .auth-tabs,
-        .login-card.sent .sso-buttons,
+        .login-card.sent #googleBtn,
         .login-card.sent .divider,
         .login-card.sent .create-link,
         .login-card.sent h1,
@@ -493,17 +493,11 @@
                     </div>
                 </form>
 
-                <!-- SSO Buttons -->
-                <div class="sso-buttons">
-                    <button type="button" class="sso-btn" id="googleBtn">
-                        <span>🔍</span>
-                        <span>Google</span>
-                    </button>
-                    <button type="button" class="sso-btn" id="appleBtn">
-                        <span>🍎</span>
-                        <span>Apple</span>
-                    </button>
-                </div>
+                <!-- SSO Button -->
+                <button type="button" class="sso-btn" id="googleBtn" style="width: 100%; margin-bottom: 1.5rem;">
+                    <span>🔍</span>
+                    <span>Continue with Google</span>
+                </button>
 
                 <div class="divider"><span>or</span></div>
 
@@ -554,7 +548,6 @@
         const errorMessage = document.getElementById('errorMessage');
         const forgotPasswordLink = document.getElementById('forgotPasswordLink');
         const googleBtn = document.getElementById('googleBtn');
-        const appleBtn = document.getElementById('appleBtn');
 
         // Initialize API client
         const api = new ForeverFieldsAPI();
@@ -687,10 +680,6 @@
         // SSO Authentication
         googleBtn.addEventListener('click', function() {
             window.location.href = api.baseURL + '/api/auth/sso/google';
-        });
-
-        appleBtn.addEventListener('click', function() {
-            window.location.href = api.baseURL + '/api/auth/sso/apple';
         });
 
         // Form Submission
