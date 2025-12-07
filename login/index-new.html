@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="api-url" content="https://forever-fields.onrender.com">
+    <meta name="description" content="Sign in to Forever Fields to manage your memorials and continue preserving memories.">
+    <title>Sign In - Forever Fields</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        :root {
+            --transition-speed: 0.2s;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            font-family: var(--font-sans);
+        }
+
+        /* Header - Minimal */
+        .login-header {
+            background: var(--warm-white);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--sage-light);
+        }
+
+        .login-header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--gray-dark);
+            text-decoration: none;
+        }
+
+        /* Main Login Area */
+        .login-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            background: linear-gradient(180deg, var(--sage-pale) 0%, var(--cream) 50%, var(--warm-white) 100%);
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 10px 40px var(--shadow-soft);
+            border: 1px solid var(--sage-light);
+        }
+
+        .login-card h1 {
+            font-family: var(--font-serif);
+            font-size: 1.75rem;
+            color: var(--gray-dark);
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-card .subtitle {
+            text-align: center;
+            color: var(--gray-body);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        /* Tab Switcher */
+        .tab-switcher {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: var(--sage-pale);
+            padding: 0.25rem;
+            border-radius: 12px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            background: transparent;
+            color: var(--gray-body);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all var(--transition-speed);
+        }
+
+        .tab-btn:hover {
+            background: rgba(167, 201, 162, 0.1);
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--gray-dark);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* SSO Buttons */
+        .sso-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .sso-btn {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 2px solid var(--sage-light);
+            border-radius: 12px;
+            background: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: all var(--transition-speed);
+            margin-bottom: 0.75rem;
+        }
+
+        .sso-btn:hover {
+            border-color: var(--sage-primary);
+            background: var(--sage-pale);
+            transform: translateY(-1px);
+        }
+
+        .sso-btn:active {
+            transform: translateY(0);
+        }
+
+        .sso-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .sso-btn.google {
+            color: #333;
+        }
+
+        .sso-btn.apple {
+            color: #000;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--gray-body);
+            font-size: 0.85rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--sage-light);
+        }
+
+        .divider span {
+            padding: 0 1rem;
+        }
+
+        /* Form Styles */
+        .login-form {
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group label .required {
+            color: #D32F2F;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 2px solid var(--sage-light);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all var(--transition-speed);
+            background: var(--warm-white);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--sage-primary);
+            background: white;
+        }
+
+        .form-group input.valid {
+            border-color: #4CAF50;
+        }
+
+        .form-group input.error {
+            border-color: #D32F2F;
+        }
+
+        .form-group input::placeholder {
+            color: var(--gray-body);
+            opacity: 0.6;
+        }
+
+        /* Password Toggle */
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--gray-body);
+            cursor: pointer;
+            padding: 0.5rem;
+            font-size: 1.2rem;
+            line-height: 1;
+            transition: color var(--transition-speed);
+        }
+
+        .password-toggle:hover {
+            color: var(--gray-dark);
+        }
+
+        /* Input Feedback */
+        .input-feedback {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-feedback.success {
+            color: #4CAF50;
+        }
+
+        .input-feedback.error {
+            color: #D32F2F;
+        }
+
+        /* Remember Me & Forgot Password */
+        .form-extras {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper label {
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .forgot-link {
+            color: var(--sage-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Submit Button */
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--sage-primary), #7A8E72);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .login-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(167, 201, 162, 0.4);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Legal Links */
+        .legal-links {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--gray-body);
+        }
+
+        .legal-links a {
+            color: var(--sage-primary);
+            text-decoration: none;
+        }
+
+        .legal-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Create Link */
+        .create-link {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .create-link p {
+            color: var(--gray-body);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .create-link a {
+            color: var(--sage-primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .create-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        .login-footer {
+            padding: 1.5rem;
+            text-align: center;
+            background: var(--warm-white);
+            border-top: 1px solid var(--sage-light);
+        }
+
+        .login-footer p {
+            color: var(--gray-body);
+            font-size: 0.85rem;
+        }
+
+        .login-footer a {
+            color: var(--sage-primary);
+            text-decoration: none;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Password Strength Indicator */
+        .password-strength {
+            margin-top: 0.5rem;
+        }
+
+        .strength-bar {
+            height: 4px;
+            background: var(--sage-light);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .strength-fill {
+            height: 100%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .strength-fill.weak {
+            width: 33%;
+            background: #D32F2F;
+        }
+
+        .strength-fill.medium {
+            width: 66%;
+            background: #FFA726;
+        }
+
+        .strength-fill.strong {
+            width: 100%;
+            background: #4CAF50;
+        }
+
+        .strength-text {
+            font-size: 0.85rem;
+            color: var(--gray-body);
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .login-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .login-card h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="login-header">
+        <div class="login-header-inner">
+            <a href="../" class="logo">
+                <span>🌿</span>
+                <span>Forever Fields</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="login-main">
+        <div class="login-container">
+            <div class="login-card" id="loginCard">
+                <h1>Welcome to Forever Fields</h1>
+                <p class="subtitle">Sign in to preserve memories that last forever</p>
+
+                <!-- Tab Switcher -->
+                <div class="tab-switcher" role="tablist" aria-label="Authentication method">
+                    <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="signin-panel" id="signin-tab" data-tab="signin">
+                        Sign In
+                    </button>
+                    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="signup-panel" id="signup-tab" data-tab="signup">
+                        Sign Up
+                    </button>
+                </div>
+
+                <!-- Sign In Panel -->
+                <div id="signin-panel" role="tabpanel" aria-labelledby="signin-tab">
+                    <!-- SSO Buttons -->
+                    <div class="sso-section">
+                        <button type="button" class="sso-btn google" id="googleSignIn" aria-label="Sign in with Google">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                            </svg>
+                            Continue with Google
+                        </button>
+
+                        <button type="button" class="sso-btn apple" id="appleSignIn" aria-label="Sign in with Apple">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                            </svg>
+                            Continue with Apple
+                        </button>
+                    </div>
+
+                    <div class="divider" role="separator" aria-label="or"><span>or</span></div>
+
+                    <!-- Email/Password Form -->
+                    <form class="login-form" id="signinForm" novalidate>
+                        <div class="form-group">
+                            <label for="signin-email">
+                                Email Address <span class="required" aria-label="required">*</span>
+                            </label>
+                            <input
+                                type="email"
+                                id="signin-email"
+                                name="email"
+                                placeholder="you@example.com"
+                                required
+                                autocomplete="email"
+                                aria-required="true"
+                                aria-describedby="signin-email-feedback"
+                                autofocus
+                            >
+                            <div id="signin-email-feedback" class="input-feedback" role="alert" aria-live="polite"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signin-password">
+                                Password <span class="required" aria-label="required">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input
+                                    type="password"
+                                    id="signin-password"
+                                    name="password"
+                                    placeholder="Enter your password"
+                                    required
+                                    autocomplete="current-password"
+                                    aria-required="true"
+                                    aria-describedby="signin-password-feedback"
+                                >
+                                <button type="button" class="password-toggle" aria-label="Toggle password visibility" data-target="signin-password">
+                                    👁️
+                                </button>
+                            </div>
+                            <div id="signin-password-feedback" class="input-feedback" role="alert" aria-live="polite"></div>
+                        </div>
+
+                        <div class="form-extras">
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" id="remember-me" name="remember">
+                                <label for="remember-me">Remember me</label>
+                            </div>
+                            <a href="#" class="forgot-link" id="forgotPasswordLink">Forgot password?</a>
+                        </div>
+
+                        <button type="submit" class="login-btn" id="signinBtn">
+                            Sign In
+                        </button>
+                    </form>
+
+                    <div class="legal-links">
+                        By continuing, you agree to our <a href="../terms/">Terms of Service</a> and <a href="../privacy/">Privacy Policy</a>
+                    </div>
+                </div>
+
+                <!-- Sign Up Panel (hidden by default) -->
+                <div id="signup-panel" role="tabpanel" aria-labelledby="signup-tab" style="display: none;">
+                    <!-- SSO Buttons -->
+                    <div class="sso-section">
+                        <button type="button" class="sso-btn google" id="googleSignUp" aria-label="Sign up with Google">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                            </svg>
+                            Continue with Google
+                        </button>
+
+                        <button type="button" class="sso-btn apple" id="appleSignUp" aria-label="Sign up with Apple">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                            </svg>
+                            Continue with Apple
+                        </button>
+                    </div>
+
+                    <div class="divider" role="separator" aria-label="or"><span>or</span></div>
+
+                    <!-- Email/Password Form -->
+                    <form class="login-form" id="signupForm" novalidate>
+                        <div class="form-group">
+                            <label for="signup-email">
+                                Email Address <span class="required" aria-label="required">*</span>
+                            </label>
+                            <input
+                                type="email"
+                                id="signup-email"
+                                name="email"
+                                placeholder="you@example.com"
+                                required
+                                autocomplete="email"
+                                aria-required="true"
+                                aria-describedby="signup-email-feedback"
+                            >
+                            <div id="signup-email-feedback" class="input-feedback" role="alert" aria-live="polite"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-password">
+                                Password <span class="required" aria-label="required">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input
+                                    type="password"
+                                    id="signup-password"
+                                    name="password"
+                                    placeholder="Create a strong password"
+                                    required
+                                    autocomplete="new-password"
+                                    aria-required="true"
+                                    aria-describedby="signup-password-feedback password-strength"
+                                    minlength="8"
+                                >
+                                <button type="button" class="password-toggle" aria-label="Toggle password visibility" data-target="signup-password">
+                                    👁️
+                                </button>
+                            </div>
+                            <div id="signup-password-feedback" class="input-feedback" role="alert" aria-live="polite"></div>
+                            <div id="password-strength" class="password-strength" aria-live="polite">
+                                <div class="strength-bar">
+                                    <div class="strength-fill" id="strengthFill"></div>
+                                </div>
+                                <div class="strength-text" id="strengthText">At least 8 characters required</div>
+                            </div>
+                        </div>
+
+                        <div class="form-extras">
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" id="remember-signup" name="remember">
+                                <label for="remember-signup">Remember me</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="login-btn" id="signupBtn">
+                            Create Account
+                        </button>
+                    </form>
+
+                    <div class="legal-links">
+                        By creating an account, you agree to our <a href="../terms/">Terms of Service</a> and <a href="../privacy/">Privacy Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="login-footer">
+        <p>
+            Need help? <a href="mailto:hello@foreverfields.com">Contact support</a>
+            &nbsp;·&nbsp;
+            <a href="../grief-support/">Grief resources</a>
+        </p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/api-config.js"></script>
+    <script src="../js/api-client.js"></script>
+    <script>
+        // Initialize API client
+        const api = new ForeverFieldsAPI();
+
+        // Tab Switching
+        const tabs = document.querySelectorAll('.tab-btn');
+        const signinPanel = document.getElementById('signin-panel');
+        const signupPanel = document.getElementById('signup-panel');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Update tab states
+                tabs.forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+                this.classList.add('active');
+                this.setAttribute('aria-selected', 'true');
+
+                // Show appropriate panel
+                const tabType = this.dataset.tab;
+                if (tabType === 'signin') {
+                    signinPanel.style.display = 'block';
+                    signupPanel.style.display = 'none';
+                    document.getElementById('signin-email').focus();
+                } else {
+                    signinPanel.style.display = 'none';
+                    signupPanel.style.display = 'block';
+                    document.getElementById('signup-email').focus();
+                }
+            });
+        });
+
+        // Password Toggle
+        document.querySelectorAll('.password-toggle').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const input = document.getElementById(targetId);
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    this.textContent = '🙈';
+                    this.setAttribute('aria-label', 'Hide password');
+                } else {
+                    input.type = 'password';
+                    this.textContent = '👁️';
+                    this.setAttribute('aria-label', 'Show password');
+                }
+            });
+        });
+
+        // Email Validation
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function showEmailFeedback(inputId, feedbackId, isValid) {
+            const input = document.getElementById(inputId);
+            const feedback = document.getElementById(feedbackId);
+
+            if (isValid) {
+                input.classList.add('valid');
+                input.classList.remove('error');
+                feedback.className = 'input-feedback success';
+                feedback.textContent = '✓ Email looks good!';
+            } else if (input.value.length > 0) {
+                input.classList.add('error');
+                input.classList.remove('valid');
+                feedback.className = 'input-feedback error';
+                feedback.textContent = '✗ Please enter a valid email address';
+            } else {
+                input.classList.remove('valid', 'error');
+                feedback.textContent = '';
+                feedback.className = 'input-feedback';
+            }
+        }
+
+        // Real-time email validation
+        ['signin-email', 'signup-email'].forEach(id => {
+            const input = document.getElementById(id);
+            const feedbackId = `${id}-feedback`;
+
+            input.addEventListener('blur', function() {
+                showEmailFeedback(id, feedbackId, validateEmail(this.value));
+            });
+
+            input.addEventListener('input', function() {
+                if (this.value.length > 0) {
+                    showEmailFeedback(id, feedbackId, validateEmail(this.value));
+                }
+            });
+        });
+
+        // Password Strength Indicator (Sign Up only)
+        const signupPassword = document.getElementById('signup-password');
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthText = document.getElementById('strengthText');
+
+        function checkPasswordStrength(password) {
+            let strength = 0;
+
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+            if (strength <= 2) {
+                strengthFill.className = 'strength-fill weak';
+                strengthText.textContent = 'Weak password - add more characters';
+                return 'weak';
+            } else if (strength <= 4) {
+                strengthFill.className = 'strength-fill medium';
+                strengthText.textContent = 'Medium strength - almost there!';
+                return 'medium';
+            } else {
+                strengthFill.className = 'strength-fill strong';
+                strengthText.textContent = 'Strong password!';
+                return 'strong';
+            }
+        }
+
+        signupPassword.addEventListener('input', function() {
+            if (this.value.length > 0) {
+                checkPasswordStrength(this.value);
+            } else {
+                strengthFill.className = 'strength-fill';
+                strengthText.textContent = 'At least 8 characters required';
+            }
+        });
+
+        // SSO Handlers
+        async function handleSSOLogin(provider) {
+            try {
+                console.log(`Initiating ${provider} SSO...`);
+
+                // Redirect to backend SSO endpoint
+                const apiUrl = api.baseURL;
+                window.location.href = `${apiUrl}/api/auth/sso/${provider}`;
+            } catch (error) {
+                console.error(`${provider} SSO error:`, error);
+                alert(`Failed to sign in with ${provider}. Please try again or use email/password.`);
+            }
+        }
+
+        document.getElementById('googleSignIn').addEventListener('click', () => handleSSOLogin('google'));
+        document.getElementById('appleSignIn').addEventListener('click', () => handleSSOLogin('apple'));
+        document.getElementById('googleSignUp').addEventListener('click', () => handleSSOLogin('google'));
+        document.getElementById('appleSignUp').addEventListener('click', () => handleSSOLogin('apple'));
+
+        // Sign In Form Handler
+        document.getElementById('signinForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('signin-email').value.trim();
+            const password = document.getElementById('signin-password').value;
+            const remember = document.getElementById('remember-me').checked;
+            const submitBtn = document.getElementById('signinBtn');
+
+            // Validate
+            if (!validateEmail(email)) {
+                showEmailFeedback('signin-email', 'signin-email-feedback', false);
+                return;
+            }
+
+            if (password.length < 8) {
+                const feedback = document.getElementById('signin-password-feedback');
+                feedback.className = 'input-feedback error';
+                feedback.textContent = '✗ Password must be at least 8 characters';
+                return;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading"></span> Signing in...';
+
+            try {
+                const response = await api.post('/api/auth/login', {
+                    email,
+                    password,
+                    remember
+                });
+
+                console.log('Login successful:', response);
+
+                // Tokens are now stored in httpOnly cookies by the backend
+                // No need to manually store in localStorage
+
+                // Redirect to dashboard or home
+                window.location.href = '../';
+            } catch (error) {
+                console.error('Login error:', error);
+
+                const feedback = document.getElementById('signin-password-feedback');
+                feedback.className = 'input-feedback error';
+
+                if (error.status === 401) {
+                    feedback.textContent = '✗ Invalid email or password';
+                } else if (error.status === 429) {
+                    feedback.textContent = '✗ Too many attempts. Please try again in 15 minutes.';
+                } else {
+                    feedback.textContent = '✗ Sign in failed. Please try again or contact support.';
+                }
+
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign In';
+            }
+        });
+
+        // Sign Up Form Handler
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const remember = document.getElementById('remember-signup').checked;
+            const submitBtn = document.getElementById('signupBtn');
+
+            // Validate
+            if (!validateEmail(email)) {
+                showEmailFeedback('signup-email', 'signup-email-feedback', false);
+                return;
+            }
+
+            const strength = checkPasswordStrength(password);
+            if (strength === 'weak' || password.length < 8) {
+                const feedback = document.getElementById('signup-password-feedback');
+                feedback.className = 'input-feedback error';
+                feedback.textContent = '✗ Please create a stronger password';
+                return;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading"></span> Creating account...';
+
+            try {
+                const response = await api.post('/api/auth/signup', {
+                    email,
+                    password,
+                    remember
+                });
+
+                console.log('Signup successful:', response);
+
+                // Tokens are now stored in httpOnly cookies by the backend
+                // No need to manually store in localStorage
+
+                // Redirect to onboarding or home
+                window.location.href = '../';
+            } catch (error) {
+                console.error('Signup error:', error);
+
+                const feedback = document.getElementById('signup-password-feedback');
+                feedback.className = 'input-feedback error';
+
+                if (error.status === 409) {
+                    feedback.textContent = '✗ An account with this email already exists';
+                } else if (error.status === 429) {
+                    feedback.textContent = '✗ Too many attempts. Please try again in 15 minutes.';
+                } else {
+                    feedback.textContent = '✗ Sign up failed. Please try again or contact support.';
+                }
+
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Account';
+            }
+        });
+
+        // Forgot Password Handler
+        document.getElementById('forgotPasswordLink').addEventListener('click', async function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('signin-email').value.trim();
+
+            if (!validateEmail(email)) {
+                alert('Please enter your email address first.');
+                document.getElementById('signin-email').focus();
+                return;
+            }
+
+            if (!confirm(`Send password reset link to ${email}?`)) {
+                return;
+            }
+
+            try {
+                await api.post('/api/auth/forgot-password', { email });
+                alert('Password reset link sent! Please check your email.');
+            } catch (error) {
+                console.error('Forgot password error:', error);
+                alert('Failed to send reset link. Please try again or contact support.');
+            }
+        });
+    </script>
+</body>
+</html>

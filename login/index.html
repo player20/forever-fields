@@ -360,6 +360,7 @@
     </footer>
 
     <!-- Scripts -->
+    <script src="../js/logger.js"></script>
     <script src="../js/api-config.js"></script>
     <script src="../js/api-client.js"></script>
     <script src="../js/script.js"></script>
@@ -376,24 +377,20 @@
 
         async function sendMagicLink(email) {
             try {
-                console.log('Sending magic link to:', email);
-                console.log('API URL:', api.baseURL);
+                Logger.log('Magic link request initiated');
 
                 const response = await api.post('/api/auth/magic-link', { email });
 
-                console.log('Magic link sent successfully:', response);
+                Logger.log('Magic link sent successfully');
 
                 // Show success state
                 sentEmailDisplay.textContent = email;
                 loginCard.classList.add('sent');
             } catch (error) {
-                console.error('Magic link error:', error);
-                console.error('Error details:', {
+                Logger.error('Authentication failed', Logger.sanitize({
                     message: error.message,
-                    status: error.status,
-                    data: error.data,
-                    stack: error.stack
-                });
+                    status: error.status
+                }));
 
                 let errorMessage = 'Failed to send magic link.';
                 if (error.status) {

@@ -759,6 +759,36 @@
             color: var(--sage-primary);
         }
 
+        /* Skip Button */
+        .skip-section-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            background: transparent;
+            border: 1.5px dashed var(--sage-light);
+            border-radius: 8px;
+            color: var(--gray-body);
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 1rem;
+        }
+
+        .skip-section-btn:hover {
+            border-color: var(--sage-primary);
+            color: var(--sage-primary);
+            background: var(--sage-pale);
+        }
+
+        .skip-section-btn:focus {
+            outline: none;
+            border-color: var(--sage-primary);
+            box-shadow: 0 0 0 3px rgba(167, 201, 162, 0.2);
+        }
+
         /* Grief Support Link */
         .grief-support-link {
             text-align: center;
@@ -808,6 +838,9 @@
     </style>
 </head>
 <body class="create-page">
+    <!-- Skip to Main Content (Accessibility) -->
+    <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
     <!-- Header -->
     <header class="create-header">
         <div class="create-header-inner">
@@ -862,8 +895,8 @@
             </div>
             <div class="wizard-progress-labels">
                 <span class="wizard-progress-label active">Welcome</span>
+                <span class="wizard-progress-label">About Them</span>
                 <span class="wizard-progress-label">Privacy</span>
-                <span class="wizard-progress-label">About</span>
                 <span class="wizard-progress-label">History</span>
                 <span class="wizard-progress-label">Memories</span>
                 <span class="wizard-progress-label">Photos</span>
@@ -873,7 +906,7 @@
     </div>
 
     <!-- Wizard Container -->
-    <div class="wizard-container" id="wizardContainer">
+    <div class="wizard-container" id="wizardContainer main-content" tabindex="-1">
         <form id="memorialForm" data-autosave="memorial-draft" data-validate>
 
             <!-- Step 1: Welcome & Quick Profile -->
@@ -882,6 +915,9 @@
                     <span class="step-icon">📋</span>
                     <h1>Let's get started</h1>
                     <p>Take your time. There's no rush here. We'll guide you through each step.</p>
+                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
+                        <strong>Step 1 of 7</strong> • About 2 minutes
+                    </p>
                 </div>
 
                 <div class="form-group">
@@ -915,12 +951,82 @@
                 </div>
             </div>
 
-            <!-- Step 2: Privacy & Preferences -->
+            <!-- Step 2: Memorial Basics (MOVED UP - was Step 3) -->
             <div class="wizard-step" data-step="1">
                 <div class="step-header">
+                    <span class="step-icon">👤</span>
+                    <h1>Tell us about them</h1>
+                    <p>Start with the basics. You can always add more details later.</p>
+                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
+                        <strong>Step 2 of 7</strong> • About 3 minutes
+                    </p>
+                </div>
+
+                <label class="portrait-upload" id="portraitUpload">
+                    <input type="file" id="portraitInput" name="portrait" accept="image/*">
+                    <span class="portrait-upload-icon">📷</span>
+                    <span class="portrait-upload-text">Add their photo<br><small>Click or drag to upload</small></span>
+                </label>
+
+                <div class="form-group">
+                    <label for="deceasedName">Their Full Name</label>
+                    <input type="text" id="deceasedName" name="deceasedName" placeholder="First Middle Last" required>
+                    <span class="field-hint">Enter their name exactly as you'd like it displayed on the memorial</span>
+                </div>
+
+                <!-- Live preview of how name will appear -->
+                <div class="name-preview" id="namePreviewBox" style="display: none; margin-top: 0.75rem; padding: 1rem; background: var(--sage-pale); border-radius: 12px; border: 1px solid var(--sage-light);">
+                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-bottom: 0.5rem;">
+                        Preview - How it will appear:
+                    </p>
+                    <p style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--gray-dark); margin: 0;" id="namePreview">
+                        [Their name will appear here]
+                    </p>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="preferredName">
+                            Preferred Name or Nickname <span class="optional">(optional)</span>
+                        </label>
+                        <input type="text" id="preferredName" name="preferredName" placeholder="e.g., 'Johnny' or 'Grandma Rose'">
+                        <span class="field-hint">What did family and friends call them? We'll use this for personalization.</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="nameTitle">
+                            Title or Suffix <span class="optional">(optional)</span>
+                        </label>
+                        <input type="text" id="nameTitle" name="nameTitle" placeholder="e.g., Dr., Sr., Jr., III">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="birthDate">Date of Birth</label>
+                        <input type="date" id="birthDate" name="birthDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passingDate">Date of Passing</label>
+                        <input type="date" id="passingDate" name="passingDate" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="shortBio">A Few Words About Them <span class="optional">(optional)</span></label>
+                    <textarea id="shortBio" name="shortBio" placeholder="A loving parent, loyal friend, always had a smile ready. What would you want someone to know about who they were?" maxlength="500"></textarea>
+                    <div class="char-counter"><span id="bioCharCount">0</span>/500</div>
+                </div>
+            </div>
+
+            <!-- Step 3: Privacy & Preferences (MOVED DOWN - was Step 2) -->
+            <div class="wizard-step" data-step="2">
+                <div class="step-header">
                     <span class="step-icon">🔐</span>
-                    <h1>Who should be able to visit?</h1>
+                    <h1>Who should be able to visit {name}'s memorial?</h1>
                     <p>You can change these settings anytime. Your comfort comes first.</p>
+                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
+                        <strong>Step 3 of 7</strong> • About 1 minute
+                    </p>
                 </div>
 
                 <div class="form-group">
@@ -968,49 +1074,15 @@
                 </div>
             </div>
 
-            <!-- Step 3: Memorial Basics -->
-            <div class="wizard-step" data-step="2">
-                <div class="step-header">
-                    <span class="step-icon">👤</span>
-                    <h1>Tell us about them</h1>
-                    <p>Start with the basics. You can always add more details later.</p>
-                </div>
-
-                <label class="portrait-upload" id="portraitUpload">
-                    <input type="file" id="portraitInput" name="portrait" accept="image/*">
-                    <span class="portrait-upload-icon">📷</span>
-                    <span class="portrait-upload-text">Add their photo<br><small>Click or drag to upload</small></span>
-                </label>
-
-                <div class="form-group">
-                    <label for="deceasedName">Their Full Name</label>
-                    <input type="text" id="deceasedName" name="deceasedName" placeholder="First Middle Last" required>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="birthDate">Date of Birth</label>
-                        <input type="date" id="birthDate" name="birthDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="passingDate">Date of Passing</label>
-                        <input type="date" id="passingDate" name="passingDate" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="shortBio">A Few Words About Them <span class="optional">(optional)</span></label>
-                    <textarea id="shortBio" name="shortBio" placeholder="What would they want people to know first? A sentence or two that captures their spirit..." maxlength="500"></textarea>
-                    <div class="char-counter"><span id="bioCharCount">0</span>/500</div>
-                </div>
-            </div>
-
             <!-- Step 4: Family History -->
             <div class="wizard-step" data-step="3">
                 <div class="step-header">
                     <span class="step-icon">📍</span>
                     <h1>Where their story began</h1>
                     <p>Help future generations understand where they came from.</p>
+                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
+                        <strong>Step 4 of 7</strong> • About 3 minutes <span style="opacity: 0.7;">(optional)</span>
+                    </p>
                 </div>
 
                 <div class="form-row">
@@ -1026,12 +1098,18 @@
 
                 <div class="form-group">
                     <label for="parentsNames">Parents' Names <span class="optional">(optional)</span></label>
-                    <input type="text" id="parentsNames" name="parentsNames" placeholder="e.g., Mary and John Smith">
+                    <input type="text" id="parentsNames" name="parentsNames" placeholder="e.g., Mary and John, Raised by Grandma Rose">
                 </div>
 
                 <div class="form-group">
                     <label for="siblings">Siblings <span class="optional">(optional)</span></label>
-                    <input type="text" id="siblings" name="siblings" placeholder="e.g., Brother James, Sister Sarah">
+                    <input type="text" id="siblings" name="siblings" placeholder="e.g., Older sister Maria, Twin brother James">
+                </div>
+
+                <div style="text-align: center;">
+                    <button type="button" class="skip-section-btn" onclick="goToStep(4)">
+                        → Skip for now — I'll add family history later
+                    </button>
                 </div>
 
                 <div class="reassurance">
@@ -1046,6 +1124,9 @@
                     <span class="step-icon">⭐</span>
                     <h1>The moments that made them who they were</h1>
                     <p>Add as many or as few as you'd like. These can be big achievements or simple moments.</p>
+                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
+                        <strong>Step 5 of 7</strong> • 5-10 minutes <span style="opacity: 0.7;">(all sections optional)</span>
+                    </p>
                 </div>
 
                 <!-- Achievements -->
@@ -1059,18 +1140,23 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <input type="text" name="achievement_title_0" placeholder="e.g., Graduated from Harvard">
+                                    <input type="text" name="achievement_title_0" placeholder="e.g., Raised three wonderful children, Coached little league for 20 years">
                                 </div>
                                 <div class="form-group">
                                     <input type="text" name="achievement_date_0" placeholder="Year or date (e.g., 1985)">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <textarea name="achievement_desc_0" placeholder="Tell the story behind this moment..." rows="2"></textarea>
+                                <textarea name="achievement_desc_0" placeholder="Share why this mattered to them or what made it special..." rows="2"></textarea>
                             </div>
                         </div>
                     </div>
                     <button type="button" class="add-block-btn" data-add="achievement">+ Add Another Achievement</button>
+                    <div style="text-align: center;">
+                        <button type="button" class="skip-section-btn" onclick="document.getElementById('achievementBlocks').style.display='none'; this.parentElement.style.display='none';">
+                            Skip achievements for now
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Favorite Foods -->
@@ -1083,14 +1169,19 @@
                                 <button type="button" class="remove-block-btn" title="Remove">&times;</button>
                             </div>
                             <div class="form-group">
-                                <input type="text" name="food_name_0" placeholder="e.g., Grandma's Apple Pie">
+                                <input type="text" name="food_name_0" placeholder="e.g., Mom's Sunday pot roast, Dad's famous pancakes">
                             </div>
                             <div class="form-group">
-                                <textarea name="food_story_0" placeholder="What made it special? Include the recipe if you have it..." rows="3"></textarea>
+                                <textarea name="food_story_0" placeholder="What do you remember about it? The smell, the tradition, the taste..." rows="3"></textarea>
                             </div>
                         </div>
                     </div>
                     <button type="button" class="add-block-btn" data-add="food">+ Add Another Favorite</button>
+                    <div style="text-align: center;">
+                        <button type="button" class="skip-section-btn" onclick="document.getElementById('foodBlocks').style.display='none'; this.parentElement.style.display='none';">
+                            Skip favorite foods for now
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Simple Memories -->
@@ -1103,14 +1194,19 @@
                                 <button type="button" class="remove-block-btn" title="Remove">&times;</button>
                             </div>
                             <div class="form-group">
-                                <textarea name="memory_text_0" placeholder="A moment, a habit, something they always said..." rows="2"></textarea>
+                                <textarea name="memory_text_0" placeholder="Their laugh, a saying they repeated, Sunday mornings together, how they made you feel..." rows="2"></textarea>
                             </div>
                             <div class="form-group">
-                                <input type="text" name="memory_by_0" placeholder="Shared by (your name or relationship)">
+                                <input type="text" name="memory_by_0" placeholder="Your name (e.g., Sarah, Their daughter)">
                             </div>
                         </div>
                     </div>
                     <button type="button" class="add-block-btn" data-add="memory">+ Add Another Memory</button>
+                    <div style="text-align: center;">
+                        <button type="button" class="skip-section-btn" onclick="document.getElementById('memoryBlocks').style.display='none'; this.parentElement.style.display='none';">
+                            Skip memories for now
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Favorite Song -->
@@ -1141,6 +1237,11 @@
                         <p style="margin: 0; color: var(--gray-dark);">
                             <strong>Song detected:</strong> <span id="songPreviewPlatform"></span>
                         </p>
+                    </div>
+                    <div style="text-align: center;">
+                        <button type="button" class="skip-section-btn" onclick="document.getElementById('favoriteSongUrl').value=''; this.parentElement.style.display='none';">
+                            Skip favorite song for now
+                        </button>
                     </div>
                 </div>
 
@@ -1208,6 +1309,11 @@
                         <span class="reassurance-icon">⏰</span>
                         <span>Time capsules require approval before appearing on the memorial. They'll be unlocked automatically on the date you choose.</span>
                     </div>
+                    <div style="text-align: center;">
+                        <button type="button" class="skip-section-btn" onclick="document.getElementById('timeCapsuleMessage').value=''; this.parentElement.parentElement.style.display='none';">
+                            Skip time capsule for now
+                        </button>
+                    </div>
                 </div>
 
                 <div class="reassurance">
@@ -1216,12 +1322,15 @@
                 </div>
             </div>
 
-            <!-- Step 5: Photos -->
+            <!-- Step 6: Photos -->
             <div class="wizard-step" data-step="5">
                 <div class="step-header">
                     <span class="step-icon">📷</span>
                     <h1>Share photos that tell their story</h1>
                     <p>Upload photos that capture who they were. All photos will be reviewed before appearing on the memorial.</p>
+                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
+                        <strong>Step 6 of 7</strong> • About 2 minutes <span style="opacity: 0.7;">(optional)</span>
+                    </p>
                 </div>
 
                 <div id="photo-uploader-container"></div>
@@ -1236,14 +1345,23 @@
                         <strong>Photo guidelines:</strong> Upload clear, respectful images in JPG, PNG, WebP, or GIF format. Maximum 10MB per photo, up to 20 photos total.
                     </p>
                 </div>
+
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button type="button" class="skip-section-btn" onclick="goToStep(6)">
+                        → Skip photos for now — I'll add them later
+                    </button>
+                </div>
             </div>
 
-            <!-- Step 6: Review, Preview & Publish -->
+            <!-- Step 7: Review, Preview & Publish -->
             <div class="wizard-step" data-step="6">
                 <div class="step-header">
                     <span class="step-icon">✓</span>
                     <h1>Review & Publish</h1>
                     <p>Here's a preview of the memorial. You can edit any section or publish when ready.</p>
+                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
+                        <strong>Step 7 of 7</strong> • Final review
+                    </p>
                 </div>
 
                 <div class="memorial-preview-card">
@@ -1328,6 +1446,8 @@
     <!-- Shared Scripts -->
     <script src="../js/moderation.js"></script>
     <script src="../js/script.js"></script>
+    <script src="../js/confirm-modal.js"></script>
+    <script src="../js/inline-validation.js"></script>
 
     <!-- Memorial Template Scripts -->
     <link rel="stylesheet" href="../memorial-template/css/memorial.css">
@@ -1399,11 +1519,29 @@
                     initializePhotoUploader();
                 }
 
+                // Update privacy step heading with name (step 2 = privacy)
+                if (step === 2) {
+                    const privacyHeading = steps[2].querySelector('.step-header h1');
+                    const preferredName = document.getElementById('preferredName').value.trim();
+                    const fullName = document.getElementById('deceasedName').value.trim();
+
+                    // Use preferred name if available, otherwise extract first name
+                    let displayName = 'them';
+                    if (preferredName) {
+                        displayName = preferredName;
+                    } else if (fullName) {
+                        // Parse first name from full name
+                        displayName = fullName.split(/\s+/)[0];
+                    }
+
+                    privacyHeading.textContent = `Who should be able to visit ${displayName}'s memorial?`;
+                }
+
                 // Scroll to top of wizard
                 document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-                // Simulate autosave
-                simulateAutosave();
+                // Autosave the form
+                autosaveForm();
             }
 
             function initializePhotoUploader() {
@@ -1652,12 +1790,26 @@
             function updatePreview() {
                 if (currentStep !== 6) return;
 
-                const name = document.getElementById('deceasedName').value || 'Their Name';
+                const fullName = document.getElementById('deceasedName').value || 'Their Name';
+                const title = document.getElementById('nameTitle').value.trim();
                 const birthDate = document.getElementById('birthDate').value;
                 const passingDate = document.getElementById('passingDate').value;
                 const bio = document.getElementById('shortBio').value || 'Their story will appear here...';
 
-                document.getElementById('previewName').textContent = name;
+                // Build display name with title if present
+                let displayName = fullName;
+                if (title) {
+                    const prefixTitles = ['Dr.', 'Dr', 'Rev.', 'Rev', 'Prof.', 'Prof', 'Mr.', 'Mr', 'Mrs.', 'Mrs', 'Ms.', 'Ms', 'Miss'];
+                    const isPrefix = prefixTitles.some(prefix => title.toLowerCase().startsWith(prefix.toLowerCase()));
+
+                    if (isPrefix) {
+                        displayName = `${title} ${fullName}`;
+                    } else {
+                        displayName = `${fullName}, ${title}`;
+                    }
+                }
+
+                document.getElementById('previewName').textContent = displayName;
                 document.getElementById('previewBio').textContent = bio;
 
                 // Format dates
@@ -1679,26 +1831,174 @@
                 }
             }
 
-            // Autosave simulation
-            function simulateAutosave() {
+            // Real autosave with localStorage
+            function autosaveForm() {
                 autosaveIndicator.innerHTML = '<span class="indicator-icon">⏳</span><span class="indicator-text">Saving...</span>';
                 autosaveIndicator.classList.add('saving');
                 autosaveIndicator.classList.remove('saved');
 
-                setTimeout(() => {
-                    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    autosaveIndicator.innerHTML = `<span class="indicator-icon">✓</span><span class="indicator-text">Saved at ${now}</span>`;
+                // Collect all form data
+                const formData = {};
+                const form = document.querySelector('form') || document;
+
+                // Save all inputs, textareas, and selects
+                form.querySelectorAll('input:not([type="file"]), textarea, select').forEach(field => {
+                    if (field.name || field.id) {
+                        const key = field.name || field.id;
+
+                        if (field.type === 'radio') {
+                            if (field.checked) {
+                                formData[key] = field.value;
+                            }
+                        } else if (field.type === 'checkbox') {
+                            formData[key] = field.checked;
+                        } else {
+                            formData[key] = field.value;
+                        }
+                    }
+                });
+
+                // Save to localStorage
+                try {
+                    localStorage.setItem('memorial_draft', JSON.stringify(formData));
+                    localStorage.setItem('memorial_draft_timestamp', new Date().toISOString());
+                    localStorage.setItem('memorial_draft_step', currentStep.toString());
+
+                    // Show success
+                    setTimeout(() => {
+                        const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        autosaveIndicator.innerHTML = `<span class="indicator-icon">✓</span><span class="indicator-text">Draft saved at ${now}</span>`;
+                        autosaveIndicator.classList.remove('saving');
+                        autosaveIndicator.classList.add('saved');
+                    }, 500);
+                } catch (error) {
+                    console.error('Autosave failed:', error);
+                    autosaveIndicator.innerHTML = '<span class="indicator-icon">⚠</span><span class="indicator-text">Save failed</span>';
                     autosaveIndicator.classList.remove('saving');
-                    autosaveIndicator.classList.add('saved');
-                }, 800);
+                }
+            }
+
+            // Restore draft from localStorage
+            function restoreDraft() {
+                try {
+                    const savedData = localStorage.getItem('memorial_draft');
+                    const savedStep = localStorage.getItem('memorial_draft_step');
+                    const savedTimestamp = localStorage.getItem('memorial_draft_timestamp');
+
+                    if (savedData) {
+                        const formData = JSON.parse(savedData);
+                        const form = document.querySelector('form') || document;
+
+                        // Ask user if they want to restore
+                        const timestamp = savedTimestamp ? new Date(savedTimestamp).toLocaleString() : 'earlier';
+                        if (confirm(`Found a draft saved at ${timestamp}. Would you like to continue editing it?`)) {
+                            // Restore all fields
+                            Object.keys(formData).forEach(key => {
+                                const field = form.querySelector(`[name="${key}"], #${key}`);
+                                if (field) {
+                                    if (field.type === 'radio') {
+                                        const radio = form.querySelector(`[name="${key}"][value="${formData[key]}"]`);
+                                        if (radio) radio.checked = true;
+                                    } else if (field.type === 'checkbox') {
+                                        field.checked = formData[key];
+                                    } else {
+                                        field.value = formData[key];
+                                    }
+                                }
+                            });
+
+                            // Restore wizard step
+                            if (savedStep) {
+                                goToStep(parseInt(savedStep));
+                            }
+
+                            // Update preview
+                            updatePreview();
+
+                            // Show notification
+                            const now = savedTimestamp ? new Date(savedTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'unknown';
+                            autosaveIndicator.innerHTML = `<span class="indicator-icon">✓</span><span class="indicator-text">Draft restored (saved ${now})</span>`;
+                            autosaveIndicator.classList.add('saved');
+                        } else {
+                            // User declined, clear the draft
+                            clearDraft();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to restore draft:', error);
+                }
+            }
+
+            // Clear draft from localStorage
+            function clearDraft() {
+                localStorage.removeItem('memorial_draft');
+                localStorage.removeItem('memorial_draft_timestamp');
+                localStorage.removeItem('memorial_draft_step');
             }
 
             // Input change triggers autosave
+            let autosaveTimeout;
             document.querySelectorAll('input, textarea, select').forEach(field => {
-                field.addEventListener('change', () => {
-                    setTimeout(simulateAutosave, 500);
+                field.addEventListener('input', () => {
+                    // Debounce autosave (wait 2 seconds after last keystroke)
+                    clearTimeout(autosaveTimeout);
+                    autosaveTimeout = setTimeout(autosaveForm, 2000);
+                });
+                // Also save on blur (when field loses focus)
+                field.addEventListener('blur', () => {
+                    clearTimeout(autosaveTimeout);
+                    autosaveForm();
                 });
             });
+
+            // Restore draft on page load
+            restoreDraft();
+
+            // ============================================
+            // NAME PREVIEW (Live preview as user types)
+            // ============================================
+
+            const deceasedNameInput = document.getElementById('deceasedName');
+            const preferredNameInput = document.getElementById('preferredName');
+            const nameTitleInput = document.getElementById('nameTitle');
+            const namePreviewBox = document.getElementById('namePreviewBox');
+            const namePreview = document.getElementById('namePreview');
+
+            function updateNamePreview() {
+                const fullName = deceasedNameInput.value.trim();
+                const title = nameTitleInput.value.trim();
+
+                if (!fullName) {
+                    namePreviewBox.style.display = 'none';
+                    return;
+                }
+
+                // Show preview box
+                namePreviewBox.style.display = 'block';
+
+                // Build display name: Title + Full Name
+                let displayName = fullName;
+                if (title) {
+                    // Check if title should go before or after
+                    const prefixTitles = ['Dr.', 'Dr', 'Rev.', 'Rev', 'Prof.', 'Prof', 'Mr.', 'Mr', 'Mrs.', 'Mrs', 'Ms.', 'Ms', 'Miss'];
+                    const isPrefix = prefixTitles.some(prefix => title.toLowerCase().startsWith(prefix.toLowerCase()));
+
+                    if (isPrefix) {
+                        displayName = `${title} ${fullName}`;
+                    } else {
+                        displayName = `${fullName}, ${title}`;
+                    }
+                }
+
+                namePreview.textContent = displayName;
+            }
+
+            if (deceasedNameInput) {
+                deceasedNameInput.addEventListener('input', updateNamePreview);
+            }
+            if (nameTitleInput) {
+                nameTitleInput.addEventListener('input', updateNamePreview);
+            }
 
             // Publish buttons
             document.getElementById('saveDraftBtn').addEventListener('click', function() {
@@ -1710,6 +2010,9 @@
             });
 
             document.getElementById('publishNowBtn').addEventListener('click', function() {
+                // Clear the draft since memorial is being published
+                clearDraft();
+
                 if (typeof showToast === 'function') {
                     showToast('Your memorial has been published! Redirecting...', 'success');
                 } else {

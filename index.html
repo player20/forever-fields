@@ -921,6 +921,9 @@
     </style>
 </head>
 <body>
+    <!-- Skip to Main Content (Accessibility) -->
+    <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
     <!-- Header Navigation -->
     <header class="page-header">
         <div class="page-header-inner">
@@ -990,7 +993,7 @@
     <div class="cursor-glow" id="cursorGlow"></div>
 
     <!-- Hero Section -->
-    <section class="hero" id="hero">
+    <section class="hero" id="hero" id="main-content" tabindex="-1">
         <div class="hero-content">
             <span class="hero-icon fade-in">🌿</span>
             <h1 class="fade-in fade-in-delay-1">A place where their story lives on—and your healing begins</h1>
@@ -1105,7 +1108,7 @@
                         <div class="everyday-content">
                             <h4>Favorite Food: Peach Cobbler</h4>
                             <p>"She made it every Sunday, and the whole house smelled like summer."</p>
-                            <a href="#" class="recipe-link">📖 See her recipe →</a>
+                            <a href="./memorial-template/demo/" class="recipe-link">📖 See her recipe →</a>
                         </div>
                     </div>
 
@@ -1180,7 +1183,7 @@
                 </div>
             </div>
             <div class="grief-cta fade-in">
-                <a href="#" class="btn btn-secondary">Explore Support Resources</a>
+                <a href="./grief-support/" class="btn btn-secondary">Explore Support Resources</a>
             </div>
         </div>
     </section>
@@ -1232,7 +1235,7 @@
                     <h3>Free Preview</h3>
                     <div class="pricing-amount">
                         <span class="price-main">$0</span>
-                        <span class="price-suffix">forever</span>
+                        <span class="price-suffix">14-day trial</span>
                     </div>
                     <ul class="pricing-features">
                         <li>1 memorial page</li>
@@ -1241,7 +1244,8 @@
                         <li>Public sharing only</li>
                         <li>Community support</li>
                     </ul>
-                    <a href="./create/" class="btn btn-secondary" style="width: 100%;">Start Free</a>
+                    <p style="font-size: 0.85rem; color: var(--gray-body); margin-top: 0.5rem; font-style: italic;">Upgrade required after 14 days</p>
+                    <a href="./create/" class="btn btn-secondary" style="width: 100%;">Start Free Trial</a>
                 </div>
                 <div class="pricing-card fade-in fade-in-delay-1">
                     <h3>Forever Plan</h3>
@@ -1257,11 +1261,11 @@
                         <li>Custom memorial URL</li>
                         <li>Private sharing controls</li>
                     </ul>
-                    <a href="#" class="btn btn-secondary" style="width: 100%;">Get Started</a>
+                    <a href="./create/" class="btn btn-secondary" style="width: 100%;">Get Started</a>
                 </div>
                 <div class="pricing-card featured fade-in fade-in-delay-2">
                     <span class="pricing-badge">Most Popular</span>
-                    <h3>Healing Bundle</h3>
+                    <h3>Healing & Heritage Bundle</h3>
                     <div class="pricing-amount">
                         <span class="price-main">$399</span>
                         <span class="price-suffix">one-time</span>
@@ -1275,7 +1279,7 @@
                         <li>Time-capsule messages</li>
                         <li>Priority family support</li>
                     </ul>
-                    <a href="#" class="btn btn-gold" style="width: 100%;">Start Your Memorial</a>
+                    <a href="./create/" class="btn btn-gold" style="width: 100%;">Start Your Memorial</a>
                 </div>
             </div>
             <p class="pricing-note fade-in">
@@ -1319,7 +1323,7 @@
         <div class="final-cta-content fade-in">
             <h2>Preserve their story. Find your peace.</h2>
             <p>Start today with a free preview—no commitment required.</p>
-            <a href="#" class="btn btn-gold">Create a Free Preview →</a>
+            <a href="./create/" class="btn btn-gold">Create a Free Preview →</a>
         </div>
     </section>
 
@@ -1330,8 +1334,10 @@
             <nav class="footer-links">
                 <a href="./about/">About</a>
                 <a href="./how-it-works/">How It Works</a>
+                <a href="./for-families/">For Families</a>
                 <a href="./for-funeral-homes/">For Funeral Homes</a>
                 <a href="./grief-support/">Grief Resources</a>
+                <a href="./pricing/">Pricing</a>
                 <a href="mailto:hello@foreverfields.com">Contact</a>
                 <a href="./privacy/">Privacy</a>
             </nav>
@@ -1342,6 +1348,8 @@
 
     <!-- Shared Scripts -->
     <script src="js/script.js"></script>
+    <script src="js/confirm-modal.js"></script>
+    <script src="js/inline-validation.js"></script>
 
     <!-- Page-specific Scripts -->
     <script>
@@ -1450,10 +1458,12 @@
             }
 
             // Check authentication status
-            function checkAuthStatus() {
-                const authToken = localStorage.getItem('ff_auth_token');
+            async function checkAuthStatus() {
+                // Check if user is authenticated via httpOnly cookies
+                const api = new ForeverFieldsAPI();
+                const isAuthenticated = await api.isAuthenticated();
 
-                if (authToken) {
+                if (isAuthenticated) {
                     // User is logged in - update UI
                     const signInLinks = document.querySelectorAll('a[href="./login/"]');
                     signInLinks.forEach(link => {
@@ -1464,12 +1474,11 @@
                         link.classList.add('btn-outline');
 
                         // Add sign out handler
-                        link.addEventListener('click', function(e) {
+                        link.addEventListener('click', async function(e) {
                             e.preventDefault();
 
-                            // Clear auth tokens
-                            localStorage.removeItem('ff_auth_token');
-                            localStorage.removeItem('ff_refresh_token');
+                            // Call logout API (clears httpOnly cookies)
+                            await api.logout();
 
                             // Reload page to show logged-out state
                             window.location.reload();

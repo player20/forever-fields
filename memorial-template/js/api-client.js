@@ -7,26 +7,37 @@ class ForeverFieldsAPI {
     constructor(baseURL = null) {
         // Use ApiConfig if available, otherwise fall back to same origin
         this.baseURL = baseURL || (typeof ApiConfig !== 'undefined' ? ApiConfig.getApiUrl() : window.location.origin);
-        this.token = localStorage.getItem('ff_auth_token');
+        // Note: Tokens now stored in httpOnly cookies (more secure than localStorage)
+        // No need to manage tokens in JavaScript - cookies sent automatically
     }
 
     /**
-     * Set authentication token
+     * Check if user is authenticated
+     * Note: We can't directly access httpOnly cookies from JavaScript
+     * This method makes a lightweight request to check auth status
      */
-    setToken(token) {
-        this.token = token;
-        if (token) {
-            localStorage.setItem('ff_auth_token', token);
-        } else {
-            localStorage.removeItem('ff_auth_token');
+    async isAuthenticated() {
+        try {
+            const response = await fetch(`${this.baseURL}/api/user/me`, {
+                credentials: 'include', // Send cookies
+            });
+            return response.ok;
+        } catch {
+            return false;
         }
     }
 
     /**
-     * Get authentication token
+     * Logout - clears httpOnly cookies
      */
-    getToken() {
-        return this.token;
+    async logout() {
+        try {
+            await this.post('/api/auth/logout');
+            // Redirect to login after logout
+            window.location.href = '/login';
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
     }
 
     /**
@@ -40,14 +51,10 @@ class ForeverFieldsAPI {
             ...options.headers,
         };
 
-        // Add auth token if available
-        if (this.token && !options.noAuth) {
-            headers['Authorization'] = `Bearer ${this.token}`;
-        }
-
         const config = {
             ...options,
             headers,
+            credentials: 'include', // IMPORTANT: Send httpOnly cookies with every request
         };
 
         try {

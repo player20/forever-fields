@@ -90,23 +90,18 @@
             const errorEl = document.getElementById('error-message');
 
             // If we have access tokens (returning from backend)
+            // Note: Tokens are now in httpOnly cookies, not URL params
+            // This code path may no longer be used, but kept for backwards compatibility
             if (accessToken && refreshToken) {
-                try {
-                    // Store tokens
-                    localStorage.setItem('ff_auth_token', accessToken);
-                    localStorage.setItem('ff_refresh_token', refreshToken);
+                // Tokens are already set as httpOnly cookies by backend
+                // No need to store in localStorage
+                statusEl.textContent = 'Success!';
+                messageEl.textContent = 'Redirecting to your dashboard...';
 
-                    statusEl.textContent = 'Success!';
-                    messageEl.textContent = 'Redirecting to your dashboard...';
-
-                    // Redirect to dashboard (or home page)
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 1000);
-                } catch (error) {
-                    console.error('Token storage error:', error);
-                    showError('Failed to save authentication. Please try again.');
-                }
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = '/dashboard/';
+                }, 1000);
                 return;
             }
 
