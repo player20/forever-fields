@@ -178,10 +178,27 @@ router.get(
 
       console.log(`[AUTH] Successful magic link login: ${user.email}`);
 
-      // Redirect with tokens
-      const redirectUrl = `${env.FRONTEND_URL}/auth/callback?access_token=${sessionData.properties.hashed_token}&refresh_token=${sessionData.properties.hashed_token}`;
+      // Set httpOnly cookies (secure, not accessible to JavaScript)
+      const sessionToken = sessionData.properties.hashed_token;
 
-      return res.redirect(302, redirectUrl);
+      res.cookie('ff_access_token', sessionToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 3600000, // 1 hour
+        path: '/',
+      });
+
+      res.cookie('ff_refresh_token', sessionToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 3600000, // 7 days
+        path: '/api/auth',
+      });
+
+      // Redirect to dashboard
+      return res.redirect(302, `${env.FRONTEND_URL}/dashboard`);
     } catch (error) {
       console.error('[AUTH] Callback error:', error);
       return res.redirect(`${env.FRONTEND_URL}/login?error=auth_failed`);
