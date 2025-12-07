@@ -7,26 +7,37 @@ class ForeverFieldsAPI {
     constructor(baseURL = null) {
         // Use ApiConfig if available, otherwise fall back to same origin
         this.baseURL = baseURL || (typeof ApiConfig !== 'undefined' ? ApiConfig.getApiUrl() : window.location.origin);
-        this.token = localStorage.getItem('ff_auth_token');
+        // Note: Tokens now stored in httpOnly cookies (more secure than localStorage)
+        // No need to manage tokens in JavaScript - cookies sent automatically
     }
 
     /**
-     * Set authentication token
+     * Check if user is authenticated
+     * Note: We can't directly access httpOnly cookies from JavaScript
+     * This method makes a lightweight request to check auth status
      */
-    setToken(token) {
-        this.token = token;
-        if (token) {
-            localStorage.setItem('ff_auth_token', token);
-        } else {
-            localStorage.removeItem('ff_auth_token');
+    async isAuthenticated() {
+        try {
+            const response = await fetch(`${this.baseURL}/api/user/me`, {
+                credentials: 'include', // Send cookies
+            });
+            return response.ok;
+        } catch {
+            return false;
         }
     }
 
     /**
-     * Get authentication token
+     * Logout - clears httpOnly cookies
      */
-    getToken() {
-        return this.token;
+    async logout() {
+        try {
+            await this.post('/api/auth/logout');
+            // Redirect to login after logout
+            window.location.href = '/login';
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
     }
 
     /**
@@ -40,14 +51,10 @@ class ForeverFieldsAPI {
             ...options.headers,
         };
 
-        // Add auth token if available
-        if (this.token && !options.noAuth) {
-            headers['Authorization'] = `Bearer ${this.token}`;
-        }
-
         const config = {
             ...options,
             headers,
+            credentials: 'include', // IMPORTANT: Send httpOnly cookies with every request
         };
 
         try {
@@ -137,6 +144,24 @@ class ForeverFieldsAPI {
      */
     async requestMagicLink(email) {
         return this.post('/api/auth/magic-link', { email });
+    }
+
+    // ============================================
+    // USER ENDPOINTS
+    // ============================================
+
+    /**
+     * Get current user profile
+     */
+    async getUserProfile() {
+        return this.get('/api/user/me');
+    }
+
+    /**
+     * Update current user profile
+     */
+    async updateUserProfile(data) {
+        return this.put('/api/user/me', data);
     }
 
     // ============================================
@@ -300,6 +325,154 @@ class ForeverFieldsAPI {
      */
     async downloadPrayerCard(memorialId, design = 'minimalist') {
         window.open(this.getPrayerCardDownloadUrl(memorialId, design), '_blank');
+    }
+
+    // ============================================
+    // FAMILY TREE ENDPOINTS
+    // ============================================
+
+    /**
+     * Get family members for a memorial
+     */
+    async getFamilyMembers(memorialId) {
+        return this.get(`/api/family-tree/${memorialId}`);
+    }
+
+    /**
+     * Create a new family member
+     */
+    async createFamilyMember(memberData) {
+        return this.post('/api/family-tree', memberData);
+    }
+
+    /**
+     * Update a family member
+     */
+    async updateFamilyMember(memberId, memberData) {
+        return this.put(`/api/family-tree/${memberId}`, memberData);
+    }
+
+    /**
+     * Delete a family member
+     */
+    async deleteFamilyMember(memberId) {
+        return this.delete(`/api/family-tree/${memberId}`);
+    }
+
+    /**
+     * Get user information
+     */
+    async getCurrentUser() {
+        return this.get('/api/user/me');
+    }
+
+    // ============================================
+    // DUPLICATE CHECK ENDPOINT
+    // ============================================
+
+    /**
+     * Check for duplicate memorials
+     */
+    async checkDuplicate(data) {
+        return this.post('/api/memorials/check-duplicate', data);
+    }
+
+    // ============================================
+    // AFFILIATE ENDPOINTS
+    // ============================================
+
+    /**
+     * Get affiliate flower delivery link
+     */
+    async getFlowerAffiliateLink(memorialId) {
+        return this.get(`/api/affiliate/flowers?memorialId=${memorialId}`);
+    }
+
+    /**
+     * Get flower delivery redirect URL
+     */
+    getFlowerDeliveryUrl(memorialId) {
+        return `${this.baseURL}/api/affiliate/flowers/redirect?memorialId=${memorialId}`;
+    }
+
+    // ============================================
+    // SOCIAL LINKS ENDPOINTS
+    // ============================================
+
+    /**
+     * Get social links for a memorial
+     */
+    async getSocialLinks(memorialId) {
+        return this.get(`/api/social-links/${memorialId}`);
+    }
+
+    /**
+     * Update social links for a memorial (owner only)
+     */
+    async updateSocialLinks(memorialId, socialLinks) {
+        return this.put(`/api/social-links/${memorialId}`, socialLinks);
+    }
+
+    /**
+     * Delete social links for a memorial (owner only)
+     */
+    async deleteSocialLinks(memorialId) {
+        return this.delete(`/api/social-links/${memorialId}`);
+    }
+
+    // ============================================
+    // ADMIN ENDPOINTS
+    // ============================================
+
+    /**
+     * Get recent signups (admin only)
+     */
+    async getAdminSignups(page = 1, search = '') {
+        return this.get(`/api/admin/signups?page=${page}&search=${encodeURIComponent(search)}`);
+    }
+
+    /**
+     * Get all memorials (admin only)
+     */
+    async getAdminMemorials(page = 1, search = '', privacy = '') {
+        let url = `/api/admin/memorials?page=${page}&search=${encodeURIComponent(search)}`;
+        if (privacy) url += `&privacy=${privacy}`;
+        return this.get(url);
+    }
+
+    /**
+     * Get potential duplicates (admin only)
+     */
+    async getAdminDuplicates() {
+        return this.get('/api/admin/duplicates');
+    }
+
+    /**
+     * Merge memorials (admin only)
+     */
+    async mergeMemorials(sourceId, targetId) {
+        return this.post('/api/admin/merge-memorials', { sourceId, targetId });
+    }
+
+    /**
+     * Get admin dashboard stats (admin only)
+     */
+    async getAdminStats() {
+        return this.get('/api/admin/stats');
+    }
+
+    /**
+     * Get admin audit log (admin only)
+     */
+    async getAdminAuditLog(page = 1) {
+        return this.get(`/api/admin/audit-log?page=${page}`);
+    }
+
+    /**
+     * Export signups as CSV (admin only)
+     */
+    getAdminSignupsExportUrl() {
+        return `${this.baseURL}/api/admin/export/signups`;
     }
 }
 

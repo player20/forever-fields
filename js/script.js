@@ -590,7 +590,7 @@
             lastSaveTime = new Date();
             updateSaveIndicator('saved');
         } catch (e) {
-            console.error('Auto-save failed:', e);
+            Logger.error('Auto-save failed', e);
             updateSaveIndicator('error');
         }
     }
@@ -618,7 +618,7 @@
 
             updateSaveIndicator('restored');
         } catch (e) {
-            console.error('Failed to load saved data:', e);
+            Logger.error('Failed to load saved data', e);
         }
     }
 
@@ -1259,7 +1259,7 @@
     window.handlePhotoUpload = async function(file, memorialId) {
         const FFMod = window.FFMod || window.ForeverFieldsModeration;
         if (!FFMod) {
-            console.error('Moderation module not loaded');
+            Logger.error('Moderation module not loaded');
             return false;
         }
 
@@ -1320,7 +1320,7 @@
     window.handleTextSubmission = function(text, type, memorialId, authorName) {
         const FFMod = window.FFMod || window.ForeverFieldsModeration;
         if (!FFMod) {
-            console.error('Moderation module not loaded');
+            Logger.error('Moderation module not loaded');
             return false;
         }
 
@@ -1382,7 +1382,7 @@
     window.handleVoiceSubmission = async function(file, durationSeconds, memorialId) {
         const FFMod = window.FFMod || window.ForeverFieldsModeration;
         if (!FFMod) {
-            console.error('Moderation module not loaded');
+            Logger.error('Moderation module not loaded');
             return false;
         }
 
@@ -1478,48 +1478,113 @@
             guestbook: 'Guestbook Message'
         };
 
-        container.innerHTML = pending.map(function(item) {
-            const timeAgo = getTimeAgo(new Date(item.submittedAt));
-            const preview = getItemPreview(item);
+        // Clear container safely
+        container.innerHTML = '';
 
-            return `
-                <div class="pending-card" data-pending-id="${item.id}">
-                    <div class="pending-card-preview">
-                        ${preview}
-                    </div>
-                    <div class="pending-card-meta">
-                        <div class="pending-type-badge">${typeIcons[item.type] || '📄'} ${typeLabels[item.type] || item.type}</div>
-                        <div class="pending-submitter">From: ${item.submittedBy || 'Anonymous'}</div>
-                        <div class="pending-date">Submitted ${timeAgo}</div>
-                        ${item.isReport ? '<div class="pending-reported">⚠️ Reported by a visitor</div>' : ''}
-                    </div>
-                    <div class="pending-card-actions">
-                        <button class="btn btn-approve" onclick="approveItem('${memorialId}', '${item.id}')">
-                            ✓ Approve
-                        </button>
-                        <button class="btn btn-reject" onclick="rejectItem('${memorialId}', '${item.id}')">
-                            ✗ Remove
-                        </button>
-                    </div>
-                </div>
-            `;
-        }).join('');
+        // Build pending items using safe DOM creation
+        pending.forEach(function(item) {
+            const timeAgo = getTimeAgo(new Date(item.submittedAt));
+
+            // Create card
+            const card = document.createElement('div');
+            card.className = 'pending-card';
+            card.setAttribute('data-pending-id', item.id);
+
+            // Create preview section
+            const preview = document.createElement('div');
+            preview.className = 'pending-card-preview';
+            const previewContent = createItemPreviewElement(item); // Safe DOM creation
+            preview.appendChild(previewContent);
+
+            // Create meta section
+            const meta = document.createElement('div');
+            meta.className = 'pending-card-meta';
+
+            // Type badge (safe - using textContent)
+            const typeBadge = document.createElement('div');
+            typeBadge.className = 'pending-type-badge';
+            typeBadge.textContent = (typeIcons[item.type] || '📄') + ' ' + (typeLabels[item.type] || item.type);
+
+            // Submitter (SAFE - using textContent)
+            const submitter = document.createElement('div');
+            submitter.className = 'pending-submitter';
+            submitter.textContent = 'From: ' + (item.submittedBy || 'Anonymous');
+
+            // Date (safe)
+            const date = document.createElement('div');
+            date.className = 'pending-date';
+            date.textContent = 'Submitted ' + timeAgo;
+
+            meta.appendChild(typeBadge);
+            meta.appendChild(submitter);
+            meta.appendChild(date);
+
+            // Reported flag if applicable
+            if (item.isReport) {
+                const reported = document.createElement('div');
+                reported.className = 'pending-reported';
+                reported.textContent = '⚠️ Reported by a visitor';
+                meta.appendChild(reported);
+            }
+
+            // Create actions section
+            const actions = document.createElement('div');
+            actions.className = 'pending-card-actions';
+
+            const approveBtn = document.createElement('button');
+            approveBtn.className = 'btn btn-approve';
+            approveBtn.textContent = '✓ Approve';
+            approveBtn.onclick = function() { approveItem(memorialId, item.id); };
+
+            const rejectBtn = document.createElement('button');
+            rejectBtn.className = 'btn btn-reject';
+            rejectBtn.textContent = '✗ Remove';
+            rejectBtn.onclick = function() { rejectItem(memorialId, item.id); };
+
+            actions.appendChild(approveBtn);
+            actions.appendChild(rejectBtn);
+
+            // Assemble card
+            card.appendChild(preview);
+            card.appendChild(meta);
+            card.appendChild(actions);
+
+            container.appendChild(card);
+        });
     };
 
     /**
-     * Get preview HTML for pending item
+     * Create safe preview DOM element (no innerHTML)
      */
-    function getItemPreview(item) {
+    function createItemPreviewElement(item) {
+        const previewDiv = document.createElement('div');
+
         if (item.type === 'photo' && item.content.dataUrl) {
-            return '<img src="' + item.content.dataUrl + '" alt="Pending photo">';
+            const img = document.createElement('img');
+            // Sanitize URL to prevent javascript: protocol
+            const safeUrl = Sanitizer.sanitizeUrl(item.content.dataUrl);
+            if (safeUrl) {
+                img.src = safeUrl;
+                img.alt = 'Pending photo';
+                previewDiv.appendChild(img);
+            } else {
+                previewDiv.className = 'generic-preview';
+                previewDiv.textContent = 'Invalid photo URL';
+            }
         } else if (item.type === 'memory' || item.type === 'guestbook') {
             const text = item.content.text || '';
             const preview = text.length > 150 ? text.substring(0, 150) + '...' : text;
-            return '<div class="memory-preview">"' + preview + '"</div>';
+            previewDiv.className = 'memory-preview';
+            previewDiv.textContent = '"' + preview + '"'; // SAFE - textContent auto-escapes
         } else if (item.type === 'voice') {
-            return '<div class="voice-preview">🎤 ' + Math.round(item.content.duration || 0) + 's voice note</div>';
+            previewDiv.className = 'voice-preview';
+            previewDiv.textContent = '🎤 ' + Math.round(item.content.duration || 0) + 's voice note';
+        } else {
+            previewDiv.className = 'generic-preview';
+            previewDiv.textContent = 'Content pending review';
         }
-        return '<div class="generic-preview">Content pending review</div>';
+
+        return previewDiv;
     }
 
     /**
@@ -1597,18 +1662,44 @@
             other: 'Other'
         };
 
-        container.innerHTML = contacts.map(function(contact) {
-            return `
-                <div class="legacy-contact-item">
-                    <div class="legacy-contact-info">
-                        <span class="legacy-contact-name">${contact.name}</span>
-                        <span class="legacy-contact-email">${contact.email}</span>
-                        <span class="legacy-contact-relation">${relationLabels[contact.relation] || contact.relation}</span>
-                    </div>
-                    <button class="invite-remove-btn" onclick="removeLegacyContact('${contact.id}')" title="Remove">×</button>
-                </div>
-            `;
-        }).join('');
+        // Clear container safely
+        container.innerHTML = '';
+
+        // Build contacts using safe DOM creation
+        contacts.forEach(function(contact) {
+            const item = document.createElement('div');
+            item.className = 'legacy-contact-item';
+
+            const info = document.createElement('div');
+            info.className = 'legacy-contact-info';
+
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'legacy-contact-name';
+            nameSpan.textContent = contact.name; // SAFE - textContent auto-escapes
+
+            const emailSpan = document.createElement('span');
+            emailSpan.className = 'legacy-contact-email';
+            emailSpan.textContent = contact.email; // SAFE
+
+            const relationSpan = document.createElement('span');
+            relationSpan.className = 'legacy-contact-relation';
+            relationSpan.textContent = relationLabels[contact.relation] || contact.relation; // SAFE
+
+            info.appendChild(nameSpan);
+            info.appendChild(emailSpan);
+            info.appendChild(relationSpan);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'invite-remove-btn';
+            removeBtn.title = 'Remove';
+            removeBtn.textContent = '×';
+            removeBtn.onclick = function() { removeLegacyContact(contact.id); };
+
+            item.appendChild(info);
+            item.appendChild(removeBtn);
+
+            container.appendChild(item);
+        });
 
         const maxContacts = 3;
         if (addSection) {
@@ -1752,15 +1843,34 @@
                 editor: 'Editor'
             };
 
-            container.innerHTML = invites.map(function(invite) {
-                return `
-                    <div class="invite-item">
-                        <span class="invite-item-email">${invite.email}</span>
-                        <span class="invite-item-role">${roleLabels[invite.role] || invite.role}</span>
-                        <button class="invite-remove-btn" onclick="removeInvite('${invite.id}')" title="Remove">×</button>
-                    </div>
-                `;
-            }).join('');
+            // Clear container safely
+            container.innerHTML = '';
+
+            // Build invites using safe DOM creation
+            invites.forEach(function(invite) {
+                const item = document.createElement('div');
+                item.className = 'invite-item';
+
+                const emailSpan = document.createElement('span');
+                emailSpan.className = 'invite-item-email';
+                emailSpan.textContent = invite.email; // SAFE - textContent auto-escapes
+
+                const roleSpan = document.createElement('span');
+                roleSpan.className = 'invite-item-role';
+                roleSpan.textContent = roleLabels[invite.role] || invite.role; // SAFE
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'invite-remove-btn';
+                removeBtn.title = 'Remove';
+                removeBtn.textContent = '×';
+                removeBtn.onclick = function() { removeInvite(invite.id); };
+
+                item.appendChild(emailSpan);
+                item.appendChild(roleSpan);
+                item.appendChild(removeBtn);
+
+                container.appendChild(item);
+            });
         }
     };
 

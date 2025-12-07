@@ -9,6 +9,7 @@ import { requireAuth, optionalAuth } from '../middleware/auth';
 import { requireMemorialEditor } from '../middleware/authorization';
 import { validate } from '../middleware/validate';
 import { uploadRateLimiter } from '../middleware/security';
+import { canUploadPhoto, requireActiveSubscription } from '../middleware/subscription-guard';
 import { uploadSignSchema } from '../validators/schemas';
 import { cloudinary } from '../config/cloudinary';
 import { checkMemorialAccess } from '../utils/permissions';
@@ -22,6 +23,8 @@ const router = Router();
 router.post(
   '/sign',
   requireAuth,
+  requireActiveSubscription, // Check trial hasn't expired
+  canUploadPhoto,            // Check photo limit for tier (only applies if memorialId provided)
   uploadRateLimiter,
   validate(uploadSignSchema),
   async (req, res) => {

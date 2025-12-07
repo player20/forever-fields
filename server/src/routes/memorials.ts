@@ -10,6 +10,11 @@ import { requireMemorialOwner } from '../middleware/authorization';
 import { validate } from '../middleware/validate';
 import { apiRateLimiter } from '../middleware/security';
 import {
+  requireActiveSubscription,
+  canCreateMemorial,
+  canCreatePrivateMemorial,
+} from '../middleware/subscription-guard';
+import {
   createMemorialSchema,
   updateMemorialSchema,
   memorialIdSchema,
@@ -56,6 +61,9 @@ router.get('/mine', requireAuth, apiRateLimiter, async (req, res) => {
 router.post(
   '/',
   requireAuth,
+  requireActiveSubscription, // Check trial hasn't expired
+  canCreateMemorial,         // Check memorial limit for tier
+  canCreatePrivateMemorial,  // Check if user can create private memorials
   apiRateLimiter,
   validate(createMemorialSchema),
   async (req, res) => {
@@ -282,5 +290,71 @@ router.delete(
     }
   }
 );
+
+/**
+ * POST /api/memorials/check-duplicate
+ * Check for potential duplicate memorials
+ * Returns soft warning if similar memorial exists
+ */
+router.post('/check-duplicate', requireAuth, apiRateLimiter, async (req, res) => {
+  try {
+    const { deceasedName, birthDate, deathDate } = req.body;
+
+    if (!deceasedName) {
+      return res.status(400).json({ error: 'Name is required' });
+    }
+
+    const deceasedNameLower = deceasedName.toLowerCase();
+
+    // Find potential duplicates
+    const potentialDuplicates = await prisma.memorial.findMany({
+      where: {
+        deceasedNameLower,
+        OR: [
+          { birthDate: birthDate ? new Date(birthDate) : null },
+          { deathDate: deathDate ? new Date(deathDate) : null },
+        ],
+      },
+      select: {
+        id: true,
+        deceasedName: true,
+        birthDate: true,
+        deathDate: true,
+        privacy: true,
+        ownerId: true,
+        owner: {
+          select: {
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (potentialDuplicates.length === 0) {
+      return res.status(200).json({ hasDuplicates: false });
+    }
+
+    // Check if any duplicates are owned by current user
+    const userDuplicates = potentialDuplicates.filter(d => d.ownerId === req.user!.id);
+
+    return res.status(200).json({
+      hasDuplicates: true,
+      duplicates: potentialDuplicates.map(d => ({
+        id: d.id,
+        name: d.deceasedName,
+        birthDate: d.birthDate?.toISOString().split('T')[0],
+        deathDate: d.deathDate?.toISOString().split('T')[0],
+        isYours: d.ownerId === req.user!.id,
+        ownerEmail: d.ownerId === req.user!.id ? d.owner.email : null,
+      })),
+      message: userDuplicates.length > 0
+        ? 'You already have a memorial for this person. Would you like to edit it instead?'
+        : 'A memorial for this person may already exist. You can still create a new one if this is a different person.',
+    });
+  } catch (error) {
+    console.error('[MEMORIAL] Check duplicate error:', error);
+    return res.status(500).json({ error: 'Failed to check for duplicates' });
+  }
+});
 
 export default router;
