@@ -31,9 +31,6 @@ import guestbookRoutes from './routes/guestbook';
 import memoriesRoutes from './routes/memories';
 import voiceNotesRoutes from './routes/voiceNotes';
 import reportsRoutes from './routes/reports';
-import familyTreeRoutes from './routes/family-tree';
-import adminRoutes from './routes/admin';
-import userRoutes from './routes/user';
 import affiliateRoutes from './routes/affiliate';
 import socialLinksRoutes from './routes/social-links';
 
@@ -102,7 +99,6 @@ app.get('/health', (req, res) => {
 // ============================================
 
 app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
 app.use('/api/memorials', memorialRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/pending', pendingRoutes);
@@ -115,8 +111,6 @@ app.use('/api/guestbook', guestbookRoutes);
 app.use('/api/memories', memoriesRoutes);
 app.use('/api/voice-notes', voiceNotesRoutes);
 app.use('/api/reports', reportsRoutes);
-app.use('/api/family-tree', familyTreeRoutes);
-app.use('/api/admin', adminRoutes); // Admin-only routes
 app.use('/api/affiliate', affiliateRoutes); // Affiliate partnerships (flowers, etc.)
 app.use('/api/social-links', socialLinksRoutes); // Social media links for memorials
 

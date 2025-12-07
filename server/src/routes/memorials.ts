@@ -10,11 +10,6 @@ import { requireMemorialOwner } from '../middleware/authorization';
 import { validate } from '../middleware/validate';
 import { apiRateLimiter } from '../middleware/security';
 import {
-  requireActiveSubscription,
-  canCreateMemorial,
-  canCreatePrivateMemorial,
-} from '../middleware/subscription-guard';
-import {
   createMemorialSchema,
   updateMemorialSchema,
   memorialIdSchema,
@@ -61,9 +56,6 @@ router.get('/mine', requireAuth, apiRateLimiter, async (req, res) => {
 router.post(
   '/',
   requireAuth,
-  requireActiveSubscription, // Check trial hasn't expired
-  canCreateMemorial,         // Check memorial limit for tier
-  canCreatePrivateMemorial,  // Check if user can create private memorials
   apiRateLimiter,
   validate(createMemorialSchema),
   async (req, res) => {

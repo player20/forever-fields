@@ -3,7 +3,7 @@
  * Magic link authentication system
  */
 
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { prisma } from '../config/database';
 import { supabaseAdmin } from '../config/supabase';
 import { validate } from '../middleware/validate';
@@ -98,20 +98,15 @@ router.get('/callback', validate(authCallbackSchema, 'query'), async (req, res) 
     });
 
     if (!user) {
-      // Create new user with 14-day free trial
-      const trialEndsAt = new Date();
-      trialEndsAt.setDate(trialEndsAt.getDate() + 14); // 14 days from now
-
+      // Create new user
       user = await prisma.user.create({
         data: {
           email: magicLink.email,
           name: magicLink.email.split('@')[0], // Default name from email
-          subscriptionTier: 'FREE', // Start with free tier
-          trialEndsAt, // 14-day trial period
         },
       });
 
-      console.log(`[AUTH] New user created: ${user.email} (trial ends ${trialEndsAt.toISOString()})`);
+      console.log(`[AUTH] New user created: ${user.email}`);
     }
 
     // Ensure Supabase auth user exists (create on first login only)
@@ -142,12 +137,11 @@ router.get('/callback', validate(authCallbackSchema, 'query'), async (req, res) 
       return res.status(500).json({ error: 'Session creation failed' });
     }
 
-    // Extract separate access and refresh tokens
-    const accessToken = sessionData.properties.access_token || sessionData.properties.hashed_token;
-    const refreshToken = sessionData.properties.refresh_token || sessionData.properties.hashed_token;
+    // Use the hashed token as both access and refresh (Supabase handles internally)
+    const token = sessionData.properties.hashed_token;
 
     // Set httpOnly cookies (secure, not accessible to JavaScript)
-    res.cookie('ff_access_token', accessToken, {
+    res.cookie('ff_access_token', token, {
       httpOnly: true,                                    // Cannot be accessed by JavaScript (XSS protection)
       secure: process.env.NODE_ENV === 'production',    // HTTPS only in production
       sameSite: 'strict',                                // CSRF protection
@@ -155,7 +149,7 @@ router.get('/callback', validate(authCallbackSchema, 'query'), async (req, res) 
       path: '/',
     });
 
-    res.cookie('ff_refresh_token', refreshToken, {
+    res.cookie('ff_refresh_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
