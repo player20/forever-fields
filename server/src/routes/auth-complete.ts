@@ -271,10 +271,27 @@ router.post(
 
       console.log(`[AUTH] Successful password signup: ${data.user.email}`);
 
+      // Set httpOnly cookies (same as login)
+      const sessionToken = sessionData.properties.hashed_token;
+
+      res.cookie('ff_access_token', sessionToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production',
+        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 3600000, // 1 hour
+        path: '/',
+      });
+
+      res.cookie('ff_refresh_token', sessionToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production',
+        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 7 * 24 * 3600000, // 7 days
+        path: '/api/auth',
+      });
+
       return res.status(201).json({
         message: 'Account created successfully',
-        access_token: sessionData.properties.hashed_token,
-        refresh_token: sessionData.properties.hashed_token,
         user: {
           id: data.user.id,
           email: data.user.email,

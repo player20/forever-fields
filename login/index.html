@@ -489,9 +489,33 @@
                         </div>
                     </div>
 
+                    <!-- Confirm Password Field (for signup only) -->
+                    <div class="form-group password-only signup-only" id="confirmPasswordGroup" style="display: none;">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <div class="password-group">
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                placeholder="Confirm your password"
+                                autocomplete="new-password"
+                            >
+                            <button type="button" class="password-toggle" id="confirmPasswordToggle">
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+
                     <button type="submit" class="login-btn" id="submitBtn">
                         Send Magic Link
                     </button>
+
+                    <!-- Sign Up / Sign In Toggle (for password mode) -->
+                    <div class="password-only" style="text-align: center; margin-top: 1rem;">
+                        <p style="font-size: 0.9rem; color: #666;" id="toggleText">
+                            Don't have an account? <a href="#" id="toggleAuthMode" style="color: #667eea; text-decoration: none; font-weight: 600;">Create one</a>
+                        </p>
+                    </div>
 
                     <div class="reassurance magic-link-only">
                         <span class="reassurance-icon">🔒</span>
@@ -588,6 +612,47 @@
 
         // Current authentication mode
         let authMode = 'magic-link';
+        let passwordMode = 'signin'; // 'signin' or 'signup'
+
+        // Get new elements
+        const confirmPasswordGroup = document.getElementById('confirmPasswordGroup');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const confirmPasswordToggle = document.getElementById('confirmPasswordToggle');
+        const toggleAuthMode = document.getElementById('toggleAuthMode');
+        const toggleText = document.getElementById('toggleText');
+
+        // Toggle between signup and signin (password mode only)
+        toggleAuthMode.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            if (passwordMode === 'signin') {
+                passwordMode = 'signup';
+                confirmPasswordGroup.style.display = 'block';
+                submitBtn.textContent = 'Create Account';
+                toggleText.innerHTML = 'Already have an account? <a href="#" id="toggleAuthMode" style="color: #667eea; text-decoration: none; font-weight: 600;">Sign in</a>';
+                passwordInput.setAttribute('autocomplete', 'new-password');
+            } else {
+                passwordMode = 'signin';
+                confirmPasswordGroup.style.display = 'none';
+                submitBtn.textContent = 'Sign In';
+                toggleText.innerHTML = 'Don\'t have an account? <a href="#" id="toggleAuthMode" style="color: #667eea; text-decoration: none; font-weight: 600;">Create one</a>';
+                passwordInput.setAttribute('autocomplete', 'current-password');
+                confirmPasswordInput.value = '';
+            }
+
+            // Re-attach event listener to new element
+            document.getElementById('toggleAuthMode').addEventListener('click', arguments.callee);
+            hideError();
+        });
+
+        // Password confirmation toggle
+        if (confirmPasswordToggle) {
+            confirmPasswordToggle.addEventListener('click', function() {
+                const type = confirmPasswordInput.type === 'password' ? 'text' : 'password';
+                confirmPasswordInput.type = type;
+                confirmPasswordToggle.textContent = type === 'password' ? '👁️' : '🙈';
+            });
+        }
 
         // Switch between magic link and password modes
         authTabs.forEach(tab => {
@@ -604,14 +669,17 @@
                 // Update submit button text
                 submitBtn.textContent = authMode === 'magic-link'
                     ? 'Send Magic Link'
-                    : 'Sign In';
+                    : (passwordMode === 'signin' ? 'Sign In' : 'Create Account');
 
                 // Clear error
                 hideError();
 
-                // Clear password field when switching away
+                // Clear password fields when switching away
                 if (authMode === 'magic-link') {
                     passwordInput.value = '';
+                    confirmPasswordInput.value = '';
+                    passwordMode = 'signin'; // Reset to signin when switching back to magic link
+                    confirmPasswordGroup.style.display = 'none';
                 }
             });
         });
@@ -654,6 +722,50 @@
 
                 showError(error.message || 'Failed to send magic link. Please try again.');
                 submitBtn.textContent = 'Send Magic Link';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Password Signup
+        async function signupWithPassword(email, password, confirmPassword) {
+            try {
+                // Validate password confirmation
+                if (password !== confirmPassword) {
+                    showError('Passwords do not match');
+                    submitBtn.textContent = 'Create Account';
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                Logger.log('Password signup initiated');
+
+                const response = await api.post('/api/auth/signup', {
+                    email,
+                    password
+                });
+
+                Logger.log('Signup successful');
+
+                // Redirect to specified URL or dashboard
+                const destination = redirectUrl || '/dashboard';
+                window.location.href = destination;
+            } catch (error) {
+                Logger.error('Password signup failed', Logger.sanitize({
+                    message: error.message,
+                    status: error.status
+                }));
+
+                let message = 'Failed to create account. Please try again.';
+                if (error.message.includes('already')) {
+                    message = 'An account with this email already exists.';
+                } else if (error.message.includes('password')) {
+                    message = error.message;
+                } else if (error.status === 429) {
+                    message = 'Too many attempts. Please try again later.';
+                }
+
+                showError(message);
+                submitBtn.textContent = 'Create Account';
                 submitBtn.disabled = false;
             }
         }
@@ -751,6 +863,7 @@
                 submitBtn.textContent = 'Sending...';
                 await sendMagicLink(email);
             } else {
+                // Password mode - either signin or signup
                 const password = passwordInput.value;
                 if (!password) {
                     showError('Please enter your password.');
@@ -758,8 +871,20 @@
                     return;
                 }
 
-                submitBtn.textContent = 'Signing in...';
-                await loginWithPassword(email, password);
+                if (passwordMode === 'signup') {
+                    const confirmPassword = confirmPasswordInput.value;
+                    if (!confirmPassword) {
+                        showError('Please confirm your password.');
+                        submitBtn.disabled = false;
+                        return;
+                    }
+
+                    submitBtn.textContent = 'Creating account...';
+                    await signupWithPassword(email, password, confirmPassword);
+                } else {
+                    submitBtn.textContent = 'Signing in...';
+                    await loginWithPassword(email, password);
+                }
             }
         });
 
