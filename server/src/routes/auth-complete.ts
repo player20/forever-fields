@@ -448,6 +448,102 @@ router.post(
 );
 
 /**
+ * GET /api/auth/reset-password?token=xxx
+ * Handle password reset link click - verifies token and logs user in
+ */
+router.get(
+  '/reset-password',
+  validate(authCallbackSchema, 'query'),
+  async (req: Request, res: Response) => {
+    try {
+      const { token } = req.query as { token: string };
+      const ipAddress = (req.ip || req.connection.remoteAddress || 'unknown').replace('::ffff:', '');
+
+      console.log(`[AUTH] Password reset link clicked from ${ipAddress}`);
+
+      // Find and validate magic link (password reset uses same token system)
+      const magicLink = await prisma.magicLink.findUnique({
+        where: { token },
+      });
+
+      if (!magicLink) {
+        console.warn(`[AUTH] Invalid password reset token from ${ipAddress}`);
+        return res.redirect(`${env.FRONTEND_URL}/login?error=invalid_token`);
+      }
+
+      if (magicLink.usedAt) {
+        console.warn(`[AUTH] Password reset token already used`);
+        return res.redirect(`${env.FRONTEND_URL}/login?error=token_used`);
+      }
+
+      if (new Date() > magicLink.expiresAt) {
+        console.warn(`[AUTH] Password reset token expired`);
+        return res.redirect(`${env.FRONTEND_URL}/login?error=token_expired`);
+      }
+
+      // Mark token as used
+      await prisma.magicLink.update({
+        where: { token },
+        data: { usedAt: new Date() },
+      });
+
+      // Get or create user
+      let user = await prisma.user.findUnique({
+        where: { email: magicLink.email },
+      });
+
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            email: magicLink.email,
+            name: magicLink.email.split('@')[0],
+          },
+        });
+      }
+
+      // Generate session tokens
+      const { data: sessionData, error: sessionError } =
+        await supabaseAdmin.auth.admin.generateLink({
+          type: 'magiclink',
+          email: magicLink.email,
+        });
+
+      if (sessionError || !sessionData) {
+        console.error('[AUTH] Session generation error:', sessionError);
+        return res.redirect(`${env.FRONTEND_URL}/login?error=session_failed`);
+      }
+
+      // Set httpOnly cookies
+      const sessionToken = sessionData.properties.hashed_token;
+
+      res.cookie('ff_access_token', sessionToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 3600000, // 1 hour
+        path: '/',
+      });
+
+      res.cookie('ff_refresh_token', sessionToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 3600000, // 7 days
+        path: '/api/auth',
+      });
+
+      console.log(`[AUTH] Password reset successful: ${user.email}`);
+
+      // Redirect to dashboard
+      return res.redirect(302, `${env.FRONTEND_URL}/dashboard`);
+    } catch (error) {
+      console.error('[AUTH] Password reset error:', error);
+      return res.redirect(`${env.FRONTEND_URL}/login?error=reset_failed`);
+    }
+  }
+);
+
+/**
  * POST /api/auth/refresh
  * Refresh access token
  *

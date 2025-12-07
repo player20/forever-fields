@@ -25,7 +25,7 @@ export const sendMagicLink = async (email: string, token: string): Promise<void>
     throw new Error('Email service not configured. Please contact support.');
   }
 
-  const magicLink = `${env.FRONTEND_URL}/auth/callback?token=${token}`;
+  const magicLink = `${env.API_URL}/api/auth/callback?token=${token}`;
   const fromEmail = env.SMTP_FROM || 'noreply@foreverfields.app';
 
   try {
@@ -104,7 +104,7 @@ export const sendPasswordResetEmail = async (email: string, token: string): Prom
     throw new Error('Email service not configured. Please contact support.');
   }
 
-  const resetLink = `${env.FRONTEND_URL}/auth/reset-password?token=${token}`;
+  const resetLink = `${env.API_URL}/api/auth/reset-password?token=${token}`;
   const fromEmail = env.SMTP_FROM || 'noreply@foreverfields.app';
 
   try {
