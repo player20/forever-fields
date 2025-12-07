@@ -138,10 +138,10 @@ router.get('/callback', validate(authCallbackSchema, 'query'), async (req, res) 
     }
 
     // Use the hashed token as both access and refresh (Supabase handles internally)
-    const token = sessionData.properties.hashed_token;
+    const sessionToken = sessionData.properties.hashed_token;
 
     // Set httpOnly cookies (secure, not accessible to JavaScript)
-    res.cookie('ff_access_token', token, {
+    res.cookie('ff_access_token', sessionToken, {
       httpOnly: true,                                    // Cannot be accessed by JavaScript (XSS protection)
       secure: process.env.NODE_ENV === 'production',    // HTTPS only in production
       sameSite: 'strict',                                // CSRF protection
@@ -149,7 +149,7 @@ router.get('/callback', validate(authCallbackSchema, 'query'), async (req, res) 
       path: '/',
     });
 
-    res.cookie('ff_refresh_token', token, {
+    res.cookie('ff_refresh_token', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
