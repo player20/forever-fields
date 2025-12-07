@@ -212,7 +212,7 @@ router.get(
       res.cookie('ff_access_token', sessionToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site (requires secure)
         maxAge: 3600000, // 1 hour
         path: '/',
       });
@@ -220,7 +220,7 @@ router.get(
       res.cookie('ff_refresh_token', sessionToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site (requires secure)
         maxAge: 7 * 24 * 3600000, // 7 days
         path: '/api/auth',
       });

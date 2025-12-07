@@ -144,7 +144,7 @@ router.get('/callback', validate(authCallbackSchema, 'query'), async (req, res) 
     res.cookie('ff_access_token', sessionToken, {
       httpOnly: true,                                    // Cannot be accessed by JavaScript (XSS protection)
       secure: process.env.NODE_ENV === 'production',    // HTTPS only in production
-      sameSite: 'strict',                                // CSRF protection
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site                                // CSRF protection
       maxAge: 3600000,                                   // 1 hour
       path: '/',
     });
@@ -152,7 +152,7 @@ router.get('/callback', validate(authCallbackSchema, 'query'), async (req, res) 
     res.cookie('ff_refresh_token', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site
       maxAge: 7 * 24 * 3600000,                          // 7 days
       path: '/api/auth',                                  // Only sent to auth endpoints
     });
@@ -175,14 +175,14 @@ router.post('/logout', async (req: Request, res: Response) => {
     res.clearCookie('ff_access_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site
       path: '/',
     });
 
     res.clearCookie('ff_refresh_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site
       path: '/api/auth',
     });
 
