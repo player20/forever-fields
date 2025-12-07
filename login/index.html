@@ -376,14 +376,34 @@
 
         async function sendMagicLink(email) {
             try {
+                console.log('Sending magic link to:', email);
+                console.log('API URL:', api.baseURL);
+
                 const response = await api.post('/api/auth/magic-link', { email });
+
+                console.log('Magic link sent successfully:', response);
 
                 // Show success state
                 sentEmailDisplay.textContent = email;
                 loginCard.classList.add('sent');
             } catch (error) {
                 console.error('Magic link error:', error);
-                alert('Failed to send magic link. Please try again or contact support.');
+                console.error('Error details:', {
+                    message: error.message,
+                    status: error.status,
+                    data: error.data,
+                    stack: error.stack
+                });
+
+                let errorMessage = 'Failed to send magic link.';
+                if (error.status) {
+                    errorMessage += ` (Error ${error.status})`;
+                }
+                if (error.message) {
+                    errorMessage += `\n${error.message}`;
+                }
+
+                alert(errorMessage + '\n\nCheck console for details.');
                 submitBtn.textContent = 'Send Magic Link';
                 submitBtn.disabled = false;
             }
