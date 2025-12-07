@@ -31,3 +31,9 @@ build/
 *.tmp
 *.temp
 .cache/
+
+# Environment files
+server/.env
+.env
+.env.local
+.env.production
