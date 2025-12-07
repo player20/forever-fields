@@ -88,6 +88,40 @@
             font-size: 0.95rem;
         }
 
+        /* Auth Tabs */
+        .auth-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: var(--sage-pale);
+            padding: 0.25rem;
+            border-radius: 12px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 0.75rem;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--gray-body);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .auth-tab.active {
+            background: white;
+            color: var(--sage-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .auth-tab:hover:not(.active) {
+            color: var(--gray-dark);
+        }
+
         /* Form Styles */
         .login-form {
             margin-bottom: 1.5rem;
@@ -127,6 +161,38 @@
             opacity: 0.6;
         }
 
+        .password-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--gray-body);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.25rem;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: 0.5rem;
+        }
+
+        .forgot-password a {
+            color: var(--sage-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
         .login-btn {
             width: 100%;
             padding: 1rem;
@@ -150,6 +216,35 @@
             opacity: 0.7;
             cursor: not-allowed;
             transform: none;
+        }
+
+        /* SSO Buttons */
+        .sso-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .sso-btn {
+            flex: 1;
+            padding: 0.9rem;
+            background: white;
+            border: 2px solid var(--sage-light);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: inherit;
+        }
+
+        .sso-btn:hover {
+            border-color: var(--sage-primary);
+            background: var(--sage-pale);
         }
 
         /* Reassurance */
@@ -255,6 +350,8 @@
 
         /* Hide form when success */
         .login-card.sent .login-form,
+        .login-card.sent .auth-tabs,
+        .login-card.sent .sso-buttons,
         .login-card.sent .divider,
         .login-card.sent .create-link,
         .login-card.sent h1,
@@ -287,6 +384,38 @@
         .login-footer a:hover {
             text-decoration: underline;
         }
+
+        /* Hide/show based on mode */
+        .magic-link-only {
+            display: block;
+        }
+
+        .password-only {
+            display: none;
+        }
+
+        .login-card[data-mode="password"] .magic-link-only {
+            display: none;
+        }
+
+        .login-card[data-mode="password"] .password-only {
+            display: block;
+        }
+
+        /* Error message */
+        .error-message {
+            background: #fdecea;
+            color: #c53030;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -303,10 +432,24 @@
     <!-- Main -->
     <main class="login-main">
         <div class="login-container">
-            <div class="login-card" id="loginCard">
+            <div class="login-card" id="loginCard" data-mode="magic-link">
                 <h1>Welcome Back</h1>
                 <p class="subtitle">Sign in to continue preserving memories</p>
 
+                <!-- Auth Mode Tabs -->
+                <div class="auth-tabs">
+                    <button type="button" class="auth-tab active" data-mode="magic-link">
+                        Magic Link
+                    </button>
+                    <button type="button" class="auth-tab" data-mode="password">
+                        Password
+                    </button>
+                </div>
+
+                <!-- Error Message -->
+                <div class="error-message" id="errorMessage"></div>
+
+                <!-- Login Form -->
                 <form class="login-form" id="loginForm">
                     <div class="form-group">
                         <label for="email">Email Address</label>
@@ -319,14 +462,48 @@
                             autocomplete="email"
                         >
                     </div>
+
+                    <!-- Password Field (hidden by default) -->
+                    <div class="form-group password-only">
+                        <label for="password">Password</label>
+                        <div class="password-group">
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                            >
+                            <button type="button" class="password-toggle" id="passwordToggle">
+                                👁️
+                            </button>
+                        </div>
+                        <div class="forgot-password">
+                            <a href="#" id="forgotPasswordLink">Forgot password?</a>
+                        </div>
+                    </div>
+
                     <button type="submit" class="login-btn" id="submitBtn">
                         Send Magic Link
                     </button>
-                    <div class="reassurance">
+
+                    <div class="reassurance magic-link-only">
                         <span class="reassurance-icon">🔒</span>
                         <span>No password needed. We'll email you a secure link.</span>
                     </div>
                 </form>
+
+                <!-- SSO Buttons -->
+                <div class="sso-buttons">
+                    <button type="button" class="sso-btn" id="googleBtn">
+                        <span>🔍</span>
+                        <span>Google</span>
+                    </button>
+                    <button type="button" class="sso-btn" id="appleBtn">
+                        <span>🍎</span>
+                        <span>Apple</span>
+                    </button>
+                </div>
 
                 <div class="divider"><span>or</span></div>
 
@@ -365,21 +542,77 @@
     <script src="../js/api-client.js"></script>
     <script src="../js/script.js"></script>
     <script>
-        const loginForm = document.getElementById('loginForm');
         const loginCard = document.getElementById('loginCard');
+        const loginForm = document.getElementById('loginForm');
         const submitBtn = document.getElementById('submitBtn');
         const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
         const sentEmailDisplay = document.getElementById('sentEmail');
         const resendLink = document.getElementById('resendLink');
+        const authTabs = document.querySelectorAll('.auth-tab');
+        const passwordToggle = document.getElementById('passwordToggle');
+        const errorMessage = document.getElementById('errorMessage');
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        const googleBtn = document.getElementById('googleBtn');
+        const appleBtn = document.getElementById('appleBtn');
 
         // Initialize API client
         const api = new ForeverFieldsAPI();
 
+        // Current authentication mode
+        let authMode = 'magic-link';
+
+        // Switch between magic link and password modes
+        authTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                authMode = this.dataset.mode;
+
+                // Update active tab
+                authTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                // Update card mode
+                loginCard.dataset.mode = authMode;
+
+                // Update submit button text
+                submitBtn.textContent = authMode === 'magic-link'
+                    ? 'Send Magic Link'
+                    : 'Sign In';
+
+                // Clear error
+                hideError();
+
+                // Clear password field when switching away
+                if (authMode === 'magic-link') {
+                    passwordInput.value = '';
+                }
+            });
+        });
+
+        // Password visibility toggle
+        passwordToggle.addEventListener('click', function() {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            passwordToggle.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+        }
+
+        // Hide error message
+        function hideError() {
+            errorMessage.classList.remove('show');
+        }
+
+        // Magic Link Authentication
         async function sendMagicLink(email) {
             try {
                 Logger.log('Magic link request initiated');
 
-                const response = await api.post('/api/auth/magic-link', { email });
+                const response = await api.post('/api/auth/request-magic-link', { email });
 
                 Logger.log('Magic link sent successfully');
 
@@ -387,53 +620,126 @@
                 sentEmailDisplay.textContent = email;
                 loginCard.classList.add('sent');
             } catch (error) {
-                Logger.error('Authentication failed', Logger.sanitize({
+                Logger.error('Magic link failed', Logger.sanitize({
                     message: error.message,
                     status: error.status
                 }));
 
-                let errorMessage = 'Failed to send magic link.';
-                if (error.status) {
-                    errorMessage += ` (Error ${error.status})`;
-                }
-                if (error.message) {
-                    errorMessage += `\n${error.message}`;
-                }
-
-                alert(errorMessage + '\n\nCheck console for details.');
+                showError(error.message || 'Failed to send magic link. Please try again.');
                 submitBtn.textContent = 'Send Magic Link';
                 submitBtn.disabled = false;
             }
         }
 
+        // Password Authentication
+        async function loginWithPassword(email, password) {
+            try {
+                Logger.log('Password login initiated');
+
+                const response = await api.post('/api/auth/login', {
+                    email,
+                    password
+                });
+
+                Logger.log('Login successful');
+
+                // Redirect to dashboard
+                window.location.href = '/dashboard';
+            } catch (error) {
+                Logger.error('Password login failed', Logger.sanitize({
+                    message: error.message,
+                    status: error.status
+                }));
+
+                let message = 'Invalid email or password.';
+                if (error.status === 429) {
+                    message = 'Too many login attempts. Please try again later.';
+                } else if (error.message) {
+                    message = error.message;
+                }
+
+                showError(message);
+                submitBtn.textContent = 'Sign In';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Forgot Password
+        forgotPasswordLink.addEventListener('click', async function(e) {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            if (!email) {
+                showError('Please enter your email address first.');
+                emailInput.focus();
+                return;
+            }
+
+            try {
+                await api.post('/api/auth/forgot-password', { email });
+                sentEmailDisplay.textContent = email;
+                loginCard.classList.add('sent');
+            } catch (error) {
+                showError('Failed to send reset email. Please try again.');
+            }
+        });
+
+        // SSO Authentication
+        googleBtn.addEventListener('click', function() {
+            window.location.href = api.baseURL + '/api/auth/sso/google';
+        });
+
+        appleBtn.addEventListener('click', function() {
+            window.location.href = api.baseURL + '/api/auth/sso/apple';
+        });
+
+        // Form Submission
         loginForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            hideError();
 
             const email = emailInput.value.trim();
             if (!email) return;
 
             // Show loading state
-            submitBtn.textContent = 'Sending...';
             submitBtn.disabled = true;
 
-            // Actually send the magic link
-            await sendMagicLink(email);
+            if (authMode === 'magic-link') {
+                submitBtn.textContent = 'Sending...';
+                await sendMagicLink(email);
+            } else {
+                const password = passwordInput.value;
+                if (!password) {
+                    showError('Please enter your password.');
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                submitBtn.textContent = 'Signing in...';
+                await loginWithPassword(email, password);
+            }
         });
 
+        // Resend Magic Link
         resendLink.addEventListener('click', function(e) {
             e.preventDefault();
 
             // Reset to form
             loginCard.classList.remove('sent');
-            submitBtn.textContent = 'Send Magic Link';
+            submitBtn.textContent = authMode === 'magic-link' ? 'Send Magic Link' : 'Sign In';
             submitBtn.disabled = false;
             emailInput.value = sentEmailDisplay.textContent;
 
             // Re-submit after a moment
             setTimeout(() => {
-                loginForm.dispatchEvent(new Event('submit'));
+                if (authMode === 'magic-link') {
+                    loginForm.dispatchEvent(new Event('submit'));
+                }
             }, 100);
         });
+
+        // Auto-focus email field
+        emailInput.focus();
     </script>
 </body>
 </html>
