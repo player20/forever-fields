@@ -97,11 +97,17 @@ router.put('/:memorialId', strictRateLimiter, async (req: Request, res: Response
     let validatedData: { facebook: string | null; instagram: string | null; tiktok: string | null };
 
     try {
-      validatedData = validateSocialUrls({
+      const validated = validateSocialUrls({
         facebook: data.facebook ?? null,
         instagram: data.instagram ?? null,
         tiktok: data.tiktok ?? null,
       });
+      // Extract only the fields we need
+      validatedData = {
+        facebook: validated.facebook ?? null,
+        instagram: validated.instagram ?? null,
+        tiktok: validated.tiktok ?? null,
+      };
     } catch (error) {
       return res.status(400).json({
         error: error instanceof Error ? error.message : 'Invalid URL format',

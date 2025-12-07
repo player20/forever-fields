@@ -55,17 +55,12 @@ router.post(
       const token = generateSecureToken();
       const expiresAt = getMagicLinkExpiration(); // 15 minutes
 
-      // Store magic link with device fingerprint
+      // Store magic link
       await prisma.magicLink.create({
         data: {
           email,
           token,
           expiresAt,
-          metadata: {
-            userAgent,
-            ipAddress,
-            requestedAt: new Date().toISOString(),
-          },
         },
       });
 
@@ -124,14 +119,6 @@ router.get(
       if (new Date() > magicLink.expiresAt) {
         console.log(`[AUTH] Expired magic link attempted: ${magicLink.email}`);
         return res.status(401).json({ error: 'Magic link expired' });
-      }
-
-      // Optional: Device fingerprint validation (relaxed for mobile)
-      // Can be enhanced with more sophisticated fingerprinting
-      const metadata = magicLink.metadata as any;
-      if (metadata?.userAgent && metadata.userAgent !== userAgent) {
-        console.warn(`[AUTH] Device mismatch for ${magicLink.email}`);
-        // Allow but log for security monitoring
       }
 
       // Mark magic link as used
@@ -492,7 +479,6 @@ router.post(
             email,
             token,
             expiresAt,
-            metadata: { purpose: 'password_reset' },
           },
         });
 

@@ -162,6 +162,22 @@ export const uploadRateLimiter = rateLimit({
   },
 });
 
+// Strict rate limiter: 10 requests per minute (for sensitive operations)
+export const strictRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10,
+  message: 'Too many requests. Please slow down.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { trustProxy: true },
+  handler: (req, res) => {
+    res.status(429).json({
+      error: 'Rate limit exceeded',
+      retryAfter: '1 minute',
+    });
+  },
+});
+
 // ============================================
 // HTTPS ENFORCEMENT
 // ============================================

@@ -17,6 +17,9 @@ export const authCallbackSchema = z.object({
   token: z.string().length(32, 'Invalid token format'),
 });
 
+// Re-export auth schemas from auth-schemas.ts
+export { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from './auth-schemas';
+
 // ============================================
 // MEMORIAL SCHEMAS
 // ============================================

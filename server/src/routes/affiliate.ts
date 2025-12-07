@@ -125,7 +125,7 @@ router.get('/flowers/redirect', async (req: Request, res: Response) => {
 
     // Get affiliate URL
     const affiliateData = await fetch(`${req.protocol}://${req.get('host')}/api/affiliate/flowers?memorialId=${memorialId}`)
-      .then(r => r.json());
+      .then(r => r.json()) as { url?: string };
 
     if (affiliateData.url) {
       // Redirect to BloomNation
