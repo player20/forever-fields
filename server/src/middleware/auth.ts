@@ -26,13 +26,19 @@ declare global {
  */
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const authHeader = req.headers.authorization;
+    // Try cookie first (httpOnly, more secure), then Authorization header (for API clients)
+    let token = req.cookies?.ff_access_token;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Authentication required' });
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      }
     }
 
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    if (!token) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
 
     // Verify token with Supabase
     const { data, error } = await supabaseAdmin.auth.getUser(token);
@@ -70,13 +76,19 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
  */
 export const optionalAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const authHeader = req.headers.authorization;
+    // Try cookie first, then Authorization header
+    let token = req.cookies?.ff_access_token;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return next(); // No auth provided, continue without user
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
     }
 
-    const token = authHeader.substring(7);
+    if (!token) {
+      return next(); // No auth provided, continue without user
+    }
 
     const { data, error } = await supabaseAdmin.auth.getUser(token);
 

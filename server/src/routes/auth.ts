@@ -98,12 +98,20 @@ router.get('/callback', validate(authCallbackSchema, 'query'), async (req, res) 
     });
 
     if (!user) {
+      // Create new user with 14-day free trial
+      const trialEndsAt = new Date();
+      trialEndsAt.setDate(trialEndsAt.getDate() + 14); // 14 days from now
+
       user = await prisma.user.create({
         data: {
           email: magicLink.email,
           name: magicLink.email.split('@')[0], // Default name from email
+          subscriptionTier: 'FREE', // Start with free tier
+          trialEndsAt, // 14-day trial period
         },
       });
+
+      console.log(`[AUTH] New user created: ${user.email} (trial ends ${trialEndsAt.toISOString()})`);
     }
 
     // Ensure Supabase auth user exists (create on first login only)
@@ -134,14 +142,60 @@ router.get('/callback', validate(authCallbackSchema, 'query'), async (req, res) 
       return res.status(500).json({ error: 'Session creation failed' });
     }
 
-    // Redirect with session tokens
-    const accessToken = sessionData.properties.hashed_token;
-    const redirectUrl = `${process.env.FRONTEND_URL}/auth/callback?access_token=${accessToken}&refresh_token=${accessToken}`;
+    // Extract separate access and refresh tokens
+    const accessToken = sessionData.properties.access_token || sessionData.properties.hashed_token;
+    const refreshToken = sessionData.properties.refresh_token || sessionData.properties.hashed_token;
 
-    return res.redirect(302, redirectUrl);
+    // Set httpOnly cookies (secure, not accessible to JavaScript)
+    res.cookie('ff_access_token', accessToken, {
+      httpOnly: true,                                    // Cannot be accessed by JavaScript (XSS protection)
+      secure: process.env.NODE_ENV === 'production',    // HTTPS only in production
+      sameSite: 'strict',                                // CSRF protection
+      maxAge: 3600000,                                   // 1 hour
+      path: '/',
+    });
+
+    res.cookie('ff_refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 3600000,                          // 7 days
+      path: '/api/auth',                                  // Only sent to auth endpoints
+    });
+
+    // Redirect without tokens in URL (secure)
+    return res.redirect(302, `${process.env.FRONTEND_URL}/dashboard`);
   } catch (error) {
     console.error('Auth callback error:', error);
     return res.status(500).json({ error: 'Authentication failed' });
+  }
+});
+
+/**
+ * POST /api/auth/logout
+ * Clear httpOnly cookies and log out user
+ */
+router.post('/logout', async (req: Request, res: Response) => {
+  try {
+    // Clear httpOnly cookies by setting them to expire immediately
+    res.clearCookie('ff_access_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+    });
+
+    res.clearCookie('ff_refresh_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/api/auth',
+    });
+
+    return res.status(200).json({ message: 'Logged out successfully' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    return res.status(500).json({ error: 'Logout failed' });
   }
 });
 

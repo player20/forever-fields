@@ -41,7 +41,17 @@ const envSchema = z.object({
   VAPID_SUBJECT: z.string().optional(),
 
   // Security
-  JWT_SECRET: z.string().min(10, 'JWT_SECRET must be at least 10 characters'),
+  JWT_SECRET: z
+    .string()
+    .min(32, 'JWT_SECRET must be at least 32 characters for adequate security')
+    .refine(
+      (val) => {
+        // Check for sufficient entropy (not just repeated characters)
+        const uniqueChars = new Set(val).size;
+        return uniqueChars >= 10; // At least 10 different characters
+      },
+      { message: 'JWT_SECRET must have sufficient entropy (varied characters)' }
+    ),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

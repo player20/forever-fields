@@ -359,12 +359,19 @@ router.get('/sso/:provider', authRateLimiter, async (req: Request, res: Response
 
     console.log(`[AUTH] SSO request: ${provider} from ${ipAddress}`);
 
+    // Generate CSRF state token for OAuth security
+    const { generateOAuthState } = await import('../utils/oauth-state');
+    const state = generateOAuthState(ipAddress);
+
     // Generate OAuth URL with Supabase
     const { data, error } = await supabaseAdmin.auth.signInWithOAuth({
       provider: provider as 'google' | 'apple',
       options: {
-        redirectTo: `${env.FRONTEND_URL}/auth/callback`,
+        redirectTo: `${env.API_URL}/api/auth/sso/callback`,
         scopes: provider === 'google' ? 'email profile' : undefined,
+        queryParams: {
+          state, // CSRF protection
+        },
       },
     });
 
@@ -377,6 +384,72 @@ router.get('/sso/:provider', authRateLimiter, async (req: Request, res: Response
   } catch (error) {
     console.error('[AUTH] SSO error:', error);
     return res.status(500).json({ error: 'SSO failed' });
+  }
+});
+
+/**
+ * GET /api/auth/sso/callback
+ * Handle OAuth provider callback with CSRF validation
+ */
+router.get('/sso/callback', async (req: Request, res: Response) => {
+  try {
+    const { code, state, error: oauthError } = req.query;
+    const ipAddress = (req.ip || req.connection.remoteAddress || 'unknown').replace('::ffff:', '');
+
+    // Check for OAuth errors from provider
+    if (oauthError) {
+      console.error('[AUTH] OAuth error from provider:', oauthError);
+      return res.redirect(`${env.FRONTEND_URL}/login?error=oauth_failed`);
+    }
+
+    // Validate CSRF state token
+    const { validateOAuthState } = await import('../utils/oauth-state');
+    if (!state || !validateOAuthState(state as string, ipAddress)) {
+      console.error('[AUTH] Invalid OAuth state from', ipAddress);
+      return res.redirect(`${env.FRONTEND_URL}/login?error=invalid_state`);
+    }
+
+    // Exchange code for session
+    const { data, error } = await supabaseAdmin.auth.exchangeCodeForSession(code as string);
+
+    if (error || !data.session) {
+      console.error('[AUTH] Code exchange failed:', error);
+      return res.redirect(`${env.FRONTEND_URL}/login?error=auth_failed`);
+    }
+
+    // Set httpOnly cookies
+    res.cookie('ff_access_token', data.session.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 3600000, // 1 hour
+      path: '/',
+    });
+
+    res.cookie('ff_refresh_token', data.session.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 3600000, // 7 days
+      path: '/api/auth',
+    });
+
+    // Get or create user in database
+    const user = await prisma.user.upsert({
+      where: { email: data.session.user.email! },
+      update: { updatedAt: new Date() },
+      create: {
+        email: data.session.user.email!,
+        name: data.session.user.user_metadata.name || data.session.user.email!.split('@')[0],
+      },
+    });
+
+    console.log(`[AUTH] Successful SSO login: ${user.email}`);
+
+    return res.redirect(`${env.FRONTEND_URL}/dashboard`);
+  } catch (error) {
+    console.error('[AUTH] SSO callback error:', error);
+    return res.redirect(`${env.FRONTEND_URL}/login?error=auth_failed`);
   }
 });
 

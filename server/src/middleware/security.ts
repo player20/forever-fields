@@ -24,6 +24,7 @@ export const helmetMiddleware = helmet({
       objectSrc: ["'none'"],
       mediaSrc: ["'self'", 'https://res.cloudinary.com'],
       frameSrc: ["'none'"],
+      upgradeInsecureRequests: isProd ? [] : null, // Upgrade HTTP to HTTPS in production
     },
   },
   hsts: {
@@ -34,7 +35,25 @@ export const helmetMiddleware = helmet({
   frameguard: { action: 'deny' },
   noSniff: true,
   xssFilter: true,
+  referrerPolicy: {
+    policy: 'strict-origin-when-cross-origin', // Privacy protection
+  },
+  dnsPrefetchControl: { allow: false }, // Prevent DNS prefetching
+  ieNoOpen: true, // Prevent IE from executing downloads
+  hidePoweredBy: true, // Remove X-Powered-By header
 });
+
+/**
+ * Permissions-Policy Header
+ * Restricts browser features for security and privacy
+ */
+export const permissionsPolicyMiddleware = (_req: any, res: any, next: any) => {
+  res.setHeader(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=(self), payment=(), usb=(), magnetometer=(), accelerometer=(), gyroscope=()'
+  );
+  next();
+};
 
 // ============================================
 // CORS - Cross-Origin Resource Sharing
@@ -44,8 +63,23 @@ export const corsMiddleware = cors({
   origin: (origin, callback) => {
     const allowedOrigins = [env.FRONTEND_URL];
 
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
+    // Add development origins if in dev mode
+    if (env.NODE_ENV === 'development') {
+      allowedOrigins.push('http://localhost:3000', 'http://127.0.0.1:3000');
+    }
+
+    // Handle no-origin requests (same-origin, tools, etc.)
+    if (!origin) {
+      // Only allow no-origin in development or from trusted user agents
+      if (env.NODE_ENV === 'development') {
+        return callback(null, true);
+      }
+
+      // In production, only allow from testing tools (not malicious apps)
+      // Note: This is evaluated in the middleware context with access to req
+      // For now, reject no-origin in production for maximum security
+      return callback(new Error('Origin header required'));
+    }
 
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -71,7 +105,7 @@ export const authRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: false,
-  validate: { trustProxy: false }, // Disable trust proxy validation for Render
+  validate: { trustProxy: true }, // Trust proxy headers (matches app.ts config)
   handler: (req, res) => {
     res.status(429).json({
       error: 'Too many requests',
@@ -87,7 +121,7 @@ export const apiRateLimiter = rateLimit({
   message: 'Too many requests, please slow down',
   standardHeaders: true,
   legacyHeaders: false,
-  validate: { trustProxy: false }, // Disable trust proxy validation for Render
+  validate: { trustProxy: true }, // Trust proxy headers (matches app.ts config)
   handler: (req, res) => {
     res.status(429).json({
       error: 'Rate limit exceeded',
@@ -103,7 +137,7 @@ export const candleRateLimiter = rateLimit({
   message: 'Please wait before lighting another candle',
   standardHeaders: true,
   legacyHeaders: false,
-  validate: { trustProxy: false }, // Disable trust proxy validation for Render
+  validate: { trustProxy: true }, // Trust proxy headers (matches app.ts config)
   handler: (req, res) => {
     res.status(429).json({
       error: 'Too many candles lit',
@@ -119,7 +153,7 @@ export const uploadRateLimiter = rateLimit({
   message: 'Too many upload requests',
   standardHeaders: true,
   legacyHeaders: false,
-  validate: { trustProxy: false }, // Disable trust proxy validation for Render
+  validate: { trustProxy: true }, // Trust proxy headers (matches app.ts config)
   handler: (req, res) => {
     res.status(429).json({
       error: 'Upload rate limit exceeded',
