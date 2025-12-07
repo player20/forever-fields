@@ -18,7 +18,8 @@ import { inputSanitizer, blockAttackPatterns } from './middleware/input-sanitize
 import { requestLogger } from './middleware/request-logger';
 
 // Import routes
-import authRoutes from './routes/auth';
+// import authRoutes from './routes/auth'; // Legacy simple magic-link only
+import authCompleteRoutes from './routes/auth-complete'; // Hybrid auth (magic link + password + SSO)
 import memorialRoutes from './routes/memorials';
 import uploadRoutes from './routes/uploads';
 import pendingRoutes from './routes/pending';
@@ -98,7 +99,8 @@ app.get('/health', (req, res) => {
 // API ROUTES
 // ============================================
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authCompleteRoutes); // Hybrid auth: magic link + password + SSO
+// app.use('/api/auth', authRoutes); // Simple magic-link only (legacy)
 app.use('/api/memorials', memorialRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/pending', pendingRoutes);
