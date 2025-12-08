@@ -349,15 +349,29 @@ router.post(
 
       console.log(`[AUTH] Successful password login: ${data.user.email}`);
 
+      // Set httpOnly cookies for security (prevent XSS token theft)
+      res.cookie('ff_access_token', data.session.access_token, {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production',
+        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: remember ? 30 * 24 * 3600000 : 3600000, // 30 days if "remember me", else 1 hour
+        path: '/',
+      });
+
+      res.cookie('ff_refresh_token', data.session.refresh_token, {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production',
+        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: remember ? 90 * 24 * 3600000 : 7 * 24 * 3600000, // 90 days if "remember me", else 7 days
+        path: '/api/auth',
+      });
+
       return res.status(200).json({
         message: 'Login successful',
-        access_token: data.session.access_token,
-        refresh_token: data.session.refresh_token,
         user: {
           id: data.user.id,
           email: data.user.email,
         },
-        remember,
       });
     } catch (error) {
       console.error('[AUTH] Login error:', error);
@@ -421,8 +435,15 @@ router.post(
 
       console.log(`[AUTH] Password reset requested: ${email} from ${ipAddress}`);
 
+      // Constant-time operation to prevent timing attacks
+      const startTime = Date.now();
+
       // Check if user exists
       const user = await prisma.user.findUnique({ where: { email } });
+
+      // Always generate token to maintain constant time
+      const token = generateSecureToken();
+      const expiresAt = getMagicLinkExpiration();
 
       if (user) {
         // Send password reset via Supabase (uses email template)
@@ -435,9 +456,6 @@ router.post(
         }
 
         // Alternative: Send via our magic link system
-        const token = generateSecureToken();
-        const expiresAt = getMagicLinkExpiration();
-
         await prisma.magicLink.create({
           data: {
             email,
@@ -449,6 +467,15 @@ router.post(
         await sendPasswordResetEmail(email, token).catch((err) => {
           console.error('[AUTH] Failed to send password reset email:', err);
         });
+      } else {
+        // Simulate same delay as email sending to prevent timing enumeration
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
+      // Ensure minimum response time of 500ms to prevent timing attacks
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 500) {
+        await new Promise((resolve) => setTimeout(resolve, 500 - elapsed));
       }
 
       // Always return success (prevent email enumeration)

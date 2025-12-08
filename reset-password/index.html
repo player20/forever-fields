@@ -224,7 +224,7 @@
                     <div class="password-requirements">
                         <strong>Password must contain:</strong>
                         <ul>
-                            <li id="req-length">At least 8 characters</li>
+                            <li id="req-length">At least 12 characters</li>
                             <li id="req-lowercase">One lowercase letter</li>
                             <li id="req-uppercase">One uppercase letter</li>
                             <li id="req-number">One number</li>
@@ -306,7 +306,7 @@
             const password = newPasswordInput.value;
 
             // Check each requirement
-            const hasLength = password.length >= 8;
+            const hasLength = password.length >= 12;
             const hasLowercase = /[a-z]/.test(password);
             const hasUppercase = /[A-Z]/.test(password);
             const hasNumber = /[0-9]/.test(password);
@@ -336,8 +336,8 @@
             }
 
             // Validate password requirements
-            if (newPassword.length < 8) {
-                showError('Password must be at least 8 characters');
+            if (newPassword.length < 12) {
+                showError('Password must be at least 12 characters');
                 return;
             }
 
