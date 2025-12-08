@@ -6,6 +6,7 @@
 import { prisma } from '../config/database';
 
 let keepAliveInterval: NodeJS.Timeout | null = null;
+let firstPing = true;
 
 export const startDatabaseKeepAlive = () => {
   if (keepAliveInterval) {
@@ -36,7 +37,15 @@ const pingDatabase = async () => {
     // Simple query to keep connection alive
     await prisma.$queryRaw`SELECT 1`;
     console.log('[KEEP-ALIVE] Database ping successful');
+    firstPing = false;
   } catch (error) {
-    console.error('[KEEP-ALIVE] Database ping failed:', error);
+    if (firstPing) {
+      // Expected failure on first ping (DB may be sleeping on Supabase free tier)
+      console.log('[KEEP-ALIVE] Database ping failed (DB may be sleeping, will retry in 5 minutes)');
+      firstPing = false;
+    } else {
+      // Unexpected failure - log full error
+      console.error('[KEEP-ALIVE] Database ping failed:', error);
+    }
   }
 };
