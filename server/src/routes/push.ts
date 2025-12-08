@@ -19,17 +19,30 @@ const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
 const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:support@foreverfields.com';
 
+// Validate VAPID keys format before attempting to use them
+function isValidVapidKey(key: string): boolean {
+  // URL-safe base64 without padding should be 87 characters for public key, 43 for private
+  return /^[A-Za-z0-9_-]+$/.test(key) && key.length > 40;
+}
+
 if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
-  try {
-    webpush.setVapidDetails(
-      VAPID_SUBJECT,
-      VAPID_PUBLIC_KEY,
-      VAPID_PRIVATE_KEY
-    );
-    console.log('[Push] VAPID keys configured successfully');
-  } catch (error) {
-    console.error('[Push] Invalid VAPID keys - push notifications disabled');
-    console.error('[Push] Error:', error instanceof Error ? error.message : error);
+  // Validate keys before trying to set them
+  if (isValidVapidKey(VAPID_PUBLIC_KEY) && isValidVapidKey(VAPID_PRIVATE_KEY)) {
+    try {
+      webpush.setVapidDetails(
+        VAPID_SUBJECT,
+        VAPID_PUBLIC_KEY,
+        VAPID_PRIVATE_KEY
+      );
+      console.log('[Push] VAPID keys configured successfully');
+    } catch (error) {
+      console.error('[Push] Invalid VAPID keys - push notifications disabled');
+      console.error('[Push] Error:', error instanceof Error ? error.message : error);
+      console.warn('[Push] Generate valid keys with: npx web-push generate-vapid-keys');
+    }
+  } else {
+    console.error('[Push] VAPID keys are not in valid URL-safe base64 format');
+    console.warn('[Push] Keys must be URL-safe base64 without padding (no "=" characters)');
     console.warn('[Push] Generate valid keys with: npx web-push generate-vapid-keys');
   }
 } else {
