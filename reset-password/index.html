@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password - Forever Fields</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .reset-container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .reset-card {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo span {
+            font-size: 3rem;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1a202c;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .password-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+        }
+
+        .password-requirements {
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        .password-requirements ul {
+            margin-top: 0.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .password-requirements li {
+            margin-bottom: 0.25rem;
+        }
+
+        .password-requirements li.valid {
+            color: #48bb78;
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .reset-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .reset-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: #c6f6d5;
+            color: #276749;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="reset-container">
+        <div class="reset-card">
+            <div class="logo">
+                <span>🌿</span>
+            </div>
+
+            <h1>Reset Password</h1>
+            <p class="subtitle">Enter your new password below</p>
+
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+
+            <form id="resetForm">
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <div class="password-group">
+                        <input
+                            type="password"
+                            id="newPassword"
+                            name="newPassword"
+                            placeholder="Enter your new password"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <button type="button" class="password-toggle" id="passwordToggle">
+                            👁️
+                        </button>
+                    </div>
+                    <div class="password-requirements">
+                        <strong>Password must contain:</strong>
+                        <ul>
+                            <li id="req-length">At least 8 characters</li>
+                            <li id="req-lowercase">One lowercase letter</li>
+                            <li id="req-uppercase">One uppercase letter</li>
+                            <li id="req-number">One number</li>
+                            <li id="req-special">One special character (!@#$%^&*)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <div class="password-group">
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            placeholder="Confirm your new password"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <button type="button" class="password-toggle" id="confirmToggle">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="reset-btn" id="submitBtn">
+                    Reset Password
+                </button>
+            </form>
+
+            <div class="back-link">
+                <a href="../login">← Back to login</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Client -->
+    <script src="../js/api-client.js"></script>
+    <script src="../js/logger.js"></script>
+
+    <script>
+        const resetForm = document.getElementById('resetForm');
+        const newPasswordInput = document.getElementById('newPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const passwordToggle = document.getElementById('passwordToggle');
+        const confirmToggle = document.getElementById('confirmToggle');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        // Get token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        // Check if token exists
+        if (!token) {
+            showError('Invalid or missing reset token. Please request a new password reset link.');
+            submitBtn.disabled = true;
+        }
+
+        // Initialize API client
+        const api = new ForeverFieldsAPI();
+
+        // Password visibility toggles
+        passwordToggle.addEventListener('click', function() {
+            const type = newPasswordInput.type === 'password' ? 'text' : 'password';
+            newPasswordInput.type = type;
+            passwordToggle.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+
+        confirmToggle.addEventListener('click', function() {
+            const type = confirmPasswordInput.type === 'password' ? 'text' : 'password';
+            confirmPasswordInput.type = type;
+            confirmToggle.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+
+        // Real-time password validation
+        newPasswordInput.addEventListener('input', function() {
+            const password = newPasswordInput.value;
+
+            // Check each requirement
+            const hasLength = password.length >= 8;
+            const hasLowercase = /[a-z]/.test(password);
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSpecial = /[^a-zA-Z0-9]/.test(password);
+
+            // Update UI
+            document.getElementById('req-length').className = hasLength ? 'valid' : '';
+            document.getElementById('req-lowercase').className = hasLowercase ? 'valid' : '';
+            document.getElementById('req-uppercase').className = hasUppercase ? 'valid' : '';
+            document.getElementById('req-number').className = hasNumber ? 'valid' : '';
+            document.getElementById('req-special').className = hasSpecial ? 'valid' : '';
+        });
+
+        // Form submission
+        resetForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            hideError();
+            hideSuccess();
+
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // Validate passwords match
+            if (newPassword !== confirmPassword) {
+                showError('Passwords do not match');
+                return;
+            }
+
+            // Validate password requirements
+            if (newPassword.length < 8) {
+                showError('Password must be at least 8 characters');
+                return;
+            }
+
+            if (!/[a-z]/.test(newPassword)) {
+                showError('Password must contain at least one lowercase letter');
+                return;
+            }
+
+            if (!/[A-Z]/.test(newPassword)) {
+                showError('Password must contain at least one uppercase letter');
+                return;
+            }
+
+            if (!/[0-9]/.test(newPassword)) {
+                showError('Password must contain at least one number');
+                return;
+            }
+
+            if (!/[^a-zA-Z0-9]/.test(newPassword)) {
+                showError('Password must contain at least one special character');
+                return;
+            }
+
+            // Disable button and show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Resetting password...';
+
+            try {
+                Logger.log('Password reset submission');
+
+                const response = await api.post('/api/auth/reset-password', {
+                    token,
+                    newPassword
+                });
+
+                Logger.log('Password reset successful');
+
+                // Show success message
+                showSuccess(response.message || 'Password updated successfully!');
+
+                // Redirect to login after 2 seconds
+                setTimeout(() => {
+                    window.location.href = '../login?message=password_reset_success';
+                }, 2000);
+            } catch (error) {
+                Logger.error('Password reset failed', Logger.sanitize({
+                    message: error.message,
+                    status: error.status
+                }));
+
+                let message = 'Failed to reset password. Please try again.';
+
+                if (error.message.includes('expired') || error.message.includes('Invalid')) {
+                    message = 'Reset link has expired or is invalid. Please request a new one.';
+                } else if (error.message.includes('used')) {
+                    message = 'Reset link has already been used. Please request a new one.';
+                } else if (error.message.includes('password')) {
+                    message = error.message;
+                }
+
+                showError(message);
+                submitBtn.textContent = 'Reset Password';
+                submitBtn.disabled = false;
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+        }
+
+        function hideError() {
+            errorMessage.classList.remove('show');
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.classList.add('show');
+        }
+
+        function hideSuccess() {
+            successMessage.classList.remove('show');
+        }
+    </script>
+</body>
+</html>

@@ -498,17 +498,73 @@ router.get(
         return res.redirect(`${env.FRONTEND_URL}/login?error=token_expired`);
       }
 
+      // Token is valid - redirect to password reset page with token
+      // DO NOT mark as used yet - only mark used after password is actually changed
+      console.log(`[AUTH] Valid reset token - redirecting to reset page`);
+      return res.redirect(302, `${env.FRONTEND_URL}/reset-password?token=${token}`);
+    } catch (error) {
+      console.error('[AUTH] Password reset error:', error);
+      return res.redirect(`${env.FRONTEND_URL}/login?error=reset_failed`);
+    }
+  }
+);
+
+/**
+ * POST /api/auth/reset-password
+ * Complete password reset by setting new password
+ */
+router.post(
+  '/reset-password',
+  authRateLimiter,
+  validate(
+    z.object({
+      token: z.string().min(32, 'Invalid token'),
+      newPassword: z
+        .string()
+        .min(8, 'Password must be at least 8 characters')
+        .max(128)
+        .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+        .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+        .regex(/[0-9]/, 'Password must contain at least one number')
+        .regex(/[^a-zA-Z0-9]/, 'Password must contain at least one special character'),
+    })
+  ),
+  async (req: Request, res: Response) => {
+    try {
+      const { token, newPassword } = req.body;
+      const ipAddress = (req.ip || req.connection.remoteAddress || 'unknown').replace('::ffff:', '');
+
+      console.log(`[AUTH] Completing password reset from ${ipAddress}`);
+
+      // Find and validate token
+      const magicLink = await prisma.magicLink.findUnique({
+        where: { token },
+      });
+
+      if (!magicLink) {
+        return res.status(400).json({ error: 'Invalid or expired reset token' });
+      }
+
+      if (magicLink.usedAt) {
+        return res.status(400).json({ error: 'Reset link has already been used' });
+      }
+
+      if (new Date() > magicLink.expiresAt) {
+        return res.status(400).json({ error: 'Reset link has expired' });
+      }
+
       // Mark token as used
       await prisma.magicLink.update({
         where: { token },
         data: { usedAt: new Date() },
       });
 
-      // Get or create user
+      // Get user by email
       let user = await prisma.user.findUnique({
         where: { email: magicLink.email },
       });
 
+      // Create user if doesn't exist (in case they're resetting password before first login)
       if (!user) {
         user = await prisma.user.create({
           data: {
@@ -518,44 +574,44 @@ router.get(
         });
       }
 
-      // Generate session tokens
-      const { data: sessionData, error: sessionError } =
-        await supabaseAdmin.auth.admin.generateLink({
-          type: 'magiclink',
-          email: magicLink.email,
+      // Check if Supabase user exists
+      const { data: existingUser } = await supabaseAdmin.auth.admin.getUserById(user.id).catch(() => ({ data: null }));
+
+      if (existingUser?.user) {
+        // Update existing Supabase user's password
+        const { error } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
+          password: newPassword,
         });
 
-      if (sessionError || !sessionData) {
-        console.error('[AUTH] Session generation error:', sessionError);
-        return res.redirect(`${env.FRONTEND_URL}/login?error=session_failed`);
+        if (error) {
+          console.error('[AUTH] Supabase password update error:', error);
+          return res.status(500).json({ error: 'Failed to update password' });
+        }
+      } else {
+        // Create new Supabase user with password
+        const { error } = await supabaseAdmin.auth.admin.createUser({
+          email: magicLink.email,
+          password: newPassword,
+          email_confirm: true,
+          user_metadata: {
+            name: user.name,
+          },
+        });
+
+        if (error) {
+          console.error('[AUTH] Supabase user creation error:', error);
+          return res.status(500).json({ error: 'Failed to set password' });
+        }
       }
 
-      // Set httpOnly cookies
-      const sessionToken = sessionData.properties.hashed_token;
+      console.log(`[AUTH] Password reset successful for ${user.email}`);
 
-      res.cookie('ff_access_token', sessionToken, {
-        httpOnly: true,
-        secure: env.NODE_ENV === 'production',
-        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site (requires secure)
-        maxAge: 3600000, // 1 hour
-        path: '/',
+      return res.status(200).json({
+        message: 'Password updated successfully. You can now sign in with your new password.',
       });
-
-      res.cookie('ff_refresh_token', sessionToken, {
-        httpOnly: true,
-        secure: env.NODE_ENV === 'production',
-        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site (requires secure)
-        maxAge: 7 * 24 * 3600000, // 7 days
-        path: '/api/auth',
-      });
-
-      console.log(`[AUTH] Password reset successful: ${user.email}`);
-
-      // Redirect to login with success flag (allows frontend to check cookies on same domain)
-      return res.redirect(302, `${env.FRONTEND_URL}/login?auth=success`);
     } catch (error) {
-      console.error('[AUTH] Password reset error:', error);
-      return res.redirect(`${env.FRONTEND_URL}/login?error=reset_failed`);
+      console.error('[AUTH] Password reset completion error:', error);
+      return res.status(500).json({ error: 'Password reset failed' });
     }
   }
 );
