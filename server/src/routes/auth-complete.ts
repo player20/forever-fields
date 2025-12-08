@@ -734,38 +734,54 @@ router.post(
         data: { usedAt: new Date() },
       });
 
-      // Find Supabase user by email (handles UUID mismatches from legacy accounts)
-      console.log(`[AUTH] Looking up Supabase user by email: ${magicLink.email}`);
-      const { data: allUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-
-      if (listError) {
-        console.error('[AUTH] Failed to list Supabase users:', listError);
-        return res.status(500).json({ error: 'Failed to reset password' });
-      }
-
-      const supabaseUser = allUsers?.users.find(u => u.email === magicLink.email);
+      // Find or create Supabase user by email
+      console.log(`[AUTH] Password reset for: ${magicLink.email}`);
 
       let supabaseUserId: string;
+      let foundExisting = false;
+
+      // Try to update existing user's password (most common case)
+      // We'll search through paginated results from listUsers()
+      let page = 1;
+      let supabaseUser = null;
+
+      try {
+        // List users with pagination (default page size is ~1000)
+        const { data: userData, error: listError } = await supabaseAdmin.auth.admin.listUsers({
+          page,
+          perPage: 1000,
+        });
+
+        if (listError) {
+          console.error('[AUTH] Failed to list Supabase users:', listError);
+        } else if (userData?.users) {
+          supabaseUser = userData.users.find(u => u.email === magicLink.email);
+        }
+      } catch (listErr) {
+        console.error('[AUTH] Error listing users:', listErr);
+      }
 
       if (supabaseUser) {
-        // Supabase user exists - update their password
-        console.log(`[AUTH] Found Supabase user, updating password: ${supabaseUser.email} (${supabaseUser.id})`);
+        // Found existing Supabase user - update password
+        console.log(`[AUTH] Found Supabase user: ${supabaseUser.email} (${supabaseUser.id})`);
 
-        const { error } = await supabaseAdmin.auth.admin.updateUserById(supabaseUser.id, {
+        const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(supabaseUser.id, {
           password: newPassword,
         });
 
-        if (error) {
-          console.error('[AUTH] Supabase password update error:', error);
+        if (updateError) {
+          console.error('[AUTH] Password update failed:', updateError);
           return res.status(500).json({ error: 'Failed to update password' });
         }
 
         supabaseUserId = supabaseUser.id;
+        foundExisting = true;
+        console.log(`[AUTH] Password updated for existing user: ${supabaseUser.email}`);
       } else {
-        // Supabase user doesn't exist - create new one
-        console.log(`[AUTH] No Supabase user found, creating new: ${magicLink.email}`);
+        // User doesn't exist in Supabase - create new user with password
+        console.log(`[AUTH] Creating new Supabase user with password: ${magicLink.email}`);
 
-        const { data: newUser, error } = await supabaseAdmin.auth.admin.createUser({
+        const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
           email: magicLink.email,
           password: newPassword,
           email_confirm: true,
@@ -774,12 +790,13 @@ router.post(
           },
         });
 
-        if (error || !newUser.user) {
-          console.error('[AUTH] Supabase user creation error:', error);
+        if (createError || !newUser.user) {
+          console.error('[AUTH] Failed to create Supabase user:', createError);
           return res.status(500).json({ error: 'Failed to set password' });
         }
 
         supabaseUserId = newUser.user.id;
+        console.log(`[AUTH] New Supabase user created: ${magicLink.email} (${supabaseUserId})`);
       }
 
       // Ensure user exists in our database

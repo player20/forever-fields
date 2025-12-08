@@ -600,14 +600,31 @@
         // Check if user just completed authentication (magic link or password reset)
         const authSuccess = urlParams.get('auth');
         if (authSuccess === 'success') {
+            console.log('[LOGIN] Auth success detected, checking authentication status...');
+
             // Check if user is now authenticated
-            api.isAuthenticated().then(isAuthenticated => {
-                if (isAuthenticated) {
-                    // Cookies are set, redirect to destination
-                    const destination = redirectUrl || '/dashboard';
-                    window.location.href = destination;
-                }
-            });
+            api.isAuthenticated()
+                .then(isAuthenticated => {
+                    console.log('[LOGIN] Authentication check result:', isAuthenticated);
+                    if (isAuthenticated) {
+                        // Cookies are set, redirect to destination
+                        const destination = redirectUrl || '/dashboard';
+                        console.log('[LOGIN] Redirecting to:', destination);
+                        window.location.href = destination;
+                    } else {
+                        console.warn('[LOGIN] Not authenticated despite auth=success');
+                        // Show message to user
+                        if (errorMessage) {
+                            errorMessage.textContent = 'Authentication successful! Please sign in to continue.';
+                            errorMessage.style.display = 'block';
+                            errorMessage.style.background = '#e8f5e9';
+                            errorMessage.style.color = '#2e7d32';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('[LOGIN] Authentication check failed:', error);
+                });
         }
 
         // Current authentication mode
