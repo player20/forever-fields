@@ -175,18 +175,40 @@ router.get(
         where: { email: magicLink.email },
       });
 
+      console.log(`[AUTH] User lookup result for ${magicLink.email}:`, user ? `Found (ID: ${user.id})` : 'Not found');
+
       if (!user) {
-        user = await prisma.user.create({
-          data: {
-            id: supabaseUserId, // CRITICAL: Use Supabase UUID
-            email: magicLink.email,
-            name: userName,
-          },
-        });
-        console.log(`[AUTH] New DB user created via magic link: ${user.email} (${user.id})`);
+        try {
+          console.log(`[AUTH] Creating new user in database with Supabase UUID: ${supabaseUserId}`);
+          user = await prisma.user.create({
+            data: {
+              id: supabaseUserId, // CRITICAL: Use Supabase UUID
+              email: magicLink.email,
+              name: userName,
+            },
+          });
+          console.log(`[AUTH] ✅ New DB user created via magic link: ${user.email} (${user.id})`);
+        } catch (createError) {
+          console.error(`[AUTH] ❌ Failed to create user in database:`, createError);
+          return res.status(500).json({ error: 'Failed to create user account' });
+        }
       } else if (user.id !== supabaseUserId) {
-        // UUID mismatch - log warning but don't fail (password reset will handle)
+        // UUID mismatch - update user ID to match Supabase
         console.warn(`[AUTH] UUID mismatch for ${user.email}: DB=${user.id}, Supabase=${supabaseUserId}`);
+        console.log(`[AUTH] Updating user ID to match Supabase UUID`);
+        try {
+          await prisma.user.update({
+            where: { email: magicLink.email },
+            data: { id: supabaseUserId },
+          });
+          user.id = supabaseUserId;
+          console.log(`[AUTH] ✅ User ID updated to ${supabaseUserId}`);
+        } catch (updateError) {
+          console.error(`[AUTH] ❌ Failed to update user ID:`, updateError);
+          // Continue anyway - token will work with old ID
+        }
+      } else {
+        console.log(`[AUTH] Existing user found with matching Supabase UUID`);
       }
 
       // Create a proper Supabase session with JWT tokens
