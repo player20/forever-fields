@@ -134,7 +134,43 @@ router.get(
         data: { usedAt: new Date() },
       });
 
-      // Get or create user
+      // Create or get Supabase auth user FIRST (to get authoritative UUID)
+      let supabaseUserId: string;
+      const userName = magicLink.email.split('@')[0];
+
+      // Try to create Supabase user (returns existing if already registered)
+      const { data: supabaseData, error: supabaseError } = await supabaseAdmin.auth.admin.createUser({
+        email: magicLink.email,
+        email_confirm: true,
+        user_metadata: { name: userName, auth_method: 'magic_link' },
+      });
+
+      if (supabaseError) {
+        // If user already exists, look them up by email
+        if (supabaseError.message?.includes('already been registered')) {
+          console.log(`[AUTH] Supabase user already exists, looking up by email: ${magicLink.email}`);
+          const { data: allUsers } = await supabaseAdmin.auth.admin.listUsers();
+          const existingUser = allUsers?.users.find(u => u.email === magicLink.email);
+
+          if (!existingUser) {
+            console.error('[AUTH] User registered in Supabase but not found in list');
+            return res.status(500).json({ error: 'Authentication failed' });
+          }
+
+          supabaseUserId = existingUser.id;
+        } else {
+          console.error('[AUTH] Supabase user creation error:', supabaseError);
+          throw supabaseError;
+        }
+      } else if (supabaseData?.user) {
+        supabaseUserId = supabaseData.user.id;
+        console.log(`[AUTH] New Supabase user created: ${magicLink.email} (${supabaseUserId})`);
+      } else {
+        console.error('[AUTH] Supabase user creation returned no data');
+        return res.status(500).json({ error: 'Authentication failed' });
+      }
+
+      // Get or create user in our database with Supabase UUID
       let user = await prisma.user.findUnique({
         where: { email: magicLink.email },
       });
@@ -142,25 +178,16 @@ router.get(
       if (!user) {
         user = await prisma.user.create({
           data: {
+            id: supabaseUserId, // CRITICAL: Use Supabase UUID
             email: magicLink.email,
-            name: magicLink.email.split('@')[0],
+            name: userName,
           },
         });
-        console.log(`[AUTH] New user created via magic link: ${user.email}`);
+        console.log(`[AUTH] New DB user created via magic link: ${user.email} (${user.id})`);
+      } else if (user.id !== supabaseUserId) {
+        // UUID mismatch - log warning but don't fail (password reset will handle)
+        console.warn(`[AUTH] UUID mismatch for ${user.email}: DB=${user.id}, Supabase=${supabaseUserId}`);
       }
-
-      // Create or get Supabase auth user (handles SSO unification)
-      await supabaseAdmin.auth.admin
-        .createUser({
-          email: magicLink.email,
-          email_confirm: true,
-          user_metadata: { name: user.name, auth_method: 'magic_link' },
-        })
-        .catch((error) => {
-          if (!error.message?.includes('already been registered')) {
-            throw error;
-          }
-        });
 
       // Generate session tokens
       const { data: sessionData, error: sessionError } =
