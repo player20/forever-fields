@@ -707,15 +707,18 @@ router.post(
         data: { usedAt: new Date() },
       });
 
-      // Check if Supabase user exists by email
-      const { data: supabaseUsers } = await supabaseAdmin.auth.admin.listUsers();
-      const existingSupabaseUser = supabaseUsers.users.find(u => u.email === magicLink.email);
+      // Check if user exists in our database first
+      let user = await prisma.user.findUnique({
+        where: { email: magicLink.email },
+      });
 
       let supabaseUserId: string;
 
-      if (existingSupabaseUser) {
-        // Update existing Supabase user's password
-        const { error } = await supabaseAdmin.auth.admin.updateUserById(existingSupabaseUser.id, {
+      if (user) {
+        // User exists - update their Supabase password using their existing ID
+        console.log(`[AUTH] Updating password for existing user: ${user.email} (${user.id})`);
+
+        const { error } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
           password: newPassword,
         });
 
@@ -724,9 +727,11 @@ router.post(
           return res.status(500).json({ error: 'Failed to update password' });
         }
 
-        supabaseUserId = existingSupabaseUser.id;
+        supabaseUserId = user.id;
       } else {
-        // Create new Supabase user with password
+        // User doesn't exist - create new Supabase user first, then create DB record
+        console.log(`[AUTH] Creating new user for password reset: ${magicLink.email}`);
+
         const { data: newUser, error } = await supabaseAdmin.auth.admin.createUser({
           email: magicLink.email,
           password: newPassword,
@@ -742,14 +747,8 @@ router.post(
         }
 
         supabaseUserId = newUser.user.id;
-      }
 
-      // Get or create user in our database with Supabase UUID
-      let user = await prisma.user.findUnique({
-        where: { email: magicLink.email },
-      });
-
-      if (!user) {
+        // Create user in our database with Supabase UUID
         user = await prisma.user.create({
           data: {
             id: supabaseUserId, // CRITICAL: Use Supabase UUID
