@@ -1346,6 +1346,10 @@
         </div>
     </footer>
 
+    <!-- API Client -->
+    <script src="js/api-config.js"></script>
+    <script src="js/api-client.js"></script>
+
     <!-- Shared Scripts -->
     <script src="js/script.js"></script>
     <script src="js/confirm-modal.js"></script>
@@ -1457,35 +1461,12 @@
                 });
             }
 
-            // Check authentication status
-            async function checkAuthStatus() {
-                // Check if user is authenticated via httpOnly cookies
-                const api = new ForeverFieldsAPI();
-                const isAuthenticated = await api.isAuthenticated();
-
-                if (isAuthenticated) {
-                    // User is logged in - change "Sign In" to "Dashboard"
-                    const authButton = document.getElementById('authButton');
-                    if (authButton) {
-                        authButton.textContent = 'Dashboard';
-                        authButton.href = './dashboard/';
-                        authButton.classList.remove('btn-secondary');
-                        authButton.classList.add('btn-primary');
-                    }
-
-                    // Update mobile nav as well
-                    const mobileSignIn = document.querySelector('.mobile-nav-links a[href="./login/"]');
-                    if (mobileSignIn) {
-                        mobileSignIn.textContent = 'Dashboard';
-                        mobileSignIn.href = './dashboard/';
-                    }
-                }
-            }
-
-            // Run on page load
-            checkAuthStatus();
+            // Auth UI is handled by auth-ui.js
         });
     </script>
+
+    <!-- Auth UI (updates nav when logged in) -->
+    <script src="./js/auth-ui.js"></script>
 
     <!-- Language Switcher -->
     <script src="./js/language-switcher.js"></script>
