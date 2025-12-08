@@ -29,6 +29,7 @@ import {
 import { generateSecureToken, getMagicLinkExpiration } from '../utils/tokens';
 import { sendMagicLink, sendPasswordResetEmail } from '../services/email';
 import { env } from '../config/env';
+import { z } from 'zod';
 
 const router = Router();
 
@@ -178,10 +179,12 @@ router.get(
 
       console.log(`[AUTH] Successful magic link login: ${user.email}`);
 
-      // Set httpOnly cookies (secure, not accessible to JavaScript)
-      const sessionToken = sessionData.properties.hashed_token;
+      // Set httpOnly cookies with SEPARATE tokens (security best practice)
+      // Use actual session tokens from Supabase, not the hashed_token
+      const accessToken = sessionData.properties.access_token || sessionData.properties.hashed_token;
+      const refreshToken = sessionData.properties.refresh_token || sessionData.properties.hashed_token;
 
-      res.cookie('ff_access_token', sessionToken, {
+      res.cookie('ff_access_token', accessToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site (requires secure)
@@ -189,7 +192,7 @@ router.get(
         path: '/',
       });
 
-      res.cookie('ff_refresh_token', sessionToken, {
+      res.cookie('ff_refresh_token', refreshToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site (requires secure)
@@ -271,10 +274,11 @@ router.post(
 
       console.log(`[AUTH] Successful password signup: ${data.user.email}`);
 
-      // Set httpOnly cookies (same as login)
-      const sessionToken = sessionData.properties.hashed_token;
+      // Set httpOnly cookies with SEPARATE tokens (security best practice)
+      const accessToken = sessionData.properties.access_token || sessionData.properties.hashed_token;
+      const refreshToken = sessionData.properties.refresh_token || sessionData.properties.hashed_token;
 
-      res.cookie('ff_access_token', sessionToken, {
+      res.cookie('ff_access_token', accessToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
@@ -282,7 +286,7 @@ router.post(
         path: '/',
       });
 
-      res.cookie('ff_refresh_token', sessionToken, {
+      res.cookie('ff_refresh_token', refreshToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
@@ -647,18 +651,19 @@ router.post(
  * POST /api/auth/refresh
  * Refresh access token
  *
- * Security: Rotates refresh tokens
+ * Security: Rotates refresh tokens, reads from httpOnly cookies
  */
 router.post('/refresh', async (req: Request, res: Response) => {
   try {
-    const { refresh_token } = req.body;
+    // Read refresh token from httpOnly cookie (preferred) or request body (fallback for API clients)
+    const refreshToken = req.cookies?.ff_refresh_token || req.body.refresh_token;
 
-    if (!refresh_token) {
+    if (!refreshToken) {
       return res.status(400).json({ error: 'Refresh token required' });
     }
 
     const { data, error } = await supabaseAdmin.auth.refreshSession({
-      refresh_token,
+      refresh_token: refreshToken,
     });
 
     if (error || !data.session) {
@@ -666,7 +671,25 @@ router.post('/refresh', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Invalid refresh token' });
     }
 
+    // Update httpOnly cookies with new tokens
+    res.cookie('ff_access_token', data.session.access_token, {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production',
+      sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 3600000, // 1 hour
+      path: '/',
+    });
+
+    res.cookie('ff_refresh_token', data.session.refresh_token, {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production',
+      sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 7 * 24 * 3600000, // 7 days
+      path: '/api/auth',
+    });
+
     return res.status(200).json({
+      message: 'Token refreshed successfully',
       access_token: data.session.access_token,
       refresh_token: data.session.refresh_token,
     });
@@ -680,22 +703,46 @@ router.post('/refresh', async (req: Request, res: Response) => {
  * POST /api/auth/logout
  * Sign out user
  *
- * Security: Revoke tokens
+ * Security: Revoke tokens and clear httpOnly cookies
  */
 router.post('/logout', async (req: Request, res: Response) => {
   try {
-    const authHeader = req.headers.authorization;
+    // Get token from httpOnly cookie (preferred) or Authorization header (fallback)
+    const accessToken = req.cookies?.ff_access_token ||
+                        (req.headers.authorization?.startsWith('Bearer ')
+                          ? req.headers.authorization.substring(7)
+                          : null);
 
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      await supabaseAdmin.auth.admin.signOut(token).catch((err) => {
+    // Revoke token in Supabase if available
+    if (accessToken) {
+      await supabaseAdmin.auth.admin.signOut(accessToken).catch((err) => {
         console.warn('[AUTH] Token revocation failed:', err);
       });
     }
 
+    // Clear httpOnly cookies (most important step)
+    res.clearCookie('ff_access_token', {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production',
+      sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/',
+    });
+
+    res.clearCookie('ff_refresh_token', {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production',
+      sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/api/auth',
+    });
+
+    console.log('[AUTH] User logged out successfully');
+
     return res.status(200).json({ message: 'Logged out successfully' });
   } catch (error) {
     console.error('[AUTH] Logout error:', error);
+    // Still clear cookies even if revocation fails
+    res.clearCookie('ff_access_token', { path: '/' });
+    res.clearCookie('ff_refresh_token', { path: '/api/auth' });
     return res.status(200).json({ message: 'Logged out successfully' });
   }
 });
