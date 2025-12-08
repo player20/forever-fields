@@ -1793,13 +1793,20 @@
 
             // Update preview
             function updatePreview() {
-                if (currentStep !== 6) return;
+                if (currentStep !== 6) {
+                    console.log('[Create] updatePreview skipped - not on review step (current:', currentStep, ')');
+                    return;
+                }
 
-                const fullName = document.getElementById('deceasedName').value || 'Their Name';
-                const title = document.getElementById('nameTitle').value.trim();
-                const birthDate = document.getElementById('birthDate').value;
-                const passingDate = document.getElementById('passingDate').value;
-                const bio = document.getElementById('shortBio').value || 'Their story will appear here...';
+                console.log('[Create] Updating preview...');
+
+                const fullName = document.getElementById('deceasedName')?.value || 'Their Name';
+                const title = document.getElementById('nameTitle')?.value?.trim() || '';
+                const birthDate = document.getElementById('birthDate')?.value || '';
+                const passingDate = document.getElementById('passingDate')?.value || '';
+                const bio = document.getElementById('shortBio')?.value || 'Their story will appear here...';
+
+                console.log('[Create] Form values:', { fullName, title, birthDate, passingDate, bio: bio.substring(0, 50) + '...' });
 
                 // Build display name with title if present
                 let displayName = fullName;
@@ -1814,8 +1821,12 @@
                     }
                 }
 
-                document.getElementById('previewName').textContent = displayName;
-                document.getElementById('previewBio').textContent = bio;
+                const previewName = document.getElementById('previewName');
+                const previewBio = document.getElementById('previewBio');
+                const previewDates = document.getElementById('previewDates');
+
+                if (previewName) previewName.textContent = displayName;
+                if (previewBio) previewBio.textContent = bio;
 
                 // Format dates
                 let dateText = 'Birth — Passing';
@@ -1823,18 +1834,31 @@
                     const birth = new Date(birthDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
                     const passing = new Date(passingDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
                     dateText = `${birth} — ${passing}`;
+                } else if (birthDate) {
+                    const birth = new Date(birthDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                    dateText = `${birth} — Present`;
+                } else if (passingDate) {
+                    const passing = new Date(passingDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                    dateText = `? — ${passing}`;
                 }
-                document.getElementById('previewDates').textContent = dateText;
+                if (previewDates) previewDates.textContent = dateText;
 
                 // Portrait
                 const portraitPreview = document.getElementById('previewPortrait');
-                const uploadedImage = portraitUpload.dataset.imageSrc;
-                if (uploadedImage) {
-                    portraitPreview.innerHTML = `<img src="${uploadedImage}" alt="${name}">`;
-                } else {
-                    portraitPreview.innerHTML = '👤';
+                if (portraitPreview) {
+                    const uploadedImage = portraitUpload?.dataset?.imageSrc;
+                    if (uploadedImage) {
+                        portraitPreview.innerHTML = `<img src="${uploadedImage}" alt="${displayName}">`;
+                    } else {
+                        portraitPreview.innerHTML = '👤';
+                    }
                 }
+
+                console.log('[Create] Preview updated:', { displayName, dateText, bioLength: bio.length });
             }
+
+            // Expose updatePreview to global scope for debugging
+            window.updatePreview = updatePreview;
 
             // Real autosave with localStorage
             function autosaveForm() {
