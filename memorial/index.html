@@ -1449,6 +1449,80 @@
         });
     </script>
 
+    <!-- Load Memorial Data from API -->
+    <script>
+        (async function loadMemorialData() {
+            try {
+                // Get memorial ID from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const memorialId = urlParams.get('id');
+
+                console.log('[Memorial] Loading memorial:', memorialId);
+
+                if (!memorialId) {
+                    console.error('[Memorial] No memorial ID in URL');
+                    return; // Keep showing demo data if no ID
+                }
+
+                // Initialize API client
+                const api = new ForeverFieldsAPI(
+                    window.location.hostname === 'localhost'
+                        ? 'http://localhost:3000'
+                        : 'https://forever-fields.onrender.com'
+                );
+
+                // Fetch memorial data
+                const response = await api.get(`/api/memorials/${memorialId}`);
+                const memorial = response.memorial;
+
+                console.log('[Memorial] Loaded memorial data:', memorial);
+
+                if (!memorial) {
+                    console.error('[Memorial] Memorial not found');
+                    document.body.innerHTML = '<div style="text-align:center; padding:4rem;"><h1>Memorial Not Found</h1><p>This memorial does not exist or has been removed.</p><a href="/dashboard/">Return to Dashboard</a></div>';
+                    return;
+                }
+
+                // Update page title and meta
+                document.title = `${memorial.deceasedName} - Forever Fields Memorial`;
+
+                // Update hero section
+                const heroName = document.querySelector('.hero-name');
+                if (heroName) {
+                    heroName.textContent = memorial.deceasedName;
+                }
+
+                // Update dates
+                const heroSubtitle = document.querySelector('.hero-subtitle');
+                if (heroSubtitle) {
+                    const birthYear = memorial.birthDate ? new Date(memorial.birthDate).getFullYear() : '?';
+                    const deathYear = memorial.deathDate ? new Date(memorial.deathDate).getFullYear() : '?';
+                    heroSubtitle.textContent = `${birthYear} - ${deathYear}`;
+                }
+
+                // Update bio
+                const bioText = document.querySelector('.bio-text');
+                if (bioText && memorial.shortBio) {
+                    bioText.textContent = memorial.shortBio;
+                }
+
+                // Update candle/flower counts if available
+                if (memorial._count) {
+                    const candleCount = document.querySelector('[data-candle-count]');
+                    if (candleCount) {
+                        candleCount.textContent = memorial._count.candles || 0;
+                    }
+                }
+
+                console.log('[Memorial] Page updated with memorial data');
+
+            } catch (error) {
+                console.error('[Memorial] Failed to load memorial:', error);
+                // Keep demo data on error
+            }
+        })();
+    </script>
+
     <!-- Language Switcher -->
     <script src="../js/language-switcher.js"></script>
 </body>

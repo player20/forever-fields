@@ -954,9 +954,13 @@
                 }
 
                 // Add each memorial card
-                memorials.forEach(memorial => {
+                console.log('[Dashboard] Creating cards for', memorials.length, 'memorials');
+                memorials.forEach((memorial, index) => {
+                    console.log(`[Dashboard] Creating card ${index + 1}:`, memorial.deceasedName, memorial.id);
                     const card = createMemorialCard(memorial);
+                    console.log(`[Dashboard] Card ${index + 1} created:`, card);
                     grid.appendChild(card);
+                    console.log(`[Dashboard] Card ${index + 1} appended to grid`);
                 });
 
                 // Add "Create New" card at the end
