@@ -2017,36 +2017,46 @@
                 btn.innerHTML = '<h4>⏳ Publishing...</h4><p>Creating your memorial</p>';
 
                 try {
-                    // Collect all form data
+                    // Collect all form data and map to API schema
+                    const birthDateValue = document.getElementById('birthDate')?.value;
+                    const deathDateValue = document.getElementById('passingDate')?.value;
+                    const songUrl = document.getElementById('favoriteSongUrl')?.value;
+
                     const memorialData = {
-                        // Step 1: User info
-                        userEmail: document.getElementById('userEmail')?.value,
-                        userName: document.getElementById('userName')?.value,
-                        relationship: document.getElementById('relationship')?.value,
-
-                        // Step 2: About them
+                        // Required fields
                         deceasedName: document.getElementById('deceasedName')?.value,
-                        preferredName: document.getElementById('preferredName')?.value,
-                        nameTitle: document.getElementById('nameTitle')?.value,
-                        birthDate: document.getElementById('birthDate')?.value,
-                        passingDate: document.getElementById('passingDate')?.value,
-                        shortBio: document.getElementById('shortBio')?.value,
 
-                        // Step 3: Privacy
-                        privacy: document.querySelector('input[name="privacy"]:checked')?.value || 'public',
-                        allowInteractions: document.querySelector('[data-toggle="allowInteractions"]')?.classList.contains('active') ?? true,
-                        enableHealingPrompts: document.querySelector('[data-toggle="enableHealingPrompts"]')?.classList.contains('active') ?? true,
+                        // Dates - convert to ISO string if provided
+                        birthDate: birthDateValue ? new Date(birthDateValue).toISOString() : null,
+                        deathDate: deathDateValue ? new Date(deathDateValue).toISOString() : null,
 
-                        // Step 4: Family history
-                        birthCity: document.getElementById('birthCity')?.value,
-                        birthState: document.getElementById('birthState')?.value,
-                        parentsNames: document.getElementById('parentsNames')?.value,
-                        siblings: document.getElementById('siblings')?.value,
+                        // Optional fields that match API schema
+                        shortBio: document.getElementById('shortBio')?.value || null,
+                        privacy: document.querySelector('input[name="privacy"]:checked')?.value || 'private',
+                        isPet: false, // Could add a toggle for this in the form
 
-                        // Step 5: Memories, achievements, etc.
-                        favoriteSongUrl: document.getElementById('favoriteSongUrl')?.value,
-                        timeCapsuleMessage: document.getElementById('timeCapsuleMessage')?.value,
-                        timeCapsuleUnlockDate: document.getElementById('timeCapsuleUnlockDate')?.value,
+                        // Song URL - detect if Spotify or YouTube
+                        songSpotifyUri: (songUrl && songUrl.includes('spotify')) ? songUrl : null,
+                        songYoutubeUrl: (songUrl && songUrl.includes('youtube')) ? songUrl : null,
+
+                        // Portrait would come from upload step
+                        portraitUrl: null,
+
+                        // Additional fields for future use (not in current API schema)
+                        // These will be stored separately or ignored by the API
+                        _additionalData: {
+                            userEmail: document.getElementById('userEmail')?.value,
+                            userName: document.getElementById('userName')?.value,
+                            relationship: document.getElementById('relationship')?.value,
+                            preferredName: document.getElementById('preferredName')?.value,
+                            nameTitle: document.getElementById('nameTitle')?.value,
+                            birthCity: document.getElementById('birthCity')?.value,
+                            birthState: document.getElementById('birthState')?.value,
+                            parentsNames: document.getElementById('parentsNames')?.value,
+                            siblings: document.getElementById('siblings')?.value,
+                            timeCapsuleMessage: document.getElementById('timeCapsuleMessage')?.value,
+                            timeCapsuleUnlockDate: document.getElementById('timeCapsuleUnlockDate')?.value,
+                        }
                     };
 
                     // Initialize API client
@@ -2095,11 +2105,19 @@
 
                 } catch (error) {
                     console.error('Failed to publish memorial:', error);
+                    console.error('Memorial data sent:', memorialData);
+
                     btn.disabled = false;
                     btn.innerHTML = '<h4>🌟 Publish Now</h4><p>Make it live for visitors</p>';
 
+                    // Show more detailed error message
+                    let errorMessage = 'Failed to publish memorial. Please try again.';
+                    if (error.details || error.message) {
+                        errorMessage = error.details?.error || error.message || errorMessage;
+                    }
+
                     if (typeof showToast === 'function') {
-                        showToast('Failed to publish memorial. Please try again.', 'error');
+                        showToast(errorMessage, 'error');
                     } else {
                         alert(`Failed to publish memorial: ${error.message}`);
                     }
