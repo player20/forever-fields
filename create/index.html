@@ -1546,6 +1546,9 @@
                 autosaveForm();
             }
 
+            // Expose goToStep to global scope for inline onclick handlers
+            window.goToStep = goToStep;
+
             function initializePhotoUploader() {
                 // Get memorial ID from form (would be generated after step 2 in real app)
                 const memorialId = sessionStorage.getItem('memorial_draft_id') || 'demo-memorial-id';
