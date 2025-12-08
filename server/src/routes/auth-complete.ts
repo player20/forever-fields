@@ -707,27 +707,15 @@ router.post(
         data: { usedAt: new Date() },
       });
 
-      // Get user by email
-      let user = await prisma.user.findUnique({
-        where: { email: magicLink.email },
-      });
+      // Check if Supabase user exists by email
+      const { data: supabaseUsers } = await supabaseAdmin.auth.admin.listUsers();
+      const existingSupabaseUser = supabaseUsers.users.find(u => u.email === magicLink.email);
 
-      // Create user if doesn't exist (in case they're resetting password before first login)
-      if (!user) {
-        user = await prisma.user.create({
-          data: {
-            email: magicLink.email,
-            name: magicLink.email.split('@')[0],
-          },
-        });
-      }
+      let supabaseUserId: string;
 
-      // Check if Supabase user exists
-      const { data: existingUser } = await supabaseAdmin.auth.admin.getUserById(user.id).catch(() => ({ data: null }));
-
-      if (existingUser?.user) {
+      if (existingSupabaseUser) {
         // Update existing Supabase user's password
-        const { error } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
+        const { error } = await supabaseAdmin.auth.admin.updateUserById(existingSupabaseUser.id, {
           password: newPassword,
         });
 
@@ -735,21 +723,40 @@ router.post(
           console.error('[AUTH] Supabase password update error:', error);
           return res.status(500).json({ error: 'Failed to update password' });
         }
+
+        supabaseUserId = existingSupabaseUser.id;
       } else {
         // Create new Supabase user with password
-        const { error } = await supabaseAdmin.auth.admin.createUser({
+        const { data: newUser, error } = await supabaseAdmin.auth.admin.createUser({
           email: magicLink.email,
           password: newPassword,
           email_confirm: true,
           user_metadata: {
-            name: user.name,
+            name: magicLink.email.split('@')[0],
           },
         });
 
-        if (error) {
+        if (error || !newUser.user) {
           console.error('[AUTH] Supabase user creation error:', error);
           return res.status(500).json({ error: 'Failed to set password' });
         }
+
+        supabaseUserId = newUser.user.id;
+      }
+
+      // Get or create user in our database with Supabase UUID
+      let user = await prisma.user.findUnique({
+        where: { email: magicLink.email },
+      });
+
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            id: supabaseUserId, // CRITICAL: Use Supabase UUID
+            email: magicLink.email,
+            name: magicLink.email.split('@')[0],
+          },
+        });
       }
 
       console.log(`[AUTH] Password reset successful for ${user.email}`);
