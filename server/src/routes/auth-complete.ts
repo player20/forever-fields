@@ -150,7 +150,7 @@ router.get(
         if (supabaseError.message?.includes('already been registered')) {
           console.log(`[AUTH] Supabase user already exists, looking up by email: ${magicLink.email}`);
           const { data: allUsers } = await supabaseAdmin.auth.admin.listUsers();
-          const existingUser = allUsers?.users.find(u => u.email === magicLink.email);
+          const existingUser = allUsers?.users.find((u: any) => u.email === magicLink.email);
 
           if (!existingUser) {
             console.error('[AUTH] User registered in Supabase but not found in list');
@@ -755,7 +755,7 @@ router.post(
         if (listError) {
           console.error('[AUTH] Failed to list Supabase users:', listError);
         } else if (userData?.users) {
-          supabaseUser = userData.users.find(u => u.email === magicLink.email);
+          supabaseUser = userData.users.find((u: any) => u.email === magicLink.email);
         }
       } catch (listErr) {
         console.error('[AUTH] Error listing users:', listErr);
