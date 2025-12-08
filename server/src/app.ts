@@ -35,6 +35,7 @@ import reportsRoutes from './routes/reports';
 import affiliateRoutes from './routes/affiliate';
 import socialLinksRoutes from './routes/social-links';
 import invitationRoutes from './routes/invitations';
+import userRoutes from './routes/user';
 
 const app = express();
 
@@ -102,6 +103,7 @@ app.get('/health', (req, res) => {
 
 app.use('/api/auth', authCompleteRoutes); // Hybrid auth: magic link + password + SSO
 // app.use('/api/auth', authRoutes); // Simple magic-link only (legacy)
+app.use('/api/user', userRoutes); // User profile and account management
 app.use('/api/memorials', memorialRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/pending', pendingRoutes);
