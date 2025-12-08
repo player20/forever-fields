@@ -2016,13 +2016,12 @@
                 btn.disabled = true;
                 btn.innerHTML = '<h4>⏳ Publishing...</h4><p>Creating your memorial</p>';
 
-                try {
-                    // Collect all form data and map to API schema
-                    const birthDateValue = document.getElementById('birthDate')?.value;
-                    const deathDateValue = document.getElementById('passingDate')?.value;
-                    const songUrl = document.getElementById('favoriteSongUrl')?.value;
+                // Collect all form data and map to API schema (moved outside try for error logging)
+                const birthDateValue = document.getElementById('birthDate')?.value;
+                const deathDateValue = document.getElementById('passingDate')?.value;
+                const songUrl = document.getElementById('favoriteSongUrl')?.value;
 
-                    const memorialData = {
+                const memorialData = {
                         // Required fields
                         deceasedName: document.getElementById('deceasedName')?.value,
 
