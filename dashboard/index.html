@@ -763,97 +763,13 @@
         <section class="memorials-section dashboard-section" id="memorialsSection">
             <h2>
                 Your Memorials
-                <span class="memorial-count">2</span>
+                <span class="memorial-count">0</span>
             </h2>
 
             <div class="memorials-grid">
-                <!-- Memorial 1 -->
-                <div class="memorial-card fade-in">
-                    <div class="memorial-card-header">
-                        <div class="memorial-portrait">👵</div>
-                        <div class="memorial-info">
-                            <h3>Margaret Louise Carter</h3>
-                            <p class="memorial-dates">1938 - 2024</p>
-                        </div>
-                    </div>
-                    <div class="memorial-card-body">
-                        <div class="memorial-meta">
-                            <span class="memorial-status published">Published</span>
-                            <span class="last-edited">Edited 2 days ago</span>
-                        </div>
-                        <div class="memorial-stats">
-                            <div class="stat">
-                                <div class="stat-value">247</div>
-                                <div class="stat-label">Candles</div>
-                            </div>
-                            <div class="stat">
-                                <div class="stat-value">89</div>
-                                <div class="stat-label">Flowers</div>
-                            </div>
-                            <div class="stat">
-                                <div class="stat-value">34</div>
-                                <div class="stat-label">Memories</div>
-                            </div>
-                            <div class="stat">
-                                <div class="stat-value">1.2k</div>
-                                <div class="stat-label">Visits</div>
-                            </div>
-                        </div>
-                        <div class="memorial-actions">
-                            <a href="../memorial/" class="btn btn-secondary">View</a>
-                            <a href="../family-tree/?memorial=margaret-carter-1938" class="btn btn-secondary">🌳 Family Tree</a>
-                            <a href="../create/?edit=margaret" class="btn btn-primary">Edit</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Memorial 2 (Draft) -->
-                <div class="memorial-card fade-in">
-                    <div class="memorial-card-header">
-                        <div class="memorial-portrait">👴</div>
-                        <div class="memorial-info">
-                            <h3>Thomas William Carter</h3>
-                            <p class="memorial-dates">1935 - 2022</p>
-                        </div>
-                    </div>
-                    <div class="memorial-card-body">
-                        <div class="memorial-meta">
-                            <span class="memorial-status draft">Draft</span>
-                            <span class="last-edited">Edited 1 week ago</span>
-                        </div>
-                        <div class="memorial-stats">
-                            <div class="stat">
-                                <div class="stat-value">—</div>
-                                <div class="stat-label">Candles</div>
-                            </div>
-                            <div class="stat">
-                                <div class="stat-value">—</div>
-                                <div class="stat-label">Flowers</div>
-                            </div>
-                            <div class="stat">
-                                <div class="stat-value">8</div>
-                                <div class="stat-label">Memories</div>
-                            </div>
-                            <div class="stat">
-                                <div class="stat-value">—</div>
-                                <div class="stat-label">Visits</div>
-                            </div>
-                        </div>
-                        <div class="memorial-actions">
-                            <a href="../preview/" class="btn btn-secondary">Preview</a>
-                            <a href="../family-tree/?memorial=thomas-quinn-1945" class="btn btn-secondary">🌳 Family Tree</a>
-                            <a href="../create/?edit=thomas" class="btn btn-primary">Continue</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Create New Card -->
-                <div class="memorial-card fade-in" style="border-style: dashed; background: var(--cream);">
-                    <a href="../create/" style="display: block; padding: 3rem 1.5rem; text-align: center; text-decoration: none;">
-                        <div style="font-size: 2.5rem; margin-bottom: 1rem;">+</div>
-                        <h3 style="font-family: var(--font-serif); color: var(--gray-dark); margin-bottom: 0.5rem;">Create New Memorial</h3>
-                        <p style="color: var(--gray-body); font-size: 0.9rem;">Honor another loved one</p>
-                    </a>
+                <!-- Memorials will be loaded dynamically -->
+                <div style="padding: 3rem; text-align: center; color: var(--gray-body);">
+                    Loading your memorials...
                 </div>
             </div>
         </section>
@@ -991,7 +907,8 @@
         // Load memorials from API
         async function loadMemorials() {
             try {
-                const memorials = await api.get('/api/memorials');
+                const response = await api.get('/api/memorials/mine');
+                const memorials = response.memorials || [];
                 console.log('[Dashboard] Loaded memorials:', memorials);
 
                 const grid = document.querySelector('.memorials-grid');
