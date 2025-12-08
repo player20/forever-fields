@@ -39,7 +39,18 @@
 
     function updateNavForAuthenticatedUser(user) {
         // Update desktop "Sign In" button to "Dashboard"
-        const authButton = document.getElementById('authButton');
+        // Try by ID first (for homepage)
+        let authButton = document.getElementById('authButton');
+
+        // If not found, find by href and text content (for other pages)
+        if (!authButton) {
+            const signInLinks = document.querySelectorAll('a[href*="login"]');
+            authButton = Array.from(signInLinks).find(link =>
+                link.textContent.includes('Sign In') &&
+                link.classList.contains('btn')
+            );
+        }
+
         if (authButton && authButton.textContent.includes('Sign In')) {
             authButton.textContent = 'Dashboard';
             authButton.href = '/dashboard/';
@@ -48,7 +59,7 @@
         }
 
         // Update mobile nav "Sign In" link
-        const mobileSignIn = document.querySelector('.mobile-nav-links a[href="./login/"], .mobile-nav-links a[href="/login/"]');
+        const mobileSignIn = document.querySelector('.mobile-nav-links a[href*="login"]');
         if (mobileSignIn && mobileSignIn.textContent.includes('Sign In')) {
             mobileSignIn.textContent = 'Dashboard';
             mobileSignIn.href = '/dashboard/';
