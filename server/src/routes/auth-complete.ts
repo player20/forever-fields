@@ -230,8 +230,8 @@ router.get(
         path: '/api/auth',
       });
 
-      // Redirect to login with success flag (allows frontend to check cookies on same domain)
-      return res.redirect(302, `${env.FRONTEND_URL}/login?auth=success`);
+      // Redirect directly to dashboard (cookies are already set in response)
+      return res.redirect(302, `${env.FRONTEND_URL}/dashboard`);
     } catch (error) {
       console.error('[AUTH] Callback error:', error);
       return res.redirect(`${env.FRONTEND_URL}/login?error=auth_failed`);
