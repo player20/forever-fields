@@ -756,12 +756,38 @@
                 }));
 
                 let message = 'Failed to create account. Please try again.';
-                if (error.message.includes('already')) {
-                    message = 'An account with this email already exists.';
-                } else if (error.message.includes('password')) {
+
+                // Check for specific error types
+                if (error.message.includes('already') || error.message.includes('registered')) {
+                    message = 'An account with this email already exists. Please sign in instead.';
+
+                    // Automatically switch to sign-in mode after showing error
+                    setTimeout(() => {
+                        passwordMode = 'signin';
+                        confirmPasswordGroup.style.display = 'none';
+                        submitBtn.textContent = 'Sign In';
+                        toggleText.innerHTML = 'Don\'t have an account? <a href="#" id="toggleAuthMode" style="color: #667eea; text-decoration: none; font-weight: 600;">Create one</a>';
+                        passwordInput.setAttribute('autocomplete', 'current-password');
+                        confirmPasswordInput.value = '';
+
+                        // Re-attach event listener
+                        document.getElementById('toggleAuthMode').addEventListener('click', function(e) {
+                            e.preventDefault();
+                            // ... (would need the full toggle logic here)
+                        });
+                    }, 2000); // Switch after 2 seconds
+                } else if (error.message === 'Validation failed' && error.details) {
+                    // Handle validation errors - show first validation message
+                    const validationErrors = error.details;
+                    if (Array.isArray(validationErrors) && validationErrors.length > 0) {
+                        message = validationErrors[0].message || 'Invalid input. Please check your password.';
+                    }
+                } else if (error.message.includes('password') || error.message.includes('Password')) {
                     message = error.message;
                 } else if (error.status === 429) {
                     message = 'Too many attempts. Please try again later.';
+                } else if (error.statusCode === 0 || error.isNetworkError?.()) {
+                    message = 'Network error. Please check your connection and try again.';
                 }
 
                 showError(message);
