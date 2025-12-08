@@ -580,6 +580,8 @@ router.post(
       // Check if user exists
       const user = await prisma.user.findUnique({ where: { email } });
 
+      console.log(`[AUTH] User lookup for password reset: ${email} - ${user ? 'FOUND' : 'NOT FOUND'}`);
+
       // Always generate token to maintain constant time
       const token = generateSecureToken();
       const expiresAt = getMagicLinkExpiration();
@@ -603,9 +605,16 @@ router.post(
           },
         });
 
-        await sendPasswordResetEmail(email, token).catch((err) => {
-          console.error('[AUTH] Failed to send password reset email:', err);
-        });
+        try {
+          await sendPasswordResetEmail(email, token);
+          console.log(`[AUTH] Password reset email sent successfully to ${email}`);
+        } catch (err) {
+          console.error('[AUTH] Failed to send password reset email:', {
+            error: err.message,
+            email,
+            details: err
+          });
+        }
       } else {
         // Simulate same delay as email sending to prevent timing enumeration
         await new Promise((resolve) => setTimeout(resolve, 500));
