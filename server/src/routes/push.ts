@@ -20,11 +20,18 @@ const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
 const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:support@foreverfields.com';
 
 if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
-  webpush.setVapidDetails(
-    VAPID_SUBJECT,
-    VAPID_PUBLIC_KEY,
-    VAPID_PRIVATE_KEY
-  );
+  try {
+    webpush.setVapidDetails(
+      VAPID_SUBJECT,
+      VAPID_PUBLIC_KEY,
+      VAPID_PRIVATE_KEY
+    );
+    console.log('[Push] VAPID keys configured successfully');
+  } catch (error) {
+    console.error('[Push] Invalid VAPID keys - push notifications disabled');
+    console.error('[Push] Error:', error instanceof Error ? error.message : error);
+    console.warn('[Push] Generate valid keys with: npx web-push generate-vapid-keys');
+  }
 } else {
   console.warn('[Push] VAPID keys not configured. Push notifications will not work.');
   console.warn('[Push] Generate keys with: npx web-push generate-vapid-keys');
