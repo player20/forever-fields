@@ -35,7 +35,8 @@ export const sendMagicLink = async (email: string, token: string): Promise<void>
     }
   }
 
-  const fromEmail = env.SMTP_FROM || 'noreply@foreverfields.app';
+  // Use Resend's onboarding email (always works) or verified domain
+  const fromEmail = env.SMTP_FROM_EMAIL || 'onboarding@resend.dev';
 
   try {
     await resend.emails.send({
@@ -123,7 +124,8 @@ export const sendPasswordResetEmail = async (email: string, token: string): Prom
     }
   }
 
-  const fromEmail = env.SMTP_FROM || 'noreply@foreverfields.app';
+  // Use Resend's onboarding email (always works) or verified domain
+  const fromEmail = env.SMTP_FROM_EMAIL || 'onboarding@resend.dev';
 
   try {
     await resend.emails.send({
@@ -221,7 +223,8 @@ export const sendInvitationEmail = async (
     }
   }
 
-  const fromEmail = env.SMTP_FROM || 'noreply@foreverfields.app';
+  // Use Resend's onboarding email (always works) or verified domain
+  const fromEmail = env.SMTP_FROM_EMAIL || 'onboarding@resend.dev';
 
   try {
     await resend.emails.send({
