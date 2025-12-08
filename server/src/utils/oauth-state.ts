@@ -1,85 +1,72 @@
 /**
- * OAuth State Token Management
- * Provides CSRF protection for OAuth flows by generating and validating state tokens
+ * OAuth State Management
+ * Prevents CSRF attacks on OAuth flows using the state parameter
  */
 
 import crypto from 'crypto';
 
-interface StateData {
-  createdAt: number;
-  ip: string;
-}
+// In-memory store for OAuth state tokens
+// In production, use Redis or database for distributed systems
+const stateStore = new Map<string, { createdAt: number; ip: string }>();
 
-// In-memory store for state tokens
-// TODO: Replace with Redis in production for scalability across multiple server instances
-const stateStore = new Map<string, StateData>();
-
-/**
- * Clean up expired state tokens every 5 minutes
- * State tokens expire after 10 minutes
- */
+// Clean up expired states every 5 minutes
 setInterval(() => {
   const now = Date.now();
-  const expiryTime = 10 * 60 * 1000; // 10 minutes
+  const staleEntries: string[] = [];
 
   for (const [state, data] of stateStore.entries()) {
-    if (now - data.createdAt > expiryTime) {
-      stateStore.delete(state);
+    if (now - data.createdAt > 10 * 60 * 1000) {
+      // 10 minutes
+      staleEntries.push(state);
     }
   }
-}, 5 * 60 * 1000); // Run cleanup every 5 minutes
+
+  staleEntries.forEach((state) => stateStore.delete(state));
+
+  if (staleEntries.length > 0) {
+    console.log(`[OAUTH] Cleaned up ${staleEntries.length} expired state tokens`);
+  }
+}, 5 * 60 * 1000);
 
 /**
- * Generate a cryptographically secure OAuth state token
- * @param ip - Client IP address for additional validation
- * @returns Random 64-character hex string
+ * Generate a new OAuth state token
  */
 export const generateOAuthState = (ip: string): string => {
   const state = crypto.randomBytes(32).toString('hex');
-
   stateStore.set(state, {
     createdAt: Date.now(),
     ip,
   });
-
   return state;
 };
 
 /**
  * Validate an OAuth state token
- * @param state - State token from OAuth callback
- * @param ip - Client IP address
- * @returns true if valid and not expired, false otherwise
+ * Returns true if valid and not expired, false otherwise
  */
 export const validateOAuthState = (state: string, ip: string): boolean => {
   const data = stateStore.get(state);
 
-  // State not found
   if (!data) {
+    console.warn('[OAUTH] Invalid state token (not found)');
     return false;
   }
 
-  // IP mismatch (optional but recommended security measure)
+  // Optional: Validate IP matches (helps prevent some attacks)
   if (data.ip !== ip) {
-    console.warn(`[SECURITY] OAuth state IP mismatch: expected ${data.ip}, got ${ip}`);
-    // Still allow but log warning - some users may have changing IPs
+    console.warn(`[OAUTH] State IP mismatch: ${ip} vs ${data.ip}`);
+    // Don't fail on IP mismatch (user might be behind NAT/proxy)
+    // Just log it for monitoring
   }
 
   // Check expiry (10 minutes)
-  const expiryTime = 10 * 60 * 1000;
-  if (Date.now() - data.createdAt > expiryTime) {
+  if (Date.now() - data.createdAt > 10 * 60 * 1000) {
     stateStore.delete(state);
+    console.warn('[OAUTH] Expired state token');
     return false;
   }
 
-  // One-time use: delete after validation
+  // One-time use - delete after validation
   stateStore.delete(state);
   return true;
-};
-
-/**
- * Get current store size (for debugging/monitoring)
- */
-export const getStateStoreSize = (): number => {
-  return stateStore.size;
 };
