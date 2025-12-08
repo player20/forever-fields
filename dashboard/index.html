@@ -965,12 +965,23 @@
 
         // Check authentication on page load
         (async function checkAuth() {
+            console.log('[Dashboard] Checking authentication...');
+            console.log('[Dashboard] Tokens in localStorage:', {
+                access_token: localStorage.getItem('ff_access_token') ? 'present' : 'missing',
+                refresh_token: localStorage.getItem('ff_refresh_token') ? 'present' : 'missing'
+            });
+
             const isAuthenticated = await api.isAuthenticated();
+            console.log('[Dashboard] Authentication result:', isAuthenticated);
+
             if (!isAuthenticated) {
+                console.error('[Dashboard] Not authenticated - redirecting to login');
                 // Redirect to login if not authenticated
                 window.location.href = '../login/';
                 return;
             }
+
+            console.log('[Dashboard] Successfully authenticated!');
         })();
 
         // Sign out handler

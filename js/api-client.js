@@ -17,13 +17,30 @@ class ForeverFieldsAPI {
      */
     async isAuthenticated() {
         try {
+            console.log('[API] Checking authentication at:', `${this.baseURL}/api/user/me`);
+            const headers = this._getAuthHeaders();
+            console.log('[API] Auth headers:', headers);
+
             // Try httpOnly cookie auth first
             const response = await fetch(`${this.baseURL}/api/user/me`, {
                 credentials: 'include', // Send cookies
-                headers: this._getAuthHeaders(),
+                headers,
             });
+
+            console.log('[API] Auth check response:', {
+                status: response.status,
+                ok: response.ok,
+                statusText: response.statusText
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                console.error('[API] Auth check failed:', text);
+            }
+
             return response.ok;
-        } catch {
+        } catch (error) {
+            console.error('[API] Auth check error:', error);
             return false;
         }
     }
