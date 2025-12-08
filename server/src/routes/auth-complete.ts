@@ -272,14 +272,14 @@ router.post(
           console.warn('[AUTH] User already exists in database:', err);
         });
 
-      // Generate session
+      // Sign in the user to get a proper session with JWT tokens
       const { data: sessionData, error: sessionError } =
-        await supabaseAdmin.auth.admin.generateLink({
-          type: 'magiclink',
-          email: data.user.email!,
+        await supabaseAdmin.auth.signInWithPassword({
+          email,
+          password,
         });
 
-      if (sessionError || !sessionData) {
+      if (sessionError || !sessionData.session) {
         console.error('[AUTH] Session generation error:', sessionError);
         return res.status(500).json({ error: 'Account created but session failed' });
       }
@@ -287,10 +287,7 @@ router.post(
       console.log(`[AUTH] Successful password signup: ${data.user.email}`);
 
       // Set httpOnly cookies (secure, not accessible to JavaScript)
-      // Note: generateLink() only provides hashed_token (not separate access/refresh)
-      const sessionToken = sessionData.properties.hashed_token;
-
-      res.cookie('ff_access_token', sessionToken, {
+      res.cookie('ff_access_token', sessionData.session.access_token, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
@@ -298,7 +295,7 @@ router.post(
         path: '/',
       });
 
-      res.cookie('ff_refresh_token', sessionToken, {
+      res.cookie('ff_refresh_token', sessionData.session.refresh_token, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
