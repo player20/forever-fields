@@ -1461,8 +1461,9 @@
             const sectionCard = photoMasonry.closest('.section-card');
 
             if (!photos || photos.length === 0) {
-                // Hide section if no photos
-                if (sectionCard) sectionCard.style.display = 'none';
+                // Keep demo content visible, just show section
+                console.log('[Photos] No data - keeping demo content');
+                if (sectionCard) sectionCard.style.display = 'block';
                 return;
             }
 
@@ -1499,8 +1500,9 @@
             const sectionCard = timelineVertical.closest('.section-card');
 
             if (!lifeEvents || lifeEvents.length === 0) {
-                // Hide section if no events
-                if (sectionCard) sectionCard.style.display = 'none';
+                // Keep demo content visible
+                console.log('[Timeline] No data - keeping demo content');
+                if (sectionCard) sectionCard.style.display = 'block';
                 return;
             }
 
@@ -1536,8 +1538,9 @@
             const sectionCard = recipesGrid.closest('.section-card');
 
             if (!recipes || recipes.length === 0) {
-                // Hide section if no recipes
-                if (sectionCard) sectionCard.style.display = 'none';
+                // Keep demo content visible
+                console.log('[Recipes] No data - keeping demo content');
+                if (sectionCard) sectionCard.style.display = 'block';
                 return;
             }
 
@@ -1576,8 +1579,9 @@
             const sectionCard = voiceNotesList.closest('.section-card');
 
             if (!voiceNotes || voiceNotes.length === 0) {
-                // Hide section if no voice notes
-                if (sectionCard) sectionCard.style.display = 'none';
+                // Keep demo content visible
+                console.log('[Voice Notes] No data - keeping demo content');
+                if (sectionCard) sectionCard.style.display = 'block';
                 return;
             }
 
@@ -1631,8 +1635,9 @@
             const sectionCard = memoriesList.closest('.section-card');
 
             if (!memories || memories.length === 0) {
-                // Hide section if no memories
-                if (sectionCard) sectionCard.style.display = 'none';
+                // Keep demo content visible
+                console.log('[Memories] No data - keeping demo content');
+                if (sectionCard) sectionCard.style.display = 'block';
                 return;
             }
 
@@ -1776,6 +1781,12 @@
                 }
 
                 // Display dynamic content from API
+                console.log('[Memorial] Photos:', memorial.photos);
+                console.log('[Memorial] Life Events:', memorial.lifeEvents);
+                console.log('[Memorial] Recipes:', memorial.recipes);
+                console.log('[Memorial] Voice Notes:', memorial.voiceNotes);
+                console.log('[Memorial] Memories:', memorial.memories);
+
                 displayPhotos(memorial.photos || []);
                 displayTimeline(memorial.lifeEvents || []);
                 displayRecipes(memorial.recipes || []);
