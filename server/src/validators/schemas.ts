@@ -14,7 +14,7 @@ export const magicLinkRequestSchema = z.object({
 });
 
 export const authCallbackSchema = z.object({
-  token: z.string().length(32, 'Invalid token format'),
+  token: z.string().min(32, 'Invalid token format'),
 });
 
 // Re-export auth schemas from auth-schemas.ts
