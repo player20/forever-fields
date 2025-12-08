@@ -1449,6 +1449,230 @@
         });
     </script>
 
+    <!-- Helper Functions for Dynamic Content Display -->
+    <script>
+        /**
+         * Display photos in the photo gallery
+         */
+        function displayPhotos(photos) {
+            const photoMasonry = document.querySelector('.photo-masonry');
+            if (!photoMasonry) return;
+
+            const sectionCard = photoMasonry.closest('.section-card');
+
+            if (!photos || photos.length === 0) {
+                // Hide section if no photos
+                if (sectionCard) sectionCard.style.display = 'none';
+                return;
+            }
+
+            // Clear existing demo content
+            photoMasonry.innerHTML = '';
+
+            // Display photos
+            photos.forEach(photo => {
+                const photoItem = document.createElement('div');
+                photoItem.className = 'photo-item';
+                photoItem.setAttribute('data-lightbox', 'gallery');
+                photoItem.style.backgroundImage = `url(${photo.url})`;
+                photoItem.style.backgroundSize = 'cover';
+                photoItem.style.backgroundPosition = 'center';
+
+                if (photo.caption) {
+                    photoItem.title = photo.caption;
+                }
+
+                photoMasonry.appendChild(photoItem);
+            });
+
+            // Show section
+            if (sectionCard) sectionCard.style.display = 'block';
+        }
+
+        /**
+         * Display timeline life events
+         */
+        function displayTimeline(lifeEvents) {
+            const timelineVertical = document.querySelector('.timeline-vertical');
+            if (!timelineVertical) return;
+
+            const sectionCard = timelineVertical.closest('.section-card');
+
+            if (!lifeEvents || lifeEvents.length === 0) {
+                // Hide section if no events
+                if (sectionCard) sectionCard.style.display = 'none';
+                return;
+            }
+
+            // Clear existing demo content
+            timelineVertical.innerHTML = '';
+
+            // Display timeline events
+            lifeEvents.forEach(event => {
+                const timelineEntry = document.createElement('div');
+                timelineEntry.className = 'timeline-entry';
+
+                timelineEntry.innerHTML = `
+                    <div class="timeline-marker"></div>
+                    <span class="timeline-year-tag" data-no-translate>${event.year}</span>
+                    <h4 class="timeline-title">${event.title}</h4>
+                    <p class="timeline-desc">${event.description}</p>
+                `;
+
+                timelineVertical.appendChild(timelineEntry);
+            });
+
+            // Show section
+            if (sectionCard) sectionCard.style.display = 'block';
+        }
+
+        /**
+         * Display recipes
+         */
+        function displayRecipes(recipes) {
+            const recipesGrid = document.querySelector('.recipes-grid');
+            if (!recipesGrid) return;
+
+            const sectionCard = recipesGrid.closest('.section-card');
+
+            if (!recipes || recipes.length === 0) {
+                // Hide section if no recipes
+                if (sectionCard) sectionCard.style.display = 'none';
+                return;
+            }
+
+            // Clear existing demo content
+            recipesGrid.innerHTML = '';
+
+            // Display recipes
+            recipes.forEach(recipe => {
+                const recipeCard = document.createElement('div');
+                recipeCard.className = 'recipe-card';
+
+                recipeCard.innerHTML = `
+                    <div class="recipe-card-header">
+                        <div class="recipe-icon">${recipe.icon || '🍽️'}</div>
+                        <div>
+                            <h4 class="recipe-name">${recipe.name}</h4>
+                            <p class="recipe-preview">${recipe.description || ''}</p>
+                        </div>
+                    </div>
+                `;
+
+                recipesGrid.appendChild(recipeCard);
+            });
+
+            // Show section
+            if (sectionCard) sectionCard.style.display = 'block';
+        }
+
+        /**
+         * Display voice notes
+         */
+        function displayVoiceNotes(voiceNotes) {
+            const voiceNotesList = document.querySelector('.voice-notes-list');
+            if (!voiceNotesList) return;
+
+            const sectionCard = voiceNotesList.closest('.section-card');
+
+            if (!voiceNotes || voiceNotes.length === 0) {
+                // Hide section if no voice notes
+                if (sectionCard) sectionCard.style.display = 'none';
+                return;
+            }
+
+            // Clear existing demo content
+            voiceNotesList.innerHTML = '';
+
+            // Display voice notes
+            voiceNotes.forEach(note => {
+                const voiceNote = document.createElement('div');
+                voiceNote.className = 'voice-note';
+
+                // Format duration (assuming it's in seconds)
+                const minutes = Math.floor(note.duration / 60);
+                const seconds = note.duration % 60;
+                const durationStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                voiceNote.innerHTML = `
+                    <button class="voice-play-btn">▶</button>
+                    <div class="voice-waveform"></div>
+                    <div class="voice-info">
+                        <div class="voice-author">${note.authorName || 'Anonymous'}</div>
+                        <div class="voice-duration">${durationStr}</div>
+                    </div>
+                `;
+
+                // Add click handler for play button
+                const playBtn = voiceNote.querySelector('.voice-play-btn');
+                if (playBtn && note.url) {
+                    playBtn.addEventListener('click', function() {
+                        // TODO: Implement actual audio playback
+                        const isPlaying = this.textContent === '⏸';
+                        document.querySelectorAll('.voice-play-btn').forEach(b => b.textContent = '▶');
+                        this.textContent = isPlaying ? '▶' : '⏸';
+                    });
+                }
+
+                voiceNotesList.appendChild(voiceNote);
+            });
+
+            // Show section
+            if (sectionCard) sectionCard.style.display = 'block';
+        }
+
+        /**
+         * Display shared memories
+         */
+        function displayMemories(memories) {
+            const memoriesList = document.querySelector('.memories-list');
+            if (!memoriesList) return;
+
+            const sectionCard = memoriesList.closest('.section-card');
+
+            if (!memories || memories.length === 0) {
+                // Hide section if no memories
+                if (sectionCard) sectionCard.style.display = 'none';
+                return;
+            }
+
+            // Clear existing demo content
+            memoriesList.innerHTML = '';
+
+            // Display memories
+            memories.forEach(memory => {
+                const memoryItem = document.createElement('div');
+                memoryItem.className = 'memory-item';
+                memoryItem.setAttribute('data-item-id', memory.id);
+
+                // Get first letter of author name for avatar
+                const authorInitial = (memory.authorName || 'A').charAt(0).toUpperCase();
+
+                // Format date
+                const date = new Date(memory.createdAt);
+                const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                memoryItem.innerHTML = `
+                    <div class="memory-header">
+                        <div class="memory-avatar">${authorInitial}</div>
+                        <div class="memory-meta">
+                            <div class="memory-author">${memory.authorName || 'Anonymous'}</div>
+                            <div class="memory-date">${dateStr}</div>
+                        </div>
+                    </div>
+                    <div class="memory-content">
+                        <p>${memory.content}</p>
+                    </div>
+                `;
+
+                memoriesList.appendChild(memoryItem);
+            });
+
+            // Show section
+            if (sectionCard) sectionCard.style.display = 'block';
+        }
+    </script>
+
     <!-- Load Memorial Data from API -->
     <script>
         (async function loadMemorialData() {
@@ -1551,13 +1775,15 @@
                     }
                 }
 
-                // Hide ALL demo content sections (we don't have this data in database yet)
+                // Display dynamic content from API
+                displayPhotos(memorial.photos || []);
+                displayTimeline(memorial.lifeEvents || []);
+                displayRecipes(memorial.recipes || []);
+                displayVoiceNotes(memorial.voiceNotes || []);
+                displayMemories(memorial.memories || []);
+
+                // Hide sections that aren't implemented yet
                 const sectionsToHide = [
-                    '.timeline-vertical',    // Life Timeline
-                    '.photo-masonry',        // Photo Gallery
-                    '.recipes-grid',         // Recipes
-                    '.voice-notes-list',     // Voice Memories
-                    '.memories-list',        // Shared Memories
                     '.healing-widget',       // Healing Widget
                     '.family-tree-preview',  // Family Tree
                     '.capsule-card'          // Time Capsule
