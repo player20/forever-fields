@@ -587,16 +587,7 @@ router.post(
       const expiresAt = getMagicLinkExpiration();
 
       if (user) {
-        // Send password reset via Supabase (uses email template)
-        const { error } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
-          redirectTo: `${env.FRONTEND_URL}/auth/reset-password`,
-        });
-
-        if (error) {
-          console.error('[AUTH] Password reset email error:', error);
-        }
-
-        // Alternative: Send via our magic link system
+        // Create password reset token in database
         await prisma.magicLink.create({
           data: {
             email,
@@ -605,6 +596,7 @@ router.post(
           },
         });
 
+        // Send branded password reset email via Resend
         try {
           await sendPasswordResetEmail(email, token);
           console.log(`[AUTH] Password reset email sent successfully to ${email}`);
