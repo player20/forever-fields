@@ -960,7 +960,13 @@
                     const card = createMemorialCard(memorial);
                     console.log(`[Dashboard] Card ${index + 1} created:`, card);
                     grid.appendChild(card);
-                    console.log(`[Dashboard] Card ${index + 1} appended to grid`);
+
+                    // Trigger fade-in animation immediately for dynamically created cards
+                    requestAnimationFrame(() => {
+                        card.classList.add('visible');
+                    });
+
+                    console.log(`[Dashboard] Card ${index + 1} appended to grid and made visible`);
                 });
 
                 // Add "Create New" card at the end
