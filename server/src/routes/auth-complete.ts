@@ -260,10 +260,11 @@ router.post(
         return res.status(500).json({ error: 'Failed to create account' });
       }
 
-      // Create user in our database
+      // Create user in our database (use Supabase's UUID to match auth tokens)
       await prisma.user
         .create({
           data: {
+            id: data.user.id, // CRITICAL: Use Supabase's UUID so auth middleware can find user
             email: data.user.email!,
             name: data.user.email!.split('@')[0],
           },
