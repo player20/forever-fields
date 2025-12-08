@@ -588,7 +588,7 @@ router.post(
 
       if (user) {
         // Create password reset token in database
-        await prisma.magicLink.create({
+        const createdToken = await prisma.magicLink.create({
           data: {
             email,
             token,
@@ -601,10 +601,14 @@ router.post(
           await sendPasswordResetEmail(email, token);
           console.log(`[AUTH] Password reset email sent successfully to ${email}`);
         } catch (err) {
-          console.error('[AUTH] Failed to send password reset email:', {
+          // Delete token if email failed to send (prevent orphaned tokens)
+          await prisma.magicLink.delete({
+            where: { id: createdToken.id },
+          });
+
+          console.error('[AUTH] Failed to send password reset email (token deleted):', {
             error: err.message,
             email,
-            details: err
           });
         }
       } else {
@@ -729,93 +733,36 @@ router.post(
         });
       }
 
-      // Mark token as used
-      await prisma.magicLink.update({
-        where: { token },
-        data: { usedAt: new Date() },
-      });
-
-      // Find or create Supabase user by email
-      console.log(`[AUTH] Password reset for: ${magicLink.email}`);
-
-      let supabaseUserId: string;
-      let foundExisting = false;
-
-      // Try to update existing user's password (most common case)
-      // We'll search through paginated results from listUsers()
-      let page = 1;
-      let supabaseUser = null;
-
-      try {
-        // List users with pagination (default page size is ~1000)
-        const { data: userData, error: listError } = await supabaseAdmin.auth.admin.listUsers({
-          page,
-          perPage: 1000,
-        });
-
-        if (listError) {
-          console.error('[AUTH] Failed to list Supabase users:', listError);
-        } else if (userData?.users) {
-          supabaseUser = userData.users.find((u: any) => u.email === magicLink.email);
-        }
-      } catch (listErr) {
-        console.error('[AUTH] Error listing users:', listErr);
-      }
-
-      if (supabaseUser) {
-        // Found existing Supabase user - update password
-        console.log(`[AUTH] Found Supabase user: ${supabaseUser.email} (${supabaseUser.id})`);
-
-        const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(supabaseUser.id, {
-          password: newPassword,
-        });
-
-        if (updateError) {
-          console.error('[AUTH] Password update failed:', updateError);
-          return res.status(500).json({ error: 'Failed to update password' });
-        }
-
-        supabaseUserId = supabaseUser.id;
-        foundExisting = true;
-        console.log(`[AUTH] Password updated for existing user: ${supabaseUser.email}`);
-      } else {
-        // User doesn't exist in Supabase - create new user with password
-        console.log(`[AUTH] Creating new Supabase user with password: ${magicLink.email}`);
-
-        const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-          email: magicLink.email,
-          password: newPassword,
-          email_confirm: true,
-          user_metadata: {
-            name: magicLink.email.split('@')[0],
-          },
-        });
-
-        if (createError || !newUser.user) {
-          console.error('[AUTH] Failed to create Supabase user:', createError);
-          return res.status(500).json({ error: 'Failed to set password' });
-        }
-
-        supabaseUserId = newUser.user.id;
-        console.log(`[AUTH] New Supabase user created: ${magicLink.email} (${supabaseUserId})`);
-      }
-
-      // Ensure user exists in our database
-      let user = await prisma.user.findUnique({
+      // Look up user in our database
+      const user = await prisma.user.findUnique({
         where: { email: magicLink.email },
       });
 
       if (!user) {
-        // Create user in our database with Supabase UUID
-        user = await prisma.user.create({
-          data: {
-            id: supabaseUserId,
-            email: magicLink.email,
-            name: magicLink.email.split('@')[0],
-          },
+        // User doesn't exist - they need to sign up first
+        console.warn(`[AUTH] Password reset attempted for non-existent user: ${magicLink.email}`);
+        return res.status(400).json({
+          error: 'No account found with this email address. Please sign up first.',
         });
-        console.log(`[AUTH] Created DB user with Supabase UUID: ${user.email}`);
       }
+
+      console.log(`[AUTH] Password reset for: ${user.email} (${user.id})`);
+
+      // Update password in Supabase using the user's UUID from our database
+      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
+        password: newPassword,
+      });
+
+      if (updateError) {
+        console.error('[AUTH] Password update failed:', updateError);
+        return res.status(500).json({ error: 'Failed to update password. Please try again.' });
+      }
+
+      // Mark token as used AFTER successful password update
+      await prisma.magicLink.update({
+        where: { token },
+        data: { usedAt: new Date() },
+      });
 
       console.log(`[AUTH] Password reset successful for ${user.email}`);
 

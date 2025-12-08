@@ -93,7 +93,7 @@ export const corsMiddleware = cors({
 // Auth endpoints: Stricter in production, relaxed in development
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProd ? 100 : 100, // Production: 100 attempts (temporarily increased for testing), Development: 100 attempts
+  max: isProd ? 10 : 100, // Production: 10 attempts, Development: 100 attempts
   message: 'Too many authentication attempts, please try again later',
   standardHeaders: true,
   legacyHeaders: false,

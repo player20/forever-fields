@@ -7,7 +7,6 @@ import app from './app';
 import { env, isDev } from './config/env';
 import { prisma } from './config/database';
 import { scheduleCleanupJob } from './jobs/cleanup-tokens';
-import { startDatabaseKeepAlive, stopDatabaseKeepAlive } from './utils/keep-alive';
 
 const PORT = parseInt(env.PORT);
 
@@ -21,20 +20,12 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log('');
 
   // Start background cleanup job (runs every 6 hours)
-  // Note: First run delayed by 30s to allow database to wake from Supabase free tier pause
   scheduleCleanupJob();
-
-  // Start database keep-alive (prevents Supabase free tier from pausing)
-  // Note: First ping may fail if DB is asleep, but will succeed on subsequent pings
-  startDatabaseKeepAlive();
 });
 
 // Graceful shutdown
 const shutdown = async () => {
   console.log('\n🛑 Shutting down gracefully...');
-
-  // Stop keep-alive
-  stopDatabaseKeepAlive();
 
   server.close(async () => {
     console.log('📡 HTTP server closed');

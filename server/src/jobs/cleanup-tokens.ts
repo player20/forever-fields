@@ -122,19 +122,15 @@ export const runCleanupJob = async (): Promise<void> => {
 
 /**
  * Schedule cleanup job to run periodically
- * Runs every 6 hours
+ * Runs immediately on startup, then every 6 hours
  */
 export const scheduleCleanupJob = (): NodeJS.Timeout => {
   const SIX_HOURS = 6 * 60 * 60 * 1000;
-  const STARTUP_DELAY = 30 * 1000; // 30 seconds
 
-  console.log('[CLEANUP] Token cleanup job scheduled (first run in 30 seconds)...');
+  console.log('[CLEANUP] Starting token cleanup job...');
 
-  // Delay first run to give database time to wake up from Supabase free tier pause
-  setTimeout(() => {
-    console.log('[CLEANUP] Running first cleanup job...');
-    runCleanupJob();
-  }, STARTUP_DELAY);
+  // Run immediately on startup
+  runCleanupJob();
 
   // Then run every 6 hours
   return setInterval(runCleanupJob, SIX_HOURS);
