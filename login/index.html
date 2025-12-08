@@ -763,6 +763,12 @@
 
                 Logger.log('Signup successful');
 
+                // Store tokens in localStorage for cross-domain authentication
+                if (response.tokens) {
+                    localStorage.setItem('ff_access_token', response.tokens.access_token);
+                    localStorage.setItem('ff_refresh_token', response.tokens.refresh_token);
+                }
+
                 // Redirect to specified URL or dashboard
                 const destination = redirectUrl || '/dashboard';
                 window.location.href = destination;
@@ -824,6 +830,12 @@
                 });
 
                 Logger.log('Login successful');
+
+                // Store tokens in localStorage for cross-domain authentication
+                if (response.tokens) {
+                    localStorage.setItem('ff_access_token', response.tokens.access_token);
+                    localStorage.setItem('ff_refresh_token', response.tokens.refresh_token);
+                }
 
                 // Redirect to specified URL or dashboard
                 const destination = redirectUrl || '/dashboard';

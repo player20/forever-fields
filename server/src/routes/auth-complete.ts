@@ -342,6 +342,11 @@ router.post(
           id: data.user.id,
           email: data.user.email,
         },
+        // Include tokens for cross-domain scenarios (cookies may not work across domains)
+        tokens: {
+          access_token: sessionData.session.access_token,
+          refresh_token: sessionData.session.refresh_token,
+        },
       });
     } catch (error) {
       console.error('[AUTH] Signup error:', error);
@@ -435,6 +440,11 @@ router.post(
         user: {
           id: data.user.id,
           email: data.user.email,
+        },
+        // Include tokens for cross-domain scenarios (cookies may not work across domains)
+        tokens: {
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
         },
       });
     } catch (error) {
