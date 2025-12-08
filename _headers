@@ -1,0 +1,65 @@
+# Cache control for Cloudflare Pages
+# Prevents aggressive caching of HTML and API responses
+
+# HTML files - no cache (always get fresh version)
+/*.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+# Root index
+/
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+# Login and auth pages
+/login/*
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+/reset-password/*
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+# JavaScript files - cache for 1 hour (can be updated frequently)
+/*.js
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# CSS files - cache for 1 hour
+/*.css
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# Images - cache for 1 day
+/*.jpg
+  Cache-Control: public, max-age=86400
+
+/*.jpeg
+  Cache-Control: public, max-age=86400
+
+/*.png
+  Cache-Control: public, max-age=86400
+
+/*.gif
+  Cache-Control: public, max-age=86400
+
+/*.svg
+  Cache-Control: public, max-age=86400
+
+/*.webp
+  Cache-Control: public, max-age=86400
+
+# Fonts - cache for 1 year (rarely change)
+/*.woff
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.ttf
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.eot
+  Cache-Control: public, max-age=31536000, immutable
