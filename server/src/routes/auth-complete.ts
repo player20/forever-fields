@@ -179,12 +179,12 @@ router.get(
 
       console.log(`[AUTH] Successful magic link login: ${user.email}`);
 
-      // Set httpOnly cookies with SEPARATE tokens (security best practice)
-      // Use actual session tokens from Supabase, not the hashed_token
-      const accessToken = sessionData.properties.access_token || sessionData.properties.hashed_token;
-      const refreshToken = sessionData.properties.refresh_token || sessionData.properties.hashed_token;
+      // Set httpOnly cookies (secure, not accessible to JavaScript)
+      // Note: generateLink() only provides hashed_token (not separate access/refresh)
+      // Separate tokens are only available from password-based auth (signup/login)
+      const sessionToken = sessionData.properties.hashed_token;
 
-      res.cookie('ff_access_token', accessToken, {
+      res.cookie('ff_access_token', sessionToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site (requires secure)
@@ -192,7 +192,7 @@ router.get(
         path: '/',
       });
 
-      res.cookie('ff_refresh_token', refreshToken, {
+      res.cookie('ff_refresh_token', sessionToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site (requires secure)
@@ -274,11 +274,11 @@ router.post(
 
       console.log(`[AUTH] Successful password signup: ${data.user.email}`);
 
-      // Set httpOnly cookies with SEPARATE tokens (security best practice)
-      const accessToken = sessionData.properties.access_token || sessionData.properties.hashed_token;
-      const refreshToken = sessionData.properties.refresh_token || sessionData.properties.hashed_token;
+      // Set httpOnly cookies (secure, not accessible to JavaScript)
+      // Note: generateLink() only provides hashed_token (not separate access/refresh)
+      const sessionToken = sessionData.properties.hashed_token;
 
-      res.cookie('ff_access_token', accessToken, {
+      res.cookie('ff_access_token', sessionToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
@@ -286,7 +286,7 @@ router.post(
         path: '/',
       });
 
-      res.cookie('ff_refresh_token', refreshToken, {
+      res.cookie('ff_refresh_token', sessionToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
