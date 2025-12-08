@@ -30,6 +30,9 @@ import { generateSecureToken, getMagicLinkExpiration } from '../utils/tokens';
 import { sendMagicLink, sendPasswordResetEmail } from '../services/email';
 import { env } from '../config/env';
 import { z } from 'zod';
+import { checkLockoutStatus, recordLoginAttempt } from '../utils/account-lockout';
+import { checkPasswordBreach } from '../utils/password-breach';
+import { generateOAuthState, validateOAuthState } from '../utils/oauth-state';
 
 const router = Router();
 
@@ -226,6 +229,15 @@ router.post(
 
       console.log(`[AUTH] Password signup requested: ${email} from ${ipAddress}`);
 
+      // Check if password has been exposed in data breaches
+      const isBreached = await checkPasswordBreach(password);
+      if (isBreached) {
+        console.warn(`[SECURITY] Breached password rejected for signup: ${email}`);
+        return res.status(400).json({
+          error: 'This password has been exposed in a data breach. Please choose a different password.',
+        });
+      }
+
       // Create Supabase auth user (handles bcrypt hashing)
       const { data, error } = await supabaseAdmin.auth.admin.createUser({
         email,
@@ -322,8 +334,21 @@ router.post(
     try {
       const { email, password, remember } = req.body;
       const ipAddress = (req.ip || req.connection.remoteAddress || 'unknown').replace('::ffff:', '');
+      const userAgent = req.headers['user-agent'] || 'unknown';
 
       console.log(`[AUTH] Password login attempt: ${email} from ${ipAddress}`);
+
+      // Check account lockout status
+      const lockoutStatus = await checkLockoutStatus(email, ipAddress);
+      if (lockoutStatus.isLocked) {
+        await recordLoginAttempt(email, ipAddress, false, 'Account locked', userAgent);
+        console.warn(`[SECURITY] Login blocked due to account lockout: ${email} from ${ipAddress}`);
+        return res.status(429).json({
+          error: 'Too many failed login attempts. Please try again later.',
+          lockoutEndsAt: lockoutStatus.lockoutEndsAt,
+          attemptsRemaining: 0,
+        });
+      }
 
       // Verify credentials with Supabase
       const { data, error } = await supabaseAdmin.auth.signInWithPassword({
@@ -332,6 +357,8 @@ router.post(
       });
 
       if (error) {
+        // Record failed login attempt
+        await recordLoginAttempt(email, ipAddress, false, error.message, userAgent);
         console.warn(`[AUTH] Failed password login: ${email} from ${ipAddress}`);
         // Don't leak information about user existence
         return res.status(401).json({ error: 'Invalid email or password' });
@@ -350,6 +377,9 @@ router.post(
         .catch((err) => {
           console.warn('[AUTH] Failed to update user last login:', err);
         });
+
+      // Record successful login attempt
+      await recordLoginAttempt(email, ipAddress, true, undefined, userAgent);
 
       console.log(`[AUTH] Successful password login: ${data.user.email}`);
 
@@ -401,12 +431,18 @@ router.get('/sso/:provider', authRateLimiter, async (req: Request, res: Response
 
     console.log(`[AUTH] SSO request: ${provider} from ${ipAddress}`);
 
+    // Generate CSRF state token
+    const state = generateOAuthState(ipAddress);
+
     // Generate OAuth URL with Supabase
     const { data, error } = await supabaseAdmin.auth.signInWithOAuth({
       provider: provider as 'google' | 'apple',
       options: {
-        redirectTo: `${env.FRONTEND_URL}/auth/callback`,
+        redirectTo: `${env.API_URL}/api/auth/sso/callback`,
         scopes: provider === 'google' ? 'email profile' : undefined,
+        queryParams: {
+          state,
+        },
       },
     });
 
@@ -419,6 +455,80 @@ router.get('/sso/:provider', authRateLimiter, async (req: Request, res: Response
   } catch (error) {
     console.error('[AUTH] SSO error:', error);
     return res.status(500).json({ error: 'SSO failed' });
+  }
+});
+
+/**
+ * GET /api/auth/sso/callback
+ * Handle OAuth provider callback
+ *
+ * Security: Validates CSRF state parameter, exchanges code for session
+ */
+router.get('/sso/callback', async (req: Request, res: Response) => {
+  try {
+    const { code, state, error: oauthError } = req.query;
+    const ipAddress = (req.ip || req.connection.remoteAddress || 'unknown').replace('::ffff:', '');
+
+    console.log(`[AUTH] OAuth callback received from ${ipAddress}`);
+
+    // Check for OAuth errors
+    if (oauthError) {
+      console.error('[AUTH] OAuth error:', oauthError);
+      return res.redirect(`${env.FRONTEND_URL}/login?error=oauth_failed`);
+    }
+
+    // Validate CSRF state
+    if (!state || !validateOAuthState(state as string, ipAddress)) {
+      console.error(`[SECURITY] Invalid OAuth state from ${ipAddress}`);
+      return res.redirect(`${env.FRONTEND_URL}/login?error=invalid_state`);
+    }
+
+    if (!code) {
+      console.error('[AUTH] No code in OAuth callback');
+      return res.redirect(`${env.FRONTEND_URL}/login?error=auth_failed`);
+    }
+
+    // Exchange code for session
+    const { data, error } = await supabaseAdmin.auth.exchangeCodeForSession(code as string);
+
+    if (error || !data.session) {
+      console.error('[AUTH] Code exchange failed:', error);
+      return res.redirect(`${env.FRONTEND_URL}/login?error=auth_failed`);
+    }
+
+    // Set httpOnly cookies
+    res.cookie('ff_access_token', data.session.access_token, {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production',
+      sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 3600000, // 1 hour
+      path: '/',
+    });
+
+    res.cookie('ff_refresh_token', data.session.refresh_token, {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production',
+      sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 7 * 24 * 3600000, // 7 days
+      path: '/api/auth',
+    });
+
+    // Get or create user in database
+    const user = await prisma.user.upsert({
+      where: { email: data.session.user.email! },
+      update: { updatedAt: new Date() },
+      create: {
+        email: data.session.user.email!,
+        name: data.session.user.user_metadata?.name || data.session.user.email!.split('@')[0],
+      },
+    });
+
+    console.log(`[AUTH] Successful SSO login: ${user.email}`);
+
+    return res.redirect(`${env.FRONTEND_URL}/dashboard`);
+  } catch (error) {
+    console.error('[AUTH] SSO callback error:', error);
+    return res.redirect(`${env.FRONTEND_URL}/login?error=auth_failed`);
   }
 });
 
@@ -582,6 +692,15 @@ router.post(
 
       if (new Date() > magicLink.expiresAt) {
         return res.status(400).json({ error: 'Reset link has expired' });
+      }
+
+      // Check if new password has been exposed in data breaches
+      const isBreached = await checkPasswordBreach(newPassword);
+      if (isBreached) {
+        console.warn(`[SECURITY] Breached password rejected for reset: ${magicLink.email}`);
+        return res.status(400).json({
+          error: 'This password has been exposed in a data breach. Please choose a different password.',
+        });
       }
 
       // Mark token as used

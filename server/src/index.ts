@@ -6,7 +6,7 @@
 import app from './app';
 import { env, isDev } from './config/env';
 import { prisma } from './config/database';
-import { startCleanupJob } from './services/cleanup';
+import { scheduleCleanupJob } from './jobs/cleanup-tokens';
 
 const PORT = parseInt(env.PORT);
 
@@ -19,8 +19,8 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Ready to serve requests`);
   console.log('');
 
-  // Start background cleanup job
-  startCleanupJob();
+  // Start background cleanup job (runs every 6 hours)
+  scheduleCleanupJob();
 });
 
 // Graceful shutdown
