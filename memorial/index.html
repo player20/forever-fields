@@ -1483,27 +1483,89 @@
                     return;
                 }
 
+                // Update data-memorial-id attribute
+                document.body.setAttribute('data-memorial-id', memorial.id);
+
                 // Update page title and meta
                 document.title = `${memorial.deceasedName} - Forever Fields Memorial`;
 
-                // Update hero section
+                // Update meta description
+                const metaDesc = document.querySelector('meta[name="description"]');
+                if (metaDesc && memorial.shortBio) {
+                    metaDesc.setAttribute('content', `In loving memory of ${memorial.deceasedName}. ${memorial.shortBio.substring(0, 100)}...`);
+                }
+
+                // Update hero section - Name
                 const heroName = document.querySelector('.hero-name');
                 if (heroName) {
                     heroName.textContent = memorial.deceasedName;
                 }
 
-                // Update dates
-                const heroSubtitle = document.querySelector('.hero-subtitle');
-                if (heroSubtitle) {
+                // Update hero section - Dates (FIX: was using wrong selector)
+                const heroDates = document.querySelector('.hero-dates');
+                if (heroDates) {
                     const birthYear = memorial.birthDate ? new Date(memorial.birthDate).getFullYear() : '?';
                     const deathYear = memorial.deathDate ? new Date(memorial.deathDate).getFullYear() : '?';
-                    heroSubtitle.textContent = `${birthYear} - ${deathYear}`;
+
+                    // Format dates properly
+                    let dateString = '';
+                    if (memorial.birthDate && memorial.deathDate) {
+                        const birthDate = new Date(memorial.birthDate);
+                        const deathDate = new Date(memorial.deathDate);
+                        dateString = `${birthDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} — ${deathDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+                    } else if (memorial.birthDate) {
+                        const birthDate = new Date(memorial.birthDate);
+                        dateString = `${birthDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} — Present`;
+                    } else if (memorial.deathDate) {
+                        const deathDate = new Date(memorial.deathDate);
+                        dateString = `? — ${deathDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+                    } else {
+                        dateString = 'Forever in our hearts';
+                    }
+
+                    heroDates.textContent = dateString;
                 }
 
-                // Update bio
+                // Update or hide epitaph quote
+                const heroEpitaph = document.querySelector('.hero-epitaph');
+                if (heroEpitaph) {
+                    if (memorial.shortBio) {
+                        heroEpitaph.textContent = `"${memorial.shortBio}"`;
+                    } else {
+                        heroEpitaph.style.display = 'none';
+                    }
+                }
+
+                // Update or hide song widget
+                const songWidget = document.querySelector('.song-widget');
+                if (songWidget) {
+                    if (memorial.songSpotifyUri || memorial.songYoutubeUrl) {
+                        // Song data exists, keep widget visible
+                        const songTitle = document.querySelector('.song-title');
+                        if (songTitle) {
+                            songTitle.textContent = memorial.songSpotifyUri ? 'Spotify Song' : 'YouTube Song';
+                        }
+                    } else {
+                        // No song data, hide widget
+                        songWidget.style.display = 'none';
+                    }
+                }
+
+                // Hide timeline section (we don't have life events in database yet)
+                const timelineSection = document.querySelector('.timeline-vertical');
+                if (timelineSection && timelineSection.closest('.section-card')) {
+                    // Hide the entire section card containing the timeline
+                    timelineSection.closest('.section-card').style.display = 'none';
+                }
+
+                // Update bio section if it exists
                 const bioText = document.querySelector('.bio-text');
-                if (bioText && memorial.shortBio) {
-                    bioText.textContent = memorial.shortBio;
+                if (bioText) {
+                    if (memorial.shortBio) {
+                        bioText.textContent = memorial.shortBio;
+                    } else {
+                        bioText.textContent = 'No biography available yet.';
+                    }
                 }
 
                 // Update candle/flower counts if available
@@ -1512,9 +1574,18 @@
                     if (candleCount) {
                         candleCount.textContent = memorial._count.candles || 0;
                     }
+
+                    const memoryCount = document.querySelector('[data-memory-count]');
+                    if (memoryCount) {
+                        memoryCount.textContent = memorial._count.timeCapsules || 0;
+                    }
                 }
 
                 console.log('[Memorial] Page updated with memorial data');
+                console.log('[Memorial] Dates updated to:', heroDates?.textContent);
+                console.log('[Memorial] Epitaph:', memorial.shortBio ? 'updated' : 'hidden');
+                console.log('[Memorial] Song widget:', (memorial.songSpotifyUri || memorial.songYoutubeUrl) ? 'visible' : 'hidden');
+                console.log('[Memorial] Timeline section: hidden');
 
             } catch (error) {
                 console.error('[Memorial] Failed to load memorial:', error);
