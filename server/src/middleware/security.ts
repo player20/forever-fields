@@ -68,17 +68,10 @@ export const corsMiddleware = cors({
       allowedOrigins.push('http://localhost:3000', 'http://127.0.0.1:3000');
     }
 
-    // Handle no-origin requests (same-origin, tools, etc.)
+    // Handle no-origin requests (same-origin, tools, health checks, etc.)
     if (!origin) {
-      // Only allow no-origin in development or from trusted user agents
-      if (env.NODE_ENV === 'development') {
-        return callback(null, true);
-      }
-
-      // In production, only allow from testing tools (not malicious apps)
-      // Note: This is evaluated in the middleware context with access to req
-      // For now, reject no-origin in production for maximum security
-      return callback(new Error('Origin header required'));
+      // Allow no-origin requests (health checks, same-origin, curl, etc.)
+      return callback(null, true);
     }
 
     if (allowedOrigins.includes(origin)) {
