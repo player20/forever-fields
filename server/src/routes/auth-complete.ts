@@ -189,15 +189,29 @@ router.get(
         console.warn(`[AUTH] UUID mismatch for ${user.email}: DB=${user.id}, Supabase=${supabaseUserId}`);
       }
 
-      // Generate session tokens
-      const { data: sessionData, error: sessionError } =
-        await supabaseAdmin.auth.admin.generateLink({
-          type: 'magiclink',
-          email: magicLink.email,
-        });
+      // Create a proper Supabase session with JWT tokens
+      // Use a temporary password to sign in and get real access/refresh tokens
+      const tempPassword = generateSecureToken(); // Random 32-char password
 
-      if (sessionError || !sessionData) {
-        console.error('[AUTH] Session generation error:', sessionError);
+      // Update user with temporary password (they won't need it, just for session creation)
+      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+        supabaseUserId,
+        { password: tempPassword }
+      );
+
+      if (updateError) {
+        console.error('[AUTH] Failed to set temp password:', updateError);
+        return res.status(500).json({ error: 'Session creation failed' });
+      }
+
+      // Sign in with temporary password to get proper JWT tokens
+      const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.signInWithPassword({
+        email: magicLink.email,
+        password: tempPassword,
+      });
+
+      if (sessionError || !sessionData.session) {
+        console.error('[AUTH] Session creation error:', sessionError);
         return res.status(500).json({ error: 'Session creation failed' });
       }
 
@@ -209,12 +223,11 @@ router.get(
 
       console.log(`[AUTH] Successful magic link login: ${user.email}`);
 
-      // Set httpOnly cookies (secure, not accessible to JavaScript)
-      // Note: generateLink() only provides hashed_token (not separate access/refresh)
-      // Separate tokens are only available from password-based auth (signup/login)
-      const sessionToken = sessionData.properties.hashed_token;
+      // Use proper JWT tokens from the session
+      const accessToken = sessionData.session.access_token;
+      const refreshToken = sessionData.session.refresh_token;
 
-      res.cookie('ff_access_token', sessionToken, {
+      res.cookie('ff_access_token', accessToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site (requires secure)
@@ -222,7 +235,7 @@ router.get(
         path: '/',
       });
 
-      res.cookie('ff_refresh_token', sessionToken, {
+      res.cookie('ff_refresh_token', refreshToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site (requires secure)
@@ -233,8 +246,8 @@ router.get(
       // Redirect to dashboard with tokens in URL (fallback for cross-domain cookies)
       // The auth/callback.html page will handle storing tokens if cookies don't work
       const redirectUrl = new URL(`${env.FRONTEND_URL}/auth/callback`);
-      redirectUrl.searchParams.set('access_token', sessionToken);
-      redirectUrl.searchParams.set('refresh_token', sessionToken);
+      redirectUrl.searchParams.set('access_token', accessToken);
+      redirectUrl.searchParams.set('refresh_token', refreshToken);
 
       return res.redirect(302, redirectUrl.toString());
     } catch (error) {
