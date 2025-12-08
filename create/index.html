@@ -1953,8 +1953,72 @@
                 });
             });
 
-            // Restore draft on page load
-            restoreDraft();
+            // Check if editing existing memorial
+            const urlParams = new URLSearchParams(window.location.search);
+            const memorialId = urlParams.get('id');
+
+            if (memorialId) {
+                // Load memorial data for editing
+                loadMemorialForEditing(memorialId);
+            } else {
+                // Restore draft on page load (only for new memorials)
+                restoreDraft();
+            }
+
+            // Load memorial data for editing
+            async function loadMemorialForEditing(id) {
+                try {
+                    console.log('[Create] Loading memorial for editing:', id);
+
+                    // Initialize API client
+                    const api = new ForeverFieldsAPI(
+                        window.location.hostname === 'localhost'
+                            ? 'http://localhost:3000'
+                            : 'https://forever-fields.onrender.com'
+                    );
+
+                    // Fetch memorial data
+                    const memorial = await api.get(`/api/memorials/${id}`);
+                    console.log('[Create] Memorial loaded:', memorial);
+
+                    // Populate form fields
+                    if (memorial.deceasedName) {
+                        document.getElementById('deceasedName').value = memorial.deceasedName;
+                    }
+                    if (memorial.birthDate) {
+                        const birthDate = new Date(memorial.birthDate);
+                        document.getElementById('birthDate').value = birthDate.toISOString().split('T')[0];
+                    }
+                    if (memorial.deathDate) {
+                        const deathDate = new Date(memorial.deathDate);
+                        document.getElementById('passingDate').value = deathDate.toISOString().split('T')[0];
+                    }
+                    if (memorial.shortBio) {
+                        document.getElementById('shortBio').value = memorial.shortBio;
+                    }
+                    if (memorial.privacy) {
+                        const privacyRadio = document.querySelector(`input[name="privacy"][value="${memorial.privacy}"]`);
+                        if (privacyRadio) {
+                            privacyRadio.checked = true;
+                        }
+                    }
+
+                    // Song URLs
+                    if (memorial.songSpotifyUri) {
+                        document.getElementById('favoriteSongUrl').value = memorial.songSpotifyUri;
+                    } else if (memorial.songYoutubeUrl) {
+                        document.getElementById('favoriteSongUrl').value = memorial.songYoutubeUrl;
+                    }
+
+                    // Store memorial ID for update
+                    window.editingMemorialId = id;
+
+                    console.log('[Create] Form populated with memorial data');
+                } catch (error) {
+                    console.error('[Create] Failed to load memorial:', error);
+                    alert('Failed to load memorial for editing. Please try again.');
+                }
+            }
 
             // ============================================
             // NAME PREVIEW (Live preview as user types)
@@ -2069,20 +2133,35 @@
                     // Check if user is logged in
                     const isLoggedIn = await api.isAuthenticated();
 
-                    // Create the memorial
-                    const result = await api.post('/api/memorials', memorialData);
-                    const memorialId = result.id || result.memorial?.id;
+                    // Check if we're editing or creating
+                    const isEditing = window.editingMemorialId;
+                    let result, memorialId;
 
-                    if (!memorialId) {
-                        throw new Error('Memorial created but no ID returned');
-                    }
+                    if (isEditing) {
+                        // Update existing memorial
+                        result = await api.put(`/api/memorials/${window.editingMemorialId}`, memorialData);
+                        memorialId = window.editingMemorialId;
 
-                    // Clear the draft since memorial is being published
-                    clearDraft();
+                        // Show success message
+                        if (typeof showToast === 'function') {
+                            showToast('Memorial updated successfully!', 'success');
+                        }
+                    } else {
+                        // Create new memorial
+                        result = await api.post('/api/memorials', memorialData);
+                        memorialId = result.id || result.memorial?.id;
 
-                    // Show success message
-                    if (typeof showToast === 'function') {
-                        showToast('Memorial created successfully!', 'success');
+                        if (!memorialId) {
+                            throw new Error('Memorial created but no ID returned');
+                        }
+
+                        // Clear the draft since memorial is being published
+                        clearDraft();
+
+                        // Show success message
+                        if (typeof showToast === 'function') {
+                            showToast('Memorial created successfully!', 'success');
+                        }
                     }
 
                     // If not logged in, prompt to sign up to claim the memorial
