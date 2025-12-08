@@ -151,10 +151,33 @@ router.get(
           },
           socialLinks: true,
           qrCode: true,
+          photos: {
+            orderBy: { createdAt: 'desc' },
+            take: 50, // Limit to most recent 50 photos
+          },
+          lifeEvents: {
+            orderBy: { eventOrder: 'asc' },
+          },
+          recipes: {
+            orderBy: { createdAt: 'desc' },
+          },
+          memories: {
+            orderBy: { createdAt: 'desc' },
+            take: 50,
+          },
+          voiceNotes: {
+            orderBy: { createdAt: 'desc' },
+            take: 20,
+          },
           _count: {
             select: {
               candles: true,
               timeCapsules: true,
+              photos: true,
+              lifeEvents: true,
+              recipes: true,
+              memories: true,
+              voiceNotes: true,
             },
           },
         },

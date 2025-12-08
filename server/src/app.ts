@@ -36,6 +36,9 @@ import affiliateRoutes from './routes/affiliate';
 import socialLinksRoutes from './routes/social-links';
 import invitationRoutes from './routes/invitations';
 import userRoutes from './routes/user';
+import lifeEventsRoutes from './routes/lifeEvents';
+import recipesRoutes from './routes/recipes';
+import photosRoutes from './routes/photos';
 
 const app = express();
 
@@ -119,6 +122,9 @@ app.use('/api/reports', reportsRoutes);
 app.use('/api/affiliate', affiliateRoutes); // Affiliate partnerships (flowers, etc.)
 app.use('/api/social-links', socialLinksRoutes); // Social media links for memorials
 app.use('/api', invitationRoutes); // Memorial collaboration invitations (handles both /invitations and /memorials routes)
+app.use('/api/life-events', lifeEventsRoutes); // Timeline life events for memorials
+app.use('/api/recipes', recipesRoutes); // Famous recipes for memorials
+app.use('/api/photos', photosRoutes); // Photo gallery for memorials
 
 // ============================================
 // 404 HANDLER
