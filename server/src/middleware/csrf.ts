@@ -56,7 +56,7 @@ export const verifyCsrfToken = (req: Request, res: Response, next: NextFunction)
   // Skip CSRF if sameSite cookies are working (primary protection)
   // This is defense-in-depth, not the primary protection mechanism
   const sameSite = env.NODE_ENV === 'production' ? 'none' : 'lax';
-  if (sameSite === 'lax' || sameSite === 'strict') {
+  if (sameSite === 'lax') {
     // SameSite provides CSRF protection, skip token verification
     return next();
   }
@@ -70,7 +70,8 @@ export const verifyCsrfToken = (req: Request, res: Response, next: NextFunction)
   // Verify tokens match
   if (!cookieToken || !headerToken || cookieToken !== headerToken) {
     console.warn(`[SECURITY] CSRF token mismatch from ${req.ip}`);
-    return res.status(403).json({ error: 'Invalid CSRF token' });
+    res.status(403).json({ error: 'Invalid CSRF token' });
+    return;
   }
 
   next();
