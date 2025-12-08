@@ -226,6 +226,13 @@ const ForeverFieldsModeration = {
     },
 
     /**
+     * Alias for getPendingItems (for backwards compatibility)
+     */
+    getPendingQueue(memorialId) {
+        return this.getPendingItems(memorialId);
+    },
+
+    /**
      * Add item to pending queue
      */
     addToPendingQueue(memorialId, type, content, submittedBy) {

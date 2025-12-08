@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="api-url" content="https://forever-fields.onrender.com">
     <meta name="description" content="Build your family tree - Forever Fields memorial family tree visualization">
     <title>Family Tree - Forever Fields</title>
 
@@ -643,8 +644,12 @@
     </div>
 
     <!-- Scripts -->
+    <script src="../js/api-config.js"></script>
     <script src="../js/api-client.js"></script>
     <script>
+        // Initialize API client
+        const api = new ForeverFieldsAPI();
+
         // Get memorial ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const memorialId = urlParams.get('memorial');
