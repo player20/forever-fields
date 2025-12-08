@@ -1551,12 +1551,27 @@
                     }
                 }
 
-                // Hide timeline section (we don't have life events in database yet)
-                const timelineSection = document.querySelector('.timeline-vertical');
-                if (timelineSection && timelineSection.closest('.section-card')) {
-                    // Hide the entire section card containing the timeline
-                    timelineSection.closest('.section-card').style.display = 'none';
-                }
+                // Hide ALL demo content sections (we don't have this data in database yet)
+                const sectionsToHide = [
+                    '.timeline-vertical',    // Life Timeline
+                    '.photo-masonry',        // Photo Gallery
+                    '.recipes-grid',         // Recipes
+                    '.voice-notes-list',     // Voice Memories
+                    '.memories-list',        // Shared Memories
+                    '.healing-widget',       // Healing Widget
+                    '.family-tree-preview',  // Family Tree
+                    '.capsule-card'          // Time Capsule
+                ];
+
+                sectionsToHide.forEach(selector => {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        const sectionCard = element.closest('.section-card, .healing-widget, .action-card, .capsule-card');
+                        if (sectionCard) {
+                            sectionCard.style.display = 'none';
+                        }
+                    }
+                });
 
                 // Update bio section if it exists
                 const bioText = document.querySelector('.bio-text');
@@ -1568,24 +1583,75 @@
                     }
                 }
 
-                // Update candle/flower counts if available
-                if (memorial._count) {
-                    const candleCount = document.querySelector('[data-candle-count]');
-                    if (candleCount) {
-                        candleCount.textContent = memorial._count.candles || 0;
+                // Update candle and flower counts
+                const candleCount = document.querySelector('[data-candle-count]');
+                if (candleCount) {
+                    candleCount.textContent = memorial._count?.candles || 0;
+                }
+
+                const flowerCount = document.querySelector('[data-flower-count]');
+                if (flowerCount) {
+                    flowerCount.textContent = 0; // Flowers not implemented yet, always 0
+                }
+
+                // Update "Honor Margaret" to use actual memorial name
+                const actionCardTitle = document.querySelector('.action-card-title');
+                if (actionCardTitle && actionCardTitle.textContent.includes('Honor')) {
+                    actionCardTitle.textContent = `💐 Honor ${memorial.deceasedName.split(' ')[0]}`;
+                }
+
+                // Update reflection widget name
+                const healingPrompt = document.querySelector('.healing-widget-prompt');
+                if (healingPrompt && healingPrompt.textContent.includes('Margaret')) {
+                    const firstName = memorial.deceasedName.split(' ')[0];
+                    healingPrompt.textContent = healingPrompt.textContent.replace('Margaret', firstName);
+                }
+
+                // Check if current user is owner
+                try {
+                    const userProfile = await api.getUserProfile();
+                    const isOwner = userProfile && userProfile.id === memorial.ownerId;
+
+                    console.log('[Memorial] User profile:', userProfile);
+                    console.log('[Memorial] Memorial owner ID:', memorial.ownerId);
+                    console.log('[Memorial] Is owner:', isOwner);
+
+                    // Update role badge
+                    const roleBadge = document.getElementById('roleBadge');
+                    if (roleBadge) {
+                        if (isOwner) {
+                            roleBadge.textContent = 'Owner';
+                            roleBadge.className = 'user-role-badge role-owner';
+                        } else {
+                            roleBadge.textContent = 'Visitor';
+                            roleBadge.className = 'user-role-badge role-visitor';
+                        }
                     }
 
-                    const memoryCount = document.querySelector('[data-memory-count]');
-                    if (memoryCount) {
-                        memoryCount.textContent = memorial._count.timeCapsules || 0;
+                    // Show/hide edit button based on ownership
+                    const editBtn = document.querySelector('.nav-btn-edit');
+                    if (editBtn) {
+                        if (isOwner) {
+                            editBtn.style.display = 'block';
+                            editBtn.onclick = () => {
+                                window.location.href = `../create/?id=${memorial.id}`;
+                            };
+                        } else {
+                            editBtn.style.display = 'none';
+                        }
                     }
+                } catch (error) {
+                    console.log('[Memorial] Could not fetch user profile (probably not logged in):', error);
+                    // User not logged in, keep as Visitor
                 }
 
                 console.log('[Memorial] Page updated with memorial data');
                 console.log('[Memorial] Dates updated to:', heroDates?.textContent);
                 console.log('[Memorial] Epitaph:', memorial.shortBio ? 'updated' : 'hidden');
                 console.log('[Memorial] Song widget:', (memorial.songSpotifyUri || memorial.songYoutubeUrl) ? 'visible' : 'hidden');
-                console.log('[Memorial] Timeline section: hidden');
+                console.log('[Memorial] Demo sections: all hidden');
+                console.log('[Memorial] Candle count:', memorial._count?.candles || 0);
+                console.log('[Memorial] Flower count: 0');
 
             } catch (error) {
                 console.error('[Memorial] Failed to load memorial:', error);
