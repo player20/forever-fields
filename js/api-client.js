@@ -143,7 +143,7 @@ class ForeverFieldsAPI {
      * Request magic link
      */
     async requestMagicLink(email) {
-        return this.post('/api/auth/magic-link', { email });
+        return this.post('/api/auth/request-magic-link', { email });
     }
 
     // ============================================

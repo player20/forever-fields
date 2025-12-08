@@ -31,12 +31,16 @@ try {
     Write-Host "Response: $($magicLink | ConvertTo-Json)" -ForegroundColor Gray
     Write-Host "✅ Magic link request succeeded" -ForegroundColor Green
 } catch {
-    $errorBody = $_.ErrorDetails.Message | ConvertFrom-Json
-    Write-Host "Response: $($errorBody | ConvertTo-Json)" -ForegroundColor Gray
-    if ($errorBody.error -match "Failed to send") {
-        Write-Host "❌ Email sending failed (SMTP not configured)" -ForegroundColor Red
+    if ($null -ne $_.ErrorDetails -and $null -ne $_.ErrorDetails.Message) {
+        $errorBody = $_.ErrorDetails.Message | ConvertFrom-Json
+        Write-Host "Response: $($errorBody | ConvertTo-Json)" -ForegroundColor Gray
+        if ($errorBody.error -match "Failed to send") {
+            Write-Host "❌ Email sending failed (SMTP not configured)" -ForegroundColor Red
+        } else {
+            Write-Host "❌ Magic link request failed" -ForegroundColor Red
+        }
     } else {
-        Write-Host "❌ Magic link request failed" -ForegroundColor Red
+        Write-Host "❌ Magic link request failed: $($_.Exception.Message)" -ForegroundColor Red
     }
 }
 Write-Host ""
@@ -50,12 +54,16 @@ try {
     Write-Host "Response: $($signup | ConvertTo-Json)" -ForegroundColor Gray
     Write-Host "✅ New account created (account didn't exist before)" -ForegroundColor Green
 } catch {
-    $errorBody = $_.ErrorDetails.Message | ConvertFrom-Json
-    Write-Host "Response: $($errorBody | ConvertTo-Json)" -ForegroundColor Gray
-    if ($errorBody.error -match "already exists") {
-        Write-Host "✅ Account already exists" -ForegroundColor Green
+    if ($null -ne $_.ErrorDetails -and $null -ne $_.ErrorDetails.Message) {
+        $errorBody = $_.ErrorDetails.Message | ConvertFrom-Json
+        Write-Host "Response: $($errorBody | ConvertTo-Json)" -ForegroundColor Gray
+        if ($errorBody.error -match "already exists") {
+            Write-Host "✅ Account already exists" -ForegroundColor Green
+        } else {
+            Write-Host "❌ Signup test failed" -ForegroundColor Red
+        }
     } else {
-        Write-Host "❌ Signup test failed" -ForegroundColor Red
+        Write-Host "❌ Signup test failed: $($_.Exception.Message)" -ForegroundColor Red
     }
 }
 Write-Host ""
@@ -93,24 +101,28 @@ try {
         -Body (@{email=$TEST_EMAIL; password=$newPassword} | ConvertTo-Json)
     Write-Host "✅ Account created successfully!" -ForegroundColor Green
 } catch {
-    $errorBody = $_.ErrorDetails.Message | ConvertFrom-Json
-    if ($errorBody.error -match "already exists") {
-        Write-Host "⚠️  Account already exists. Trying password login..." -ForegroundColor Yellow
+    if ($null -ne $_.ErrorDetails -and $null -ne $_.ErrorDetails.Message) {
+        $errorBody = $_.ErrorDetails.Message | ConvertFrom-Json
+        if ($errorBody.error -match "already exists") {
+            Write-Host "⚠️  Account already exists. Trying password login..." -ForegroundColor Yellow
 
-        # Try login with new password (won't work if account had different password)
-        try {
-            $loginResult = Invoke-RestMethod -Uri "$API_URL/auth/login" -Method Post `
-                -ContentType "application/json" `
-                -Body (@{email=$TEST_EMAIL; password=$newPassword} | ConvertTo-Json)
-            Write-Host "✅ Login successful!" -ForegroundColor Green
-        } catch {
-            Write-Host "❌ Can't log in with new password (account has different password)" -ForegroundColor Red
-            Write-Host ""
-            Write-Host "MANUAL STEPS REQUIRED:" -ForegroundColor Yellow
-            Write-Host "Option 1: Configure SMTP to send password reset emails" -ForegroundColor White
-            Write-Host "Option 2: Delete existing account and recreate" -ForegroundColor White
-            Write-Host "Option 3: Direct database password update" -ForegroundColor White
+            # Try login with new password (won't work if account had different password)
+            try {
+                $loginResult = Invoke-RestMethod -Uri "$API_URL/auth/login" -Method Post `
+                    -ContentType "application/json" `
+                    -Body (@{email=$TEST_EMAIL; password=$newPassword} | ConvertTo-Json)
+                Write-Host "✅ Login successful!" -ForegroundColor Green
+            } catch {
+                Write-Host "❌ Can't log in with new password (account has different password)" -ForegroundColor Red
+                Write-Host ""
+                Write-Host "MANUAL STEPS REQUIRED:" -ForegroundColor Yellow
+                Write-Host "Option 1: Configure SMTP to send password reset emails" -ForegroundColor White
+                Write-Host "Option 2: Delete existing account and recreate" -ForegroundColor White
+                Write-Host "Option 3: Direct database password update" -ForegroundColor White
+            }
         }
+    } else {
+        Write-Host "❌ Account creation failed: $($_.Exception.Message)" -ForegroundColor Red
     }
 }
 
