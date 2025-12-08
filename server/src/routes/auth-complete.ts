@@ -230,8 +230,13 @@ router.get(
         path: '/api/auth',
       });
 
-      // Redirect directly to dashboard (cookies are already set in response)
-      return res.redirect(302, `${env.FRONTEND_URL}/dashboard`);
+      // Redirect to dashboard with tokens in URL (fallback for cross-domain cookies)
+      // The auth/callback.html page will handle storing tokens if cookies don't work
+      const redirectUrl = new URL(`${env.FRONTEND_URL}/auth/callback`);
+      redirectUrl.searchParams.set('access_token', sessionToken);
+      redirectUrl.searchParams.set('refresh_token', sessionToken);
+
+      return res.redirect(302, redirectUrl.toString());
     } catch (error) {
       console.error('[AUTH] Callback error:', error);
       return res.redirect(`${env.FRONTEND_URL}/login?error=auth_failed`);

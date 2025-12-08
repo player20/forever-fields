@@ -13,13 +13,14 @@ class ForeverFieldsAPI {
 
     /**
      * Check if user is authenticated
-     * Note: We can't directly access httpOnly cookies from JavaScript
-     * This method makes a lightweight request to check auth status
+     * Supports both httpOnly cookies (preferred) and localStorage tokens (cross-domain fallback)
      */
     async isAuthenticated() {
         try {
+            // Try httpOnly cookie auth first
             const response = await fetch(`${this.baseURL}/api/user/me`, {
                 credentials: 'include', // Send cookies
+                headers: this._getAuthHeaders(),
             });
             return response.ok;
         } catch {
@@ -28,26 +29,46 @@ class ForeverFieldsAPI {
     }
 
     /**
-     * Logout - clears httpOnly cookies
+     * Get auth headers - checks localStorage for tokens (cross-domain fallback)
+     * @private
+     */
+    _getAuthHeaders() {
+        const token = localStorage.getItem('ff_access_token');
+        if (token) {
+            return { 'Authorization': `Bearer ${token}` };
+        }
+        return {};
+    }
+
+    /**
+     * Logout - clears httpOnly cookies and localStorage tokens
      */
     async logout() {
         try {
             await this.post('/api/auth/logout');
+            // Clear localStorage tokens (cross-domain fallback)
+            localStorage.removeItem('ff_access_token');
+            localStorage.removeItem('ff_refresh_token');
             // Redirect to login after logout
             window.location.href = '/login';
         } catch (error) {
             console.error('Logout failed:', error);
+            // Even if API call fails, clear localStorage tokens
+            localStorage.removeItem('ff_access_token');
+            localStorage.removeItem('ff_refresh_token');
         }
     }
 
     /**
      * Make an HTTP request
+     * Supports both httpOnly cookies (preferred) and localStorage tokens (cross-domain fallback)
      */
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
 
         const headers = {
             'Content-Type': 'application/json',
+            ...this._getAuthHeaders(), // Add localStorage token if available
             ...options.headers,
         };
 

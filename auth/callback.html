@@ -90,11 +90,13 @@
             const errorEl = document.getElementById('error-message');
 
             // If we have access tokens (returning from backend)
-            // Note: Tokens are now in httpOnly cookies, not URL params
-            // This code path may no longer be used, but kept for backwards compatibility
+            // Cross-domain workaround: Store tokens in localStorage since httpOnly cookies
+            // don't work across different domains (onrender.com vs pages.dev)
             if (accessToken && refreshToken) {
-                // Tokens are already set as httpOnly cookies by backend
-                // No need to store in localStorage
+                // Store tokens in localStorage for cross-domain auth
+                localStorage.setItem('ff_access_token', accessToken);
+                localStorage.setItem('ff_refresh_token', refreshToken);
+
                 statusEl.textContent = 'Success!';
                 messageEl.textContent = 'Redirecting to your dashboard...';
 
