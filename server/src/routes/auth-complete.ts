@@ -707,18 +707,24 @@ router.post(
         data: { usedAt: new Date() },
       });
 
-      // Check if user exists in our database first
-      let user = await prisma.user.findUnique({
-        where: { email: magicLink.email },
-      });
+      // Find Supabase user by email (handles UUID mismatches from legacy accounts)
+      console.log(`[AUTH] Looking up Supabase user by email: ${magicLink.email}`);
+      const { data: allUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+
+      if (listError) {
+        console.error('[AUTH] Failed to list Supabase users:', listError);
+        return res.status(500).json({ error: 'Failed to reset password' });
+      }
+
+      const supabaseUser = allUsers?.users.find(u => u.email === magicLink.email);
 
       let supabaseUserId: string;
 
-      if (user) {
-        // User exists - update their Supabase password using their existing ID
-        console.log(`[AUTH] Updating password for existing user: ${user.email} (${user.id})`);
+      if (supabaseUser) {
+        // Supabase user exists - update their password
+        console.log(`[AUTH] Found Supabase user, updating password: ${supabaseUser.email} (${supabaseUser.id})`);
 
-        const { error } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
+        const { error } = await supabaseAdmin.auth.admin.updateUserById(supabaseUser.id, {
           password: newPassword,
         });
 
@@ -727,10 +733,10 @@ router.post(
           return res.status(500).json({ error: 'Failed to update password' });
         }
 
-        supabaseUserId = user.id;
+        supabaseUserId = supabaseUser.id;
       } else {
-        // User doesn't exist - create new Supabase user first, then create DB record
-        console.log(`[AUTH] Creating new user for password reset: ${magicLink.email}`);
+        // Supabase user doesn't exist - create new one
+        console.log(`[AUTH] No Supabase user found, creating new: ${magicLink.email}`);
 
         const { data: newUser, error } = await supabaseAdmin.auth.admin.createUser({
           email: magicLink.email,
@@ -747,15 +753,23 @@ router.post(
         }
 
         supabaseUserId = newUser.user.id;
+      }
 
+      // Ensure user exists in our database
+      let user = await prisma.user.findUnique({
+        where: { email: magicLink.email },
+      });
+
+      if (!user) {
         // Create user in our database with Supabase UUID
         user = await prisma.user.create({
           data: {
-            id: supabaseUserId, // CRITICAL: Use Supabase UUID
+            id: supabaseUserId,
             email: magicLink.email,
             name: magicLink.email.split('@')[0],
           },
         });
+        console.log(`[AUTH] Created DB user with Supabase UUID: ${user.email}`);
       }
 
       console.log(`[AUTH] Password reset successful for ${user.email}`);
