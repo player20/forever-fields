@@ -1461,9 +1461,9 @@
             const sectionCard = photoMasonry.closest('.section-card');
 
             if (!photos || photos.length === 0) {
-                // Keep demo content visible, just show section
-                console.log('[Photos] No data - keeping demo content');
-                if (sectionCard) sectionCard.style.display = 'block';
+                // Hide section if no photos
+                console.log('[Photos] No data - hiding section');
+                if (sectionCard) sectionCard.style.display = 'none';
                 return;
             }
 
@@ -1500,9 +1500,9 @@
             const sectionCard = timelineVertical.closest('.section-card');
 
             if (!lifeEvents || lifeEvents.length === 0) {
-                // Keep demo content visible
-                console.log('[Timeline] No data - keeping demo content');
-                if (sectionCard) sectionCard.style.display = 'block';
+                // Hide section if no events
+                console.log('[Timeline] No data - hiding section');
+                if (sectionCard) sectionCard.style.display = 'none';
                 return;
             }
 
@@ -1538,9 +1538,9 @@
             const sectionCard = recipesGrid.closest('.section-card');
 
             if (!recipes || recipes.length === 0) {
-                // Keep demo content visible
-                console.log('[Recipes] No data - keeping demo content');
-                if (sectionCard) sectionCard.style.display = 'block';
+                // Hide section if no recipes
+                console.log('[Recipes] No data - hiding section');
+                if (sectionCard) sectionCard.style.display = 'none';
                 return;
             }
 
@@ -1579,9 +1579,9 @@
             const sectionCard = voiceNotesList.closest('.section-card');
 
             if (!voiceNotes || voiceNotes.length === 0) {
-                // Keep demo content visible
-                console.log('[Voice Notes] No data - keeping demo content');
-                if (sectionCard) sectionCard.style.display = 'block';
+                // Hide section if no voice notes
+                console.log('[Voice Notes] No data - hiding section');
+                if (sectionCard) sectionCard.style.display = 'none';
                 return;
             }
 
@@ -1635,9 +1635,9 @@
             const sectionCard = memoriesList.closest('.section-card');
 
             if (!memories || memories.length === 0) {
-                // Keep demo content visible
-                console.log('[Memories] No data - keeping demo content');
-                if (sectionCard) sectionCard.style.display = 'block';
+                // Hide section if no memories
+                console.log('[Memories] No data - hiding section');
+                if (sectionCard) sectionCard.style.display = 'none';
                 return;
             }
 
