@@ -2191,6 +2191,111 @@
                         }
                     }
 
+                    // ============================================
+                    // SAVE ADDITIONAL MEMORIAL DATA
+                    // ============================================
+                    // After creating the memorial, save recipes, life events, and memories
+
+                    try {
+                        let savedCount = 0;
+
+                        // Update button to show progress
+                        btn.innerHTML = '<h4>💾 Saving recipes, events & memories...</h4><p>Almost done</p>';
+
+                        // 1. Save Recipes (Favorite Foods)
+                        const foodBlocks = document.querySelectorAll('#foodBlocks .repeatable-block[data-block-type="food"]');
+                        for (let i = 0; i < foodBlocks.length; i++) {
+                            const nameInput = foodBlocks[i].querySelector(`input[name="food_name_${i}"]`);
+                            const storyInput = foodBlocks[i].querySelector(`textarea[name="food_story_${i}"]`);
+
+                            const name = nameInput?.value.trim();
+                            const story = storyInput?.value.trim();
+
+                            if (name) {
+                                try {
+                                    await api.post(`/api/recipes/${memorialId}`, {
+                                        name: name,
+                                        description: story || null,
+                                        icon: '🍽️',
+                                        ingredients: null,
+                                        instructions: null
+                                    });
+                                    savedCount++;
+                                    console.log(`Saved recipe: ${name}`);
+                                } catch (err) {
+                                    console.error(`Failed to save recipe "${name}":`, err);
+                                }
+                            }
+                        }
+
+                        // 2. Save Life Events (Achievements)
+                        const achievementBlocks = document.querySelectorAll('#achievementBlocks .repeatable-block[data-block-type="achievement"]');
+                        for (let i = 0; i < achievementBlocks.length; i++) {
+                            const titleInput = achievementBlocks[i].querySelector(`input[name="achievement_title_${i}"]`);
+                            const dateInput = achievementBlocks[i].querySelector(`input[name="achievement_date_${i}"]`);
+                            const descInput = achievementBlocks[i].querySelector(`textarea[name="achievement_desc_${i}"]`);
+
+                            const title = titleInput?.value.trim();
+                            const year = dateInput?.value.trim();
+                            const description = descInput?.value.trim();
+
+                            if (title && year && description) {
+                                try {
+                                    await api.post(`/api/life-events/${memorialId}`, {
+                                        year: year,
+                                        title: title,
+                                        description: description,
+                                        eventOrder: i
+                                    });
+                                    savedCount++;
+                                    console.log(`Saved life event: ${title}`);
+                                } catch (err) {
+                                    console.error(`Failed to save life event "${title}":`, err);
+                                }
+                            }
+                        }
+
+                        // 3. Save Memories
+                        const memoryBlocks = document.querySelectorAll('#memoryBlocks .repeatable-block[data-block-type="memory"]');
+                        for (let i = 0; i < memoryBlocks.length; i++) {
+                            const textInput = memoryBlocks[i].querySelector(`textarea[name="memory_text_${i}"]`);
+                            const byInput = memoryBlocks[i].querySelector(`input[name="memory_by_${i}"]`);
+
+                            const content = textInput?.value.trim();
+                            const authorName = byInput?.value.trim();
+
+                            if (content) {
+                                try {
+                                    await api.post('/api/memories', {
+                                        memorialId: memorialId,
+                                        title: 'Memory',
+                                        content: content,
+                                        authorName: authorName || 'Memorial Creator',
+                                        authorRelationship: null
+                                    });
+                                    savedCount++;
+                                    console.log(`Saved memory from: ${authorName || 'Anonymous'}`);
+                                } catch (err) {
+                                    console.error('Failed to save memory:', err);
+                                }
+                            }
+                        }
+
+                        if (savedCount > 0) {
+                            console.log(`✅ Successfully saved ${savedCount} additional items to memorial`);
+                            if (typeof showToast === 'function') {
+                                showToast(`Saved ${savedCount} recipes, events & memories! Memories pending your approval.`, 'success');
+                            }
+                        }
+
+                    } catch (error) {
+                        console.error('Error saving additional memorial data:', error);
+                        // Don't block the flow - memorial is already created
+                        if (typeof showToast === 'function') {
+                            showToast('Memorial created! Some items may not have saved.', 'warning');
+                        }
+                    }
+
                     // If not logged in, prompt to sign up to claim the memorial
                     if (!isLoggedIn) {
                         const shouldSignUp = confirm(
