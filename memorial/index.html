@@ -1460,15 +1460,18 @@
 
             const sectionCard = photoMasonry.closest('.section-card');
 
-            if (!photos || photos.length === 0) {
-                // Hide section if no photos
-                console.log('[Photos] No data - hiding section');
-                if (sectionCard) sectionCard.style.display = 'none';
-                return;
-            }
+            // Show section
+            if (sectionCard) sectionCard.style.display = 'block';
 
             // Clear existing demo content
             photoMasonry.innerHTML = '';
+
+            if (!photos || photos.length === 0) {
+                // Show "no data" message
+                console.log('[Photos] No data - showing empty message');
+                photoMasonry.innerHTML = '<p style="text-align: center; color: var(--gray-body); padding: 2rem;">No photos yet. Add photos to share visual memories.</p>';
+                return;
+            }
 
             // Display photos
             photos.forEach(photo => {
@@ -1499,15 +1502,18 @@
 
             const sectionCard = timelineVertical.closest('.section-card');
 
-            if (!lifeEvents || lifeEvents.length === 0) {
-                // Hide section if no events
-                console.log('[Timeline] No data - hiding section');
-                if (sectionCard) sectionCard.style.display = 'none';
-                return;
-            }
+            // Show section
+            if (sectionCard) sectionCard.style.display = 'block';
 
             // Clear existing demo content
             timelineVertical.innerHTML = '';
+
+            if (!lifeEvents || lifeEvents.length === 0) {
+                // Show "no data" message
+                console.log('[Timeline] No data - showing empty message');
+                timelineVertical.innerHTML = '<p style="text-align: center; color: var(--gray-body); padding: 2rem;">No timeline events yet. Add life milestones to tell their story.</p>';
+                return;
+            }
 
             // Display timeline events
             lifeEvents.forEach(event => {
@@ -1537,15 +1543,18 @@
 
             const sectionCard = recipesGrid.closest('.section-card');
 
-            if (!recipes || recipes.length === 0) {
-                // Hide section if no recipes
-                console.log('[Recipes] No data - hiding section');
-                if (sectionCard) sectionCard.style.display = 'none';
-                return;
-            }
+            // Show section
+            if (sectionCard) sectionCard.style.display = 'block';
 
             // Clear existing demo content
             recipesGrid.innerHTML = '';
+
+            if (!recipes || recipes.length === 0) {
+                // Show "no data" message
+                console.log('[Recipes] No data - showing empty message');
+                recipesGrid.innerHTML = '<p style="text-align: center; color: var(--gray-body); padding: 2rem;">No recipes yet. Add favorite recipes to preserve their culinary legacy.</p>';
+                return;
+            }
 
             // Display recipes
             recipes.forEach(recipe => {
@@ -1578,15 +1587,18 @@
 
             const sectionCard = voiceNotesList.closest('.section-card');
 
-            if (!voiceNotes || voiceNotes.length === 0) {
-                // Hide section if no voice notes
-                console.log('[Voice Notes] No data - hiding section');
-                if (sectionCard) sectionCard.style.display = 'none';
-                return;
-            }
+            // Show section
+            if (sectionCard) sectionCard.style.display = 'block';
 
             // Clear existing demo content
             voiceNotesList.innerHTML = '';
+
+            if (!voiceNotes || voiceNotes.length === 0) {
+                // Show "no data" message
+                console.log('[Voice Notes] No data - showing empty message');
+                voiceNotesList.innerHTML = '<p style="text-align: center; color: var(--gray-body); padding: 2rem;">No voice notes yet. Visitors can share audio memories.</p>';
+                return;
+            }
 
             // Display voice notes
             voiceNotes.forEach(note => {
@@ -1634,15 +1646,18 @@
 
             const sectionCard = memoriesList.closest('.section-card');
 
-            if (!memories || memories.length === 0) {
-                // Hide section if no memories
-                console.log('[Memories] No data - hiding section');
-                if (sectionCard) sectionCard.style.display = 'none';
-                return;
-            }
+            // Show section
+            if (sectionCard) sectionCard.style.display = 'block';
 
             // Clear existing demo content
             memoriesList.innerHTML = '';
+
+            if (!memories || memories.length === 0) {
+                // Show "no data" message
+                console.log('[Memories] No data - showing empty message');
+                memoriesList.innerHTML = '<p style="text-align: center; color: var(--gray-body); padding: 2rem;">No memories shared yet. Visitors can share their stories and memories.</p>';
+                return;
+            }
 
             // Display memories
             memories.forEach(memory => {
