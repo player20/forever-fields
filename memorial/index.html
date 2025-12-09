@@ -1864,22 +1864,8 @@
                 displayVoiceNotes(memorial.voiceNotes || []);
                 displayMemories(memorial.memories || []);
 
-                // Hide sections that aren't implemented yet
-                const sectionsToHide = [
-                    '.healing-widget',       // Healing Widget
-                    '.family-tree-preview',  // Family Tree
-                    '.capsule-card'          // Time Capsule
-                ];
-
-                sectionsToHide.forEach(selector => {
-                    const element = document.querySelector(selector);
-                    if (element) {
-                        const sectionCard = element.closest('.section-card, .healing-widget, .action-card, .capsule-card');
-                        if (sectionCard) {
-                            sectionCard.style.display = 'none';
-                        }
-                    }
-                });
+                // Keep all sections visible (Daily Reflections, Family Tree, Time Capsule)
+                // so users know these features are available
 
                 // Update bio section if it exists
                 const bioText = document.querySelector('.bio-text');
