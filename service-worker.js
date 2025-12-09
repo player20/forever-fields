@@ -3,8 +3,10 @@
  * Provides offline functionality and caching for PWA
  */
 
-const CACHE_VERSION = 'v1.0.0';
+const CACHE_VERSION = 'v1.1.0'; // Upgraded for offline memorial viewing
 const CACHE_NAME = `forever-fields-${CACHE_VERSION}`;
+const RUNTIME_CACHE = `forever-fields-runtime-${CACHE_VERSION}`;
+const API_CACHE = `forever-fields-api-${CACHE_VERSION}`;
 
 // Assets to cache on install
 const STATIC_ASSETS = [
@@ -19,6 +21,8 @@ const STATIC_ASSETS = [
     '/js/undo-system.js',
     '/js/keyboard-shortcuts.js',
     '/js/upload-progress.js',
+    '/js/indexeddb-manager.js',
+    '/js/offline-sync.js',
     '/js/auth-ui.js',
     '/js/language-switcher.js',
     '/js/pwa.js',
@@ -48,13 +52,13 @@ self.addEventListener('install', (event) => {
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
     console.log('[Service Worker] Activating...');
-    
+
     event.waitUntil(
         caches.keys()
             .then((cacheNames) => {
                 return Promise.all(
                     cacheNames.map((cacheName) => {
-                        if (cacheName !== CACHE_NAME) {
+                        if (cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE && cacheName !== API_CACHE) {
                             console.log('[Service Worker] Deleting old cache:', cacheName);
                             return caches.delete(cacheName);
                         }
@@ -68,71 +72,139 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - smart caching strategies
 self.addEventListener('fetch', (event) => {
     const { request } = event;
-    
+    const url = new URL(request.url);
+
+    // Only handle GET requests
     if (request.method !== 'GET') {
         return;
     }
-    
-    // Skip API requests - always use network
-    if (request.url.includes('/api/')) {
-        event.respondWith(
-            fetch(request).catch(() => {
-                return new Response(
-                    JSON.stringify({
-                        error: 'You are offline. Please check your internet connection.',
-                        offline: true
-                    }),
-                    {
-                        status: 503,
-                        headers: { 'Content-Type': 'application/json' }
-                    }
-                );
-            })
-        );
+
+    // Strategy 1: Stale-while-revalidate for memorial API calls (offline viewing!)
+    if (url.pathname.startsWith('/api/memorials/') && !url.pathname.includes('/candles')) {
+        event.respondWith(staleWhileRevalidate(request));
         return;
     }
-    
-    // Cache-first strategy for static assets
-    event.respondWith(
-        caches.match(request)
-            .then((cachedResponse) => {
-                if (cachedResponse) {
-                    return cachedResponse;
-                }
-                
-                return fetch(request)
-                    .then((response) => {
-                        if (!response || response.status !== 200 || response.type === 'error') {
-                            return response;
-                        }
-                        
-                        const responseToCache = response.clone();
-                        
-                        caches.open(CACHE_NAME)
-                            .then((cache) => {
-                                cache.put(request, responseToCache);
-                            });
-                        
-                        return response;
-                    })
-                    .catch(() => {
-                        if (request.destination === 'document') {
-                            return new Response(
-                                getOfflinePage(),
-                                {
-                                    status: 200,
-                                    headers: { 'Content-Type': 'text/html' }
-                                }
-                            );
-                        }
-                        return new Response('Offline', { status: 503 });
-                    });
-            })
-    );
+
+    // Strategy 2: Network-only for write operations
+    if (url.pathname.includes('/api/') && (url.pathname.includes('/candles') || url.pathname.includes('/memories'))) {
+        event.respondWith(networkOnly(request));
+        return;
+    }
+
+    // Strategy 3: Network-first with cache fallback for other API calls
+    if (url.pathname.startsWith('/api/')) {
+        event.respondWith(networkFirstWithCache(request));
+        return;
+    }
+
+    // Strategy 4: Cache-first for static assets and pages
+    event.respondWith(cacheFirst(request));
 });
+
+/**
+ * Stale-while-revalidate strategy
+ * Returns cached version immediately, updates cache in background
+ */
+async function staleWhileRevalidate(request) {
+    const cache = await caches.open(API_CACHE);
+    const cachedResponse = await cache.match(request);
+
+    // Fetch from network and update cache in background
+    const fetchPromise = fetch(request)
+        .then((response) => {
+            if (response && response.status === 200) {
+                cache.put(request, response.clone());
+            }
+            return response;
+        })
+        .catch(() => null);
+
+    // Return cached response immediately, or wait for network
+    return cachedResponse || fetchPromise || offlineResponse();
+}
+
+/**
+ * Network-only strategy (for write operations)
+ */
+async function networkOnly(request) {
+    try {
+        return await fetch(request);
+    } catch (error) {
+        return offlineResponse();
+    }
+}
+
+/**
+ * Network-first with cache fallback
+ */
+async function networkFirstWithCache(request) {
+    const cache = await caches.open(API_CACHE);
+
+    try {
+        const response = await fetch(request);
+        if (response && response.status === 200) {
+            cache.put(request, response.clone());
+        }
+        return response;
+    } catch (error) {
+        const cachedResponse = await cache.match(request);
+        return cachedResponse || offlineResponse();
+    }
+}
+
+/**
+ * Cache-first strategy for static assets
+ */
+async function cacheFirst(request) {
+    const cachedResponse = await caches.match(request);
+
+    if (cachedResponse) {
+        return cachedResponse;
+    }
+
+    try {
+        const response = await fetch(request);
+
+        if (response && response.status === 200) {
+            const cache = await caches.open(RUNTIME_CACHE);
+            cache.put(request, response.clone());
+        }
+
+        return response;
+    } catch (error) {
+        // Return offline page for navigation requests
+        if (request.destination === 'document') {
+            return new Response(
+                getOfflinePage(),
+                {
+                    status: 200,
+                    headers: { 'Content-Type': 'text/html' }
+                }
+            );
+        }
+
+        return new Response('Offline', { status: 503 });
+    }
+}
+
+/**
+ * Generic offline response
+ */
+function offlineResponse() {
+    return new Response(
+        JSON.stringify({
+            error: 'You are offline. Please check your internet connection.',
+            offline: true
+        }),
+        {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' }
+        }
+    );
+}
 
 function getOfflinePage() {
     return `<!DOCTYPE html>
