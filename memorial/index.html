@@ -1711,15 +1711,15 @@
                     return; // Keep showing demo data if no ID
                 }
 
-                // Initialize API client
-                const api = new ForeverFieldsAPI(
+                // Initialize API client (make it global for other scripts)
+                window.api = new ForeverFieldsAPI(
                     window.location.hostname === 'localhost'
                         ? 'http://localhost:3000'
                         : 'https://forever-fields.onrender.com'
                 );
 
                 // Fetch memorial data
-                const response = await api.get(`/api/memorials/${memorialId}`);
+                const response = await window.api.get(`/api/memorials/${memorialId}`);
                 const memorial = response.memorial;
 
                 console.log('[Memorial] Loaded memorial data:', memorial);
@@ -1864,10 +1864,11 @@
 
                 // Check if current user is owner
                 try {
-                    const userProfile = await api.getUserProfile();
-                    const isOwner = userProfile && userProfile.id === memorial.ownerId;
+                    const userProfile = await window.api.getUserProfile();
+                    const isOwner = userProfile && userProfile.user && userProfile.user.id === memorial.ownerId;
 
                     console.log('[Memorial] User profile:', userProfile);
+                    console.log('[Memorial] User ID:', userProfile?.user?.id);
                     console.log('[Memorial] Memorial owner ID:', memorial.ownerId);
                     console.log('[Memorial] Is owner:', isOwner);
 
