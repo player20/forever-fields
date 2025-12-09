@@ -68,7 +68,7 @@ router.post(
  * GET /api/memories/:memorialId
  * Get all approved memories for a memorial
  */
-router.get('/:memorialId', optionalAuth, async (req, res) => {
+router.get('/:memorialId', optionalAuth, apiRateLimiter, async (req, res) => {
   try {
     const { memorialId } = req.params;
 

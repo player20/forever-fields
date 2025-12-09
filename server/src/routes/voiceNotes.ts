@@ -68,7 +68,7 @@ router.post(
  * GET /api/voice-notes/:memorialId
  * Get all approved voice notes for a memorial
  */
-router.get('/:memorialId', optionalAuth, async (req, res) => {
+router.get('/:memorialId', optionalAuth, apiRateLimiter, async (req, res) => {
   try {
     const { memorialId } = req.params;
 

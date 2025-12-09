@@ -199,7 +199,7 @@ class ForeverFieldsAPI {
      * Update current user profile
      */
     async updateUserProfile(data) {
-        return this.put('/api/user/me', data);
+        return this.patch('/api/user/profile', data);
     }
 
     // ============================================

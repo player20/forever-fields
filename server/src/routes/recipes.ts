@@ -7,6 +7,8 @@ import { Router } from 'express';
 import { prisma } from '../config/database';
 import { requireAuth, optionalAuth } from '../middleware/auth';
 import { apiRateLimiter } from '../middleware/security';
+import { validate } from '../middleware/validate';
+import { createRecipeSchema, updateRecipeSchema } from '../validators/schemas';
 
 const router = Router();
 
@@ -49,14 +51,10 @@ router.get('/:memorialId', optionalAuth, apiRateLimiter, async (req, res) => {
  * POST /api/recipes/:memorialId
  * Create a new recipe (owner only)
  */
-router.post('/:memorialId', requireAuth, apiRateLimiter, async (req, res) => {
+router.post('/:memorialId', requireAuth, apiRateLimiter, validate(createRecipeSchema), async (req, res) => {
   try {
     const { memorialId } = req.params;
     const { name, description, icon, ingredients, instructions } = req.body;
-
-    if (!name) {
-      return res.status(400).json({ error: 'Recipe name is required' });
-    }
 
     // Verify user owns the memorial
     const memorial = await prisma.memorial.findUnique({
@@ -94,7 +92,7 @@ router.post('/:memorialId', requireAuth, apiRateLimiter, async (req, res) => {
  * PUT /api/recipes/:id
  * Update a recipe (owner only)
  */
-router.put('/:id', requireAuth, apiRateLimiter, async (req, res) => {
+router.put('/:id', requireAuth, apiRateLimiter, validate(updateRecipeSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, icon, ingredients, instructions } = req.body;

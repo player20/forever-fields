@@ -6,8 +6,9 @@
 import { Router } from 'express';
 import { prisma } from '../config/database';
 import { requireAuth, optionalAuth } from '../middleware/auth';
-import { requireMemorialOwner } from '../middleware/authorization';
 import { apiRateLimiter } from '../middleware/security';
+import { validate } from '../middleware/validate';
+import { createLifeEventSchema, updateLifeEventSchema } from '../validators/schemas';
 
 const router = Router();
 
@@ -54,6 +55,7 @@ router.post(
   '/:memorialId',
   requireAuth,
   apiRateLimiter,
+  validate(createLifeEventSchema),
   async (req, res) => {
     try {
       const { memorialId } = req.params;
@@ -99,7 +101,7 @@ router.post(
  * PUT /api/life-events/:id
  * Update a life event (owner only)
  */
-router.put('/:id', requireAuth, apiRateLimiter, async (req, res) => {
+router.put('/:id', requireAuth, apiRateLimiter, validate(updateLifeEventSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { year, title, description, eventOrder } = req.body;

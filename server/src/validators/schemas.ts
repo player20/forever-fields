@@ -205,6 +205,59 @@ export const createVoiceNoteSchema = z.object({
 });
 
 // ============================================
+// PHOTO SCHEMAS
+// ============================================
+
+export const createPhotoSchema = z.object({
+  url: z.string().url('Invalid photo URL'),
+  publicId: z.string().max(500).optional().nullable(),
+  caption: z.string().max(500, 'Caption too long').optional().nullable(),
+  uploadedBy: z.string().max(100).default('Anonymous'),
+});
+
+export const updatePhotoSchema = z.object({
+  caption: z.string().max(500, 'Caption too long'),
+});
+
+// ============================================
+// RECIPE SCHEMAS
+// ============================================
+
+export const createRecipeSchema = z.object({
+  name: z.string().min(1, 'Recipe name required').max(200, 'Recipe name too long'),
+  description: z.string().max(500, 'Description too long').optional().nullable(),
+  icon: z.string().max(10, 'Icon should be a single emoji').optional().nullable(),
+  ingredients: z.string().max(2000, 'Ingredients list too long').optional().nullable(),
+  instructions: z.string().max(5000, 'Instructions too long').optional().nullable(),
+});
+
+export const updateRecipeSchema = z.object({
+  name: z.string().min(1, 'Recipe name required').max(200, 'Recipe name too long').optional(),
+  description: z.string().max(500, 'Description too long').optional().nullable(),
+  icon: z.string().max(10, 'Icon should be a single emoji').optional().nullable(),
+  ingredients: z.string().max(2000, 'Ingredients list too long').optional().nullable(),
+  instructions: z.string().max(5000, 'Instructions too long').optional().nullable(),
+});
+
+// ============================================
+// LIFE EVENT SCHEMAS
+// ============================================
+
+export const createLifeEventSchema = z.object({
+  year: z.string().regex(/^\d{4}(-\d{4})?$/, 'Invalid year format (e.g., "1990" or "1990-2000")'),
+  title: z.string().min(1, 'Title required').max(200, 'Title too long'),
+  description: z.string().min(1, 'Description required').max(1000, 'Description too long'),
+  eventOrder: z.number().int().min(0).default(0),
+});
+
+export const updateLifeEventSchema = z.object({
+  year: z.string().regex(/^\d{4}(-\d{4})?$/, 'Invalid year format').optional(),
+  title: z.string().min(1, 'Title required').max(200, 'Title too long').optional(),
+  description: z.string().min(1, 'Description required').max(1000, 'Description too long').optional(),
+  eventOrder: z.number().int().min(0).optional(),
+});
+
+// ============================================
 // REPORTS SCHEMAS
 // ============================================
 

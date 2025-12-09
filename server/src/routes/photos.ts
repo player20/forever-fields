@@ -7,6 +7,8 @@ import { Router } from 'express';
 import { prisma } from '../config/database';
 import { requireAuth, optionalAuth } from '../middleware/auth';
 import { apiRateLimiter } from '../middleware/security';
+import { validate } from '../middleware/validate';
+import { createPhotoSchema, updatePhotoSchema } from '../validators/schemas';
 
 const router = Router();
 
@@ -50,14 +52,10 @@ router.get('/:memorialId', optionalAuth, apiRateLimiter, async (req, res) => {
  * Add a new photo (owner only)
  * Note: This expects the photo URL to be provided (after upload to cloud storage)
  */
-router.post('/:memorialId', requireAuth, apiRateLimiter, async (req, res) => {
+router.post('/:memorialId', requireAuth, apiRateLimiter, validate(createPhotoSchema), async (req, res) => {
   try {
     const { memorialId } = req.params;
     const { url, publicId, caption, uploadedBy } = req.body;
-
-    if (!url) {
-      return res.status(400).json({ error: 'Photo URL is required' });
-    }
 
     // Verify user owns the memorial
     const memorial = await prisma.memorial.findUnique({
@@ -94,7 +92,7 @@ router.post('/:memorialId', requireAuth, apiRateLimiter, async (req, res) => {
  * PUT /api/photos/:id
  * Update photo caption (owner only)
  */
-router.put('/:id', requireAuth, apiRateLimiter, async (req, res) => {
+router.put('/:id', requireAuth, apiRateLimiter, validate(updatePhotoSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { caption } = req.body;
