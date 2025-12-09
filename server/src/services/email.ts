@@ -197,6 +197,116 @@ If you didn't request this, you can safely ignore this email.
 };
 
 /**
+ * Send password change notification email
+ */
+export const sendPasswordChangeNotification = async (
+  email: string,
+  ipAddress: string,
+  timestamp: Date
+): Promise<void> => {
+  const formattedTimestamp = timestamp.toLocaleString('en-US', {
+    dateStyle: 'full',
+    timeStyle: 'long',
+  });
+
+  // Development mode: Log notification instead of sending email
+  if (!resend || env.NODE_ENV === 'development') {
+    console.log('=====================================');
+    console.log('🔔 PASSWORD CHANGE NOTIFICATION (DEV MODE):');
+    console.log(`Email: ${email}`);
+    console.log(`IP: ${ipAddress}`);
+    console.log(`Time: ${formattedTimestamp}`);
+    console.log('=====================================');
+
+    if (!resend) {
+      console.warn('⚠️  Resend not configured - notification logged to console');
+      return; // Success - just log the notification
+    }
+  }
+
+  // Use Resend's onboarding email (always works) or verified domain
+  const fromEmail = env.SMTP_FROM || 'onboarding@resend.dev';
+
+  try {
+    await resend.emails.send({
+      from: fromEmail,
+      to: email,
+      subject: 'Your Forever Fields Password Was Changed',
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Password Changed</title>
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 28px;">Forever Fields</h1>
+              <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Security Alert</p>
+            </div>
+
+            <div style="background: white; padding: 40px 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px;">
+              <h2 style="color: #333; margin-top: 0;">✅ Password Successfully Changed</h2>
+              <p>Your Forever Fields password was successfully changed.</p>
+
+              <div style="background: #f5f5f5; padding: 20px; border-radius: 6px; margin: 20px 0;">
+                <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;"><strong>When:</strong> ${formattedTimestamp}</p>
+                <p style="margin: 0; font-size: 14px; color: #666;"><strong>IP Address:</strong> ${ipAddress}</p>
+              </div>
+
+              <p style="color: #666; font-size: 14px;">
+                For your security, all active sessions on other devices have been signed out. You'll need to sign in again on those devices.
+              </p>
+
+              <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0; color: #856404; font-size: 14px;">
+                  <strong>⚠️ Didn't make this change?</strong><br>
+                  If you didn't change your password, your account may be compromised. Please contact our support team immediately at <a href="mailto:support@foreverfields.com" style="color: #667eea;">support@foreverfields.com</a>
+                </p>
+              </div>
+
+              <p style="color: #666; font-size: 14px;">
+                This is an automated security notification. For your protection, we always send an email when your password is changed.
+              </p>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
+              <p>© ${new Date().getFullYear()} Forever Fields. All rights reserved.</p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `
+Password Successfully Changed
+
+Your Forever Fields password was successfully changed.
+
+Details:
+- When: ${formattedTimestamp}
+- IP Address: ${ipAddress}
+
+For your security, all active sessions on other devices have been signed out.
+
+DIDN'T MAKE THIS CHANGE?
+If you didn't change your password, please contact support immediately at support@foreverfields.com
+
+This is an automated security notification.
+
+---
+© ${new Date().getFullYear()} Forever Fields. All rights reserved.
+      `.trim(),
+    });
+
+    console.log(`✅ Password change notification sent to ${email}`);
+  } catch (error) {
+    console.error('Failed to send password change notification:', error);
+    // Don't throw - this is a non-critical notification
+    // Password has already been changed successfully
+  }
+};
+
+/**
  * Send invitation email
  */
 export const sendInvitationEmail = async (

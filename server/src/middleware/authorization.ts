@@ -5,6 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/database';
+import { createError, logError } from './error-handler';
 
 /**
  * Require memorial ownership
@@ -13,13 +14,14 @@ import { prisma } from '../config/database';
 export const requireMemorialOwner = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' });
+      throw createError.unauthorized('Authentication required');
     }
 
-    const memorialId = req.params.id || req.body.memorialId;
+    // Check multiple possible locations for memorial ID (flexible for different route patterns)
+    const memorialId = req.params.id || req.params.memorialId || req.body.memorialId;
 
     if (!memorialId) {
-      return res.status(400).json({ error: 'Memorial ID required' });
+      throw createError.badRequest('Memorial ID required');
     }
 
     const memorial = await prisma.memorial.findUnique({
@@ -28,17 +30,17 @@ export const requireMemorialOwner = async (req: Request, res: Response, next: Ne
     });
 
     if (!memorial) {
-      return res.status(404).json({ error: 'Memorial not found' });
+      throw createError.notFound('Memorial not found');
     }
 
     if (memorial.ownerId !== req.user.id) {
-      return res.status(403).json({ error: 'You do not have permission to modify this memorial' });
+      throw createError.forbidden('You do not have permission to modify this memorial');
     }
 
     next();
   } catch (error) {
-    console.error('Authorization error:', error);
-    return res.status(500).json({ error: 'Authorization check failed' });
+    logError('Authorization check', error, { memorialId: req.params.id || req.params.memorialId });
+    next(error);
   }
 };
 
@@ -49,13 +51,14 @@ export const requireMemorialOwner = async (req: Request, res: Response, next: Ne
 export const requireMemorialEditor = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' });
+      throw createError.unauthorized('Authentication required');
     }
 
-    const memorialId = req.params.id || req.body.memorialId;
+    // Check multiple possible locations for memorial ID
+    const memorialId = req.params.id || req.params.memorialId || req.body.memorialId;
 
     if (!memorialId) {
-      return res.status(400).json({ error: 'Memorial ID required' });
+      throw createError.badRequest('Memorial ID required');
     }
 
     const memorial = await prisma.memorial.findUnique({
@@ -64,7 +67,7 @@ export const requireMemorialEditor = async (req: Request, res: Response, next: N
     });
 
     if (!memorial) {
-      return res.status(404).json({ error: 'Memorial not found' });
+      throw createError.notFound('Memorial not found');
     }
 
     // Check if user is owner
@@ -84,13 +87,13 @@ export const requireMemorialEditor = async (req: Request, res: Response, next: N
     });
 
     if (!invitation) {
-      return res.status(403).json({ error: 'You do not have editor access to this memorial' });
+      throw createError.forbidden('You do not have editor access to this memorial');
     }
 
     next();
   } catch (error) {
-    console.error('Authorization error:', error);
-    return res.status(500).json({ error: 'Authorization check failed' });
+    logError('Authorization check - editor', error, { memorialId: req.params.id || req.params.memorialId });
+    next(error);
   }
 };
 
@@ -101,13 +104,14 @@ export const requireMemorialEditor = async (req: Request, res: Response, next: N
 export const requireMemorialViewer = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' });
+      throw createError.unauthorized('Authentication required');
     }
 
-    const memorialId = req.params.id || req.body.memorialId;
+    // Check multiple possible locations for memorial ID
+    const memorialId = req.params.id || req.params.memorialId || req.body.memorialId;
 
     if (!memorialId) {
-      return res.status(400).json({ error: 'Memorial ID required' });
+      throw createError.badRequest('Memorial ID required');
     }
 
     const memorial = await prisma.memorial.findUnique({
@@ -116,7 +120,7 @@ export const requireMemorialViewer = async (req: Request, res: Response, next: N
     });
 
     if (!memorial) {
-      return res.status(404).json({ error: 'Memorial not found' });
+      throw createError.notFound('Memorial not found');
     }
 
     // Check if user is owner
@@ -135,12 +139,12 @@ export const requireMemorialViewer = async (req: Request, res: Response, next: N
     });
 
     if (!invitation) {
-      return res.status(403).json({ error: 'You do not have access to this memorial' });
+      throw createError.forbidden('You do not have access to this memorial');
     }
 
     next();
   } catch (error) {
-    console.error('Authorization error:', error);
-    return res.status(500).json({ error: 'Authorization check failed' });
+    logError('Authorization check - viewer', error, { memorialId: req.params.id || req.params.memorialId });
+    next(error);
   }
 };

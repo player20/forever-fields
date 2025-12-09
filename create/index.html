@@ -227,6 +227,34 @@
             line-height: 1.7;
         }
 
+        /* Form Sections (New 3-Step Wizard) */
+        .form-section {
+            margin-bottom: 3rem;
+            padding-bottom: 3rem;
+            border-bottom: 2px solid var(--sage-light);
+        }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .form-section-title {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-section-desc {
+            color: var(--gray-body);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
         /* Form Styles */
         .form-group {
             margin-bottom: 1.5rem;
@@ -886,22 +914,14 @@
                 <div class="wizard-progress-bar-fill" id="progressBarFill"></div>
             </div>
             <div class="wizard-progress-dots">
-                <div class="wizard-progress-dot active" data-step="0">1</div>
-                <div class="wizard-progress-dot" data-step="1">2</div>
-                <div class="wizard-progress-dot" data-step="2">3</div>
-                <div class="wizard-progress-dot" data-step="3">4</div>
-                <div class="wizard-progress-dot" data-step="4">5</div>
-                <div class="wizard-progress-dot" data-step="5">6</div>
-                <div class="wizard-progress-dot" data-step="6">7</div>
+                <div class="wizard-progress-dot active" data-step="0" aria-label="Step 1: Essential Information">1</div>
+                <div class="wizard-progress-dot" data-step="1" aria-label="Step 2: Personalize Memorial">2</div>
+                <div class="wizard-progress-dot" data-step="2" aria-label="Step 3: Review and Publish">3</div>
             </div>
             <div class="wizard-progress-labels">
-                <span class="wizard-progress-label active">Welcome</span>
-                <span class="wizard-progress-label">About Them</span>
-                <span class="wizard-progress-label">Privacy</span>
-                <span class="wizard-progress-label">History</span>
-                <span class="wizard-progress-label">Memories</span>
-                <span class="wizard-progress-label">Photos</span>
-                <span class="wizard-progress-label">Publish</span>
+                <span class="wizard-progress-label active">Essential Info</span>
+                <span class="wizard-progress-label">Personalize</span>
+                <span class="wizard-progress-label">Review & Publish</span>
             </div>
         </div>
     </div>
@@ -910,16 +930,20 @@
     <div class="wizard-container" id="wizardContainer main-content" tabindex="-1">
         <form id="memorialForm" data-autosave="memorial-draft" data-validate>
 
-            <!-- Step 1: Welcome & Quick Profile -->
-            <div class="wizard-step active" data-step="0">
+            <!-- Step 1: Essential Information (Consolidated from old Steps 1+2+3) -->
+            <div class="wizard-step active" data-step="0" aria-labelledby="step-essential-heading">
                 <div class="step-header">
                     <span class="step-icon">📋</span>
-                    <h1>Let's get started</h1>
-                    <p>Take your time. There's no rush here. We'll guide you through each step.</p>
+                    <h1 id="step-essential-heading">Essential Information</h1>
+                    <p>Let's start with the basics. Take your time — there's no rush here.</p>
                     <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
-                        <strong>Step 1 of 7</strong> • About 2 minutes
+                        <strong>Step 1 of 3</strong> • About 5-7 minutes
                     </p>
                 </div>
+
+                <!-- Section 1: About You -->
+                <div class="form-section">
+                    <h3 class="form-section-title">👤 About You</h3>
 
                 <div class="form-group">
                     <label for="userEmail">Your Email</label>
@@ -950,33 +974,26 @@
                     <span class="reassurance-icon">✓</span>
                     <span>We'll save your progress automatically. You can come back anytime.</span>
                 </div>
-            </div>
-
-            <!-- Step 2: Memorial Basics (MOVED UP - was Step 3) -->
-            <div class="wizard-step" data-step="1">
-                <div class="step-header">
-                    <span class="step-icon">👤</span>
-                    <h1>Tell us about them</h1>
-                    <p>Start with the basics. You can always add more details later.</p>
-                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
-                        <strong>Step 2 of 7</strong> • About 3 minutes
-                    </p>
                 </div>
 
-                <label class="portrait-upload" id="portraitUpload">
-                    <input type="file" id="portraitInput" name="portrait" accept="image/*">
-                    <span class="portrait-upload-icon">📷</span>
+                <!-- Section 2: Memorial Basics -->
+                <div class="form-section">
+                    <h3 class="form-section-title">💐 Memorial Basics</h3>
+
+                <label class="portrait-upload" id="portraitUpload" aria-label="Upload portrait photo">
+                    <input type="file" id="portraitInput" name="portrait" accept="image/*" aria-label="Portrait photo file input">
+                    <span class="portrait-upload-icon" aria-hidden="true">📷</span>
                     <span class="portrait-upload-text">Add their photo<br><small>Click or drag to upload</small></span>
                 </label>
 
                 <div class="form-group">
                     <label for="deceasedName">Their Full Name</label>
-                    <input type="text" id="deceasedName" name="deceasedName" placeholder="First Middle Last" required>
+                    <input type="text" id="deceasedName" name="deceasedName" placeholder="First Middle Last" required aria-required="true">
                     <span class="field-hint">Enter their name exactly as you'd like it displayed on the memorial</span>
                 </div>
 
                 <!-- Live preview of how name will appear -->
-                <div class="name-preview" id="namePreviewBox" style="display: none; margin-top: 0.75rem; padding: 1rem; background: var(--sage-pale); border-radius: 12px; border: 1px solid var(--sage-light);">
+                <div class="name-preview" id="namePreviewBox" style="display: none; margin-top: 0.75rem; padding: 1rem; background: var(--sage-pale); border-radius: 12px; border: 1px solid var(--sage-light);" role="status" aria-live="polite">
                     <p style="font-size: 0.85rem; color: var(--gray-light); margin-bottom: 0.5rem;">
                         Preview - How it will appear:
                     </p>
@@ -1004,36 +1021,30 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="birthDate">Date of Birth</label>
-                        <input type="date" id="birthDate" name="birthDate" required>
+                        <input type="date" id="birthDate" name="birthDate" required aria-required="true">
                     </div>
                     <div class="form-group">
                         <label for="passingDate">Date of Passing</label>
-                        <input type="date" id="passingDate" name="passingDate" required>
+                        <input type="date" id="passingDate" name="passingDate" required aria-required="true">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="shortBio">A Few Words About Them <span class="optional">(optional)</span></label>
                     <textarea id="shortBio" name="shortBio" placeholder="A loving parent, loyal friend, always had a smile ready. What would you want someone to know about who they were?" maxlength="500"></textarea>
-                    <div class="char-counter"><span id="bioCharCount">0</span>/500</div>
+                    <div class="char-counter" aria-live="polite"><span id="bioCharCount">0</span>/500</div>
                 </div>
-            </div>
+                </div>
 
-            <!-- Step 3: Privacy & Preferences (MOVED DOWN - was Step 2) -->
-            <div class="wizard-step" data-step="2">
-                <div class="step-header">
-                    <span class="step-icon">🔐</span>
-                    <h1>Who should be able to visit {name}'s memorial?</h1>
-                    <p>You can change these settings anytime. Your comfort comes first.</p>
-                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
-                        <strong>Step 3 of 7</strong> • About 1 minute
-                    </p>
-                </div>
+                <!-- Section 3: Privacy Settings -->
+                <div class="form-section">
+                    <h3 class="form-section-title">🔐 Privacy Settings</h3>
+                    <p class="form-section-desc">Who should be able to visit this memorial? You can change these settings anytime.</p>
 
                 <div class="form-group">
                     <div class="option-cards">
                         <label class="option-card selected" data-value="public">
-                            <input type="radio" name="privacy" value="public" checked>
+                            <input type="radio" name="privacy" value="public" checked aria-label="Public memorial - anyone with the link can visit">
                             <div class="option-radio"></div>
                             <div class="option-content">
                                 <h4>Public Memorial</h4>
@@ -1041,7 +1052,7 @@
                             </div>
                         </label>
                         <label class="option-card" data-value="family">
-                            <input type="radio" name="privacy" value="family">
+                            <input type="radio" name="privacy" value="family" aria-label="Family only - only people you invite can visit">
                             <div class="option-radio"></div>
                             <div class="option-content">
                                 <h4>Family Only</h4>
@@ -1049,7 +1060,7 @@
                             </div>
                         </label>
                         <label class="option-card" data-value="private">
-                            <input type="radio" name="privacy" value="private">
+                            <input type="radio" name="privacy" value="private" aria-label="Private - just you can visit">
                             <div class="option-radio"></div>
                             <div class="option-content">
                                 <h4>Private (Just You)</h4>
@@ -1061,30 +1072,36 @@
 
                 <div class="toggle-group">
                     <span class="toggle-label">Allow visitors to light candles & leave flowers</span>
-                    <div class="toggle-switch active" data-toggle="allowInteractions"></div>
+                    <div class="toggle-switch active" data-toggle="allowInteractions" role="switch" aria-checked="true" aria-label="Allow visitors to light candles and leave flowers" tabindex="0"></div>
                 </div>
 
                 <div class="toggle-group">
                     <span class="toggle-label">Enable daily healing prompts on the memorial</span>
-                    <div class="toggle-switch active" data-toggle="enableHealingPrompts"></div>
+                    <div class="toggle-switch active" data-toggle="enableHealingPrompts" role="switch" aria-checked="true" aria-label="Enable daily healing prompts" tabindex="0"></div>
                 </div>
 
                 <div class="reassurance">
                     <span class="reassurance-icon">✓</span>
                     <span>You can change these settings anytime from your dashboard.</span>
                 </div>
+                </div>
             </div>
 
-            <!-- Step 4: Family History -->
-            <div class="wizard-step" data-step="3">
+            <!-- Step 2: Personalize Memorial (Consolidated from old Steps 4+5+6) -->
+            <div class="wizard-step" data-step="1" aria-labelledby="step-personalize-heading">
                 <div class="step-header">
-                    <span class="step-icon">📍</span>
-                    <h1>Where their story began</h1>
-                    <p>Help future generations understand where they came from.</p>
+                    <span class="step-icon">✨</span>
+                    <h1 id="step-personalize-heading">Personalize Their Memorial</h1>
+                    <p>Add photos, stories, and special memories. All sections are optional — add as much or as little as feels right.</p>
                     <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
-                        <strong>Step 4 of 7</strong> • About 3 minutes <span style="opacity: 0.7;">(optional)</span>
+                        <strong>Step 2 of 3</strong> • 5-15 minutes <span style="opacity: 0.7;">(all optional)</span>
                     </p>
                 </div>
+
+                <!-- Section 1: Family History -->
+                <div class="form-section">
+                    <h3 class="form-section-title">📍 Family History</h3>
+                    <p class="form-section-desc">Help future generations understand where they came from.</p>
 
                 <div class="form-row">
                     <div class="form-group">
@@ -1107,28 +1124,16 @@
                     <input type="text" id="siblings" name="siblings" placeholder="e.g., Older sister Maria, Twin brother James">
                 </div>
 
-                <div style="text-align: center;">
-                    <button type="button" class="skip-section-btn" onclick="goToStep(4)">
-                        → Skip for now — I'll add family history later
-                    </button>
-                </div>
-
                 <div class="reassurance">
                     <span class="reassurance-icon">→</span>
                     <span>You can build a visual family tree later and link to other family members' memorials.</span>
                 </div>
-            </div>
-
-            <!-- Step 5: Accomplishments & Everyday Joys -->
-            <div class="wizard-step" data-step="4">
-                <div class="step-header">
-                    <span class="step-icon">⭐</span>
-                    <h1>The moments that made them who they were</h1>
-                    <p>Add as many or as few as you'd like. These can be big achievements or simple moments.</p>
-                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
-                        <strong>Step 5 of 7</strong> • 5-10 minutes <span style="opacity: 0.7;">(all sections optional)</span>
-                    </p>
                 </div>
+
+                <!-- Section 2: Accomplishments & Memories -->
+                <div class="form-section">
+                    <h3 class="form-section-title">⭐ Life Highlights & Memories</h3>
+                    <p class="form-section-desc">Share the moments that made them who they were — big achievements or simple everyday joys.</p>
 
                 <!-- Achievements -->
                 <div class="repeatable-section">
@@ -1321,18 +1326,12 @@
                     <span class="reassurance-icon">→</span>
                     <span>You can always add more later. Family members can contribute their own memories too.</span>
                 </div>
-            </div>
-
-            <!-- Step 6: Photos -->
-            <div class="wizard-step" data-step="5">
-                <div class="step-header">
-                    <span class="step-icon">📷</span>
-                    <h1>Share photos that tell their story</h1>
-                    <p>Upload photos that capture who they were. All photos will be reviewed before appearing on the memorial.</p>
-                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
-                        <strong>Step 6 of 7</strong> • About 2 minutes <span style="opacity: 0.7;">(optional)</span>
-                    </p>
                 </div>
+
+                <!-- Section 3: Photos -->
+                <div class="form-section">
+                    <h3 class="form-section-title">📷 Photos</h3>
+                    <p class="form-section-desc">Upload photos that capture who they were. All photos are reviewed before appearing on the memorial.</p>
 
                 <div id="photo-uploader-container"></div>
 
@@ -1347,21 +1346,21 @@
                     </p>
                 </div>
 
-                <div style="text-align: center; margin-top: 1.5rem;">
-                    <button type="button" class="skip-section-btn" onclick="goToStep(6)">
-                        → Skip photos for now — I'll add them later
-                    </button>
+                <div class="reassurance">
+                    <span class="reassurance-icon">✓</span>
+                    <span>You can always come back and add more photos, stories, and memories later.</span>
+                </div>
                 </div>
             </div>
 
-            <!-- Step 7: Review, Preview & Publish -->
-            <div class="wizard-step" data-step="6">
+            <!-- Step 3: Review & Publish -->
+            <div class="wizard-step" data-step="2">
                 <div class="step-header">
                     <span class="step-icon">✓</span>
                     <h1>Review & Publish</h1>
                     <p>Here's a preview of the memorial. You can edit any section or publish when ready.</p>
                     <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
-                        <strong>Step 7 of 7</strong> • Final review
+                        <strong>Step 3 of 3</strong> • Final review
                     </p>
                 </div>
 
@@ -1376,13 +1375,13 @@
 
                         <div class="preview-section-title">
                             <span>📜 Life Timeline</span>
-                            <span class="edit-section-btn" data-goto="3">✏️ Edit</span>
+                            <span class="edit-section-btn" data-goto="1" aria-label="Edit family history and timeline">✏️ Edit</span>
                         </div>
                         <div class="preview-placeholder">Timeline events will appear here</div>
 
                         <div class="preview-section-title">
                             <span>✨ Highlights & Memories</span>
-                            <span class="edit-section-btn" data-goto="4">✏️ Edit</span>
+                            <span class="edit-section-btn" data-goto="1" aria-label="Edit highlights and memories">✏️ Edit</span>
                         </div>
                         <div class="preview-placeholder">Achievements, favorites, and memories will appear here</div>
                     </div>
@@ -1459,7 +1458,7 @@
     <!-- Wizard Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const totalSteps = 7;
+            const totalSteps = 3;
             let currentStep = 0;
             let photoUploader = null;
 
@@ -1516,13 +1515,13 @@
                 updateNavButtons();
                 updatePreview();
 
-                // Initialize photo uploader on step 5
-                if (step === 5 && !photoUploader) {
+                // Initialize photo uploader on step 1 (Personalize step)
+                if (step === 1 && !photoUploader) {
                     initializePhotoUploader();
                 }
 
-                // Update privacy step heading with name (step 2 = privacy)
-                if (step === 2) {
+                // Update privacy section heading with name (now part of step 0)
+                if (step === 0) {
                     const privacyHeading = steps[2].querySelector('.step-header h1');
                     const preferredName = document.getElementById('preferredName').value.trim();
                     const fullName = document.getElementById('deceasedName').value.trim();

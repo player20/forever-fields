@@ -139,3 +139,35 @@ export const createError = {
   internal: (message: string = 'Internal server error') =>
     new OperationalError(message, 500),
 };
+
+/**
+ * Async handler wrapper for Express routes
+ * Automatically catches errors and passes them to error handler middleware
+ *
+ * Usage:
+ * router.get('/path', asyncHandler(async (req, res) => {
+ *   const data = await someAsyncOperation();
+ *   res.json({ data });
+ * }));
+ */
+export const asyncHandler = (
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<any>
+) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
+};
+
+/**
+ * Standardized logging for errors
+ * Provides consistent error logging across all routes
+ */
+export const logError = (context: string, error: any, additionalInfo?: Record<string, any>) => {
+  console.error(`[ERROR] ${context}:`, {
+    timestamp: new Date().toISOString(),
+    message: error.message,
+    statusCode: error.statusCode || 500,
+    ...(additionalInfo || {}),
+    ...(isProd ? {} : { stack: error.stack }),
+  });
+};
