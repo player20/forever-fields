@@ -21,6 +21,7 @@
 
     <!-- Shared Styles -->
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
 
     <style>
         /* Full Memorial Page Styles */
@@ -1065,8 +1066,8 @@
                     </div>
                 </div>
                 <span class="user-role-badge" id="roleBadge">Visitor</span>
-                <button class="nav-btn nav-btn-edit" data-role-show="owner">✏️ Edit</button>
-                <button class="nav-btn nav-btn-share" id="shareBtn">📤 Share</button>
+                <button class="nav-btn nav-btn-edit" data-role-show="owner" aria-label="Edit memorial page">✏️ Edit</button>
+                <button class="nav-btn nav-btn-share" id="shareBtn" aria-label="Share memorial page">📤 Share</button>
             </div>
         </div>
     </nav>
@@ -1083,7 +1084,7 @@
                 <div class="song-label">Her Favorite Song</div>
                 <div class="song-title">Moon River — Andy Williams</div>
             </div>
-            <button class="song-play-btn" id="playBtn">▶</button>
+            <button class="song-play-btn" id="playBtn" aria-label="Play memorial song">▶</button>
         </div>
     </header>
 
@@ -1095,7 +1096,7 @@
             <section class="section-card fade-in">
                 <div class="section-header">
                     <h2 class="section-title">📜 Life Timeline</h2>
-                    <span class="section-action">+ Add Event</span>
+                    <span class="section-action" id="addEventBtn" role="button" tabindex="0" aria-label="Add new life event to timeline">+ Add Event</span>
                 </div>
                 <div class="timeline-vertical" data-user-content>
                     <div class="timeline-entry">
@@ -1144,7 +1145,7 @@
             <section class="section-card fade-in">
                 <div class="section-header">
                     <h2 class="section-title">📸 Photo Gallery</h2>
-                    <span class="section-action">+ Upload Photos</span>
+                    <span class="section-action" id="uploadPhotosBtn" role="button" tabindex="0" aria-label="Upload photos to gallery">+ Upload Photos</span>
                 </div>
                 <div class="photo-masonry">
                     <div class="photo-chapter">Wedding & Early Years</div>
@@ -1167,7 +1168,7 @@
             <section class="section-card fade-in">
                 <div class="section-header">
                     <h2 class="section-title">🍳 Her Famous Recipes</h2>
-                    <span class="section-action">+ Add Recipe</span>
+                    <span class="section-action" id="addRecipeBtn" role="button" tabindex="0" aria-label="Add new recipe">+ Add Recipe</span>
                 </div>
                 <div class="recipes-grid">
                     <div class="recipe-card">
@@ -1204,11 +1205,11 @@
             <section class="section-card fade-in">
                 <div class="section-header">
                     <h2 class="section-title">🎙️ Voice Memories</h2>
-                    <span class="section-action">+ Record Memory</span>
+                    <span class="section-action" id="recordMemoryBtn" role="button" tabindex="0" aria-label="Record new voice memory">+ Record Memory</span>
                 </div>
                 <div class="voice-notes-list">
                     <div class="voice-note">
-                        <button class="voice-play-btn">▶</button>
+                        <button class="voice-play-btn" aria-label="Play voice memory from Elizabeth, duration 1 minute 24 seconds">▶</button>
                         <div class="voice-waveform"></div>
                         <div class="voice-info">
                             <div class="voice-author">Elizabeth</div>
@@ -1216,7 +1217,7 @@
                         </div>
                     </div>
                     <div class="voice-note">
-                        <button class="voice-play-btn">▶</button>
+                        <button class="voice-play-btn" aria-label="Play voice memory from Robert, duration 58 seconds">▶</button>
                         <div class="voice-waveform"></div>
                         <div class="voice-info">
                             <div class="voice-author">Robert</div>
@@ -1224,7 +1225,7 @@
                         </div>
                     </div>
                     <div class="voice-note">
-                        <button class="voice-play-btn">▶</button>
+                        <button class="voice-play-btn" aria-label="Play voice memory from Grandkids, duration 2 minutes 15 seconds">▶</button>
                         <div class="voice-waveform"></div>
                         <div class="voice-info">
                             <div class="voice-author">Grandkids</div>
@@ -1240,9 +1241,9 @@
                     <h2 class="section-title">💝 Shared Memories</h2>
                 </div>
                 <div class="memories-filter">
-                    <button class="filter-btn active">All</button>
-                    <button class="filter-btn">Family</button>
-                    <button class="filter-btn">Friends</button>
+                    <button class="filter-btn active" aria-label="Show all memories">All</button>
+                    <button class="filter-btn" aria-label="Show family memories only">Family</button>
+                    <button class="filter-btn" aria-label="Show friends memories only">Friends</button>
                 </div>
                 <div class="memories-list" data-user-content>
                     <div class="memory-item" data-item-id="memory_001">
@@ -1253,11 +1254,11 @@
                                 <div class="memory-relation">Daughter • 2 days ago</div>
                             </div>
                             <div class="memory-actions">
-                                <button class="memory-like-btn">❤️ 12</button>
+                                <button class="memory-like-btn" aria-label="Like this memory, currently 12 likes">❤️ 12</button>
                             </div>
                         </div>
                         <p class="memory-text">Mom always said the kitchen was where love was made, not just food. Every holiday, she'd wake up at 5am to start cooking. I'll never walk into a kitchen without thinking of her humming Moon River.</p>
-                        <button class="report-btn" onclick="reportItem('memory_001', 'memory')" title="Report this item">&#9872;</button>
+                        <button class="report-btn" onclick="reportItem('memory_001', 'memory')" title="Report this item" aria-label="Report inappropriate content">&#9872;</button>
                     </div>
                     <div class="memory-item" data-item-id="memory_002">
                         <div class="memory-header">
@@ -1267,11 +1268,11 @@
                                 <div class="memory-relation">Granddaughter • 1 week ago</div>
                             </div>
                             <div class="memory-actions">
-                                <button class="memory-like-btn">❤️ 8</button>
+                                <button class="memory-like-btn" aria-label="Like this memory, currently 8 likes">❤️ 8</button>
                             </div>
                         </div>
                         <p class="memory-text">Grandma taught me that fresh flowers can fix almost anything. A bad day? Flowers. A broken heart? Flowers and cookies. She turned her little shop into a place where people came not just for arrangements, but for her wisdom.</p>
-                        <button class="report-btn" onclick="reportItem('memory_002', 'memory')" title="Report this item">&#9872;</button>
+                        <button class="report-btn" onclick="reportItem('memory_002', 'memory')" title="Report this item" aria-label="Report inappropriate content">&#9872;</button>
                     </div>
                     <div class="memory-item" data-item-id="memory_003">
                         <div class="memory-header">
@@ -1281,14 +1282,14 @@
                                 <div class="memory-relation">Neighbor • 1 week ago</div>
                             </div>
                             <div class="memory-actions">
-                                <button class="memory-like-btn">❤️ 15</button>
+                                <button class="memory-like-btn" aria-label="Like this memory, currently 15 likes">❤️ 15</button>
                             </div>
                         </div>
                         <p class="memory-text">Margaret brought me soup every single time I was sick. For forty years. Rain or shine, there she'd be at my door with her chicken noodle soup and a smile. That kind of kindness is rare.</p>
-                        <button class="report-btn" onclick="reportItem('memory_003', 'memory')" title="Report this item">&#9872;</button>
+                        <button class="report-btn" onclick="reportItem('memory_003', 'memory')" title="Report this item" aria-label="Report inappropriate content">&#9872;</button>
                     </div>
                 </div>
-                <button class="add-memory-btn">+ Share Your Memory</button>
+                <button class="add-memory-btn" id="shareMemoryBtn" aria-label="Share your memory of the deceased">+ Share Your Memory</button>
             </section>
         </main>
 
@@ -1298,10 +1299,10 @@
             <div class="action-card">
                 <h3 class="action-card-title">💐 Honor Margaret</h3>
                 <div class="action-buttons">
-                    <button class="action-btn-full primary" id="candleBtn">
+                    <button class="action-btn-full primary" id="candleBtn" aria-label="Light a candle in memory">
                         🕯️ Light a Candle
                     </button>
-                    <button class="action-btn-full" id="flowerBtn">
+                    <button class="action-btn-full" id="flowerBtn" aria-label="Leave flowers in memory">
                         🌸 Leave Flowers
                     </button>
                 </div>
@@ -1331,7 +1332,7 @@
                 <div class="family-tree-preview">
                     <div class="tree-placeholder">👨‍👩‍👧‍👦</div>
                     <p class="tree-text">Connect Margaret's story to her family's legacy</p>
-                    <button class="btn btn-secondary btn-sm">View Family Tree</button>
+                    <button class="btn btn-secondary btn-sm" id="viewFamilyTreeBtn" aria-label="View family tree showing family relationships">View Family Tree</button>
                 </div>
             </div>
 
@@ -1352,6 +1353,11 @@
     <script src="../js/api-client.js"></script>
     <script src="../js/script.js"></script>
     <script src="../js/memorial-enhancements.js"></script>
+
+    <!-- Interactive Systems -->
+    <script src="../js/modal-system.js"></script>
+    <script src="../js/undo-system.js"></script>
+    <script src="../js/keyboard-shortcuts.js"></script>
 
     <!-- Page Scripts -->
     <script>
@@ -1501,6 +1507,87 @@
                     document.querySelectorAll('.voice-play-btn').forEach(b => b.textContent = '▶');
                     this.textContent = isPlaying ? '▶' : '⏸';
                 });
+            });
+
+            // Section action buttons
+            const addEventBtn = document.getElementById('addEventBtn');
+            if (addEventBtn) {
+                addEventBtn.addEventListener('click', function() {
+                    if (typeof showToast === 'function') {
+                        showToast('Add Life Event feature coming soon', 'info');
+                    } else {
+                        alert('Add Life Event feature coming soon');
+                    }
+                });
+            }
+
+            const uploadPhotosBtn = document.getElementById('uploadPhotosBtn');
+            if (uploadPhotosBtn) {
+                uploadPhotosBtn.addEventListener('click', function() {
+                    if (typeof showToast === 'function') {
+                        showToast('Upload Photos feature coming soon', 'info');
+                    } else {
+                        alert('Upload Photos feature coming soon');
+                    }
+                });
+            }
+
+            const addRecipeBtn = document.getElementById('addRecipeBtn');
+            if (addRecipeBtn) {
+                addRecipeBtn.addEventListener('click', function() {
+                    if (typeof showToast === 'function') {
+                        showToast('Add Recipe feature coming soon', 'info');
+                    } else {
+                        alert('Add Recipe feature coming soon');
+                    }
+                });
+            }
+
+            const recordMemoryBtn = document.getElementById('recordMemoryBtn');
+            if (recordMemoryBtn) {
+                recordMemoryBtn.addEventListener('click', function() {
+                    if (typeof showToast === 'function') {
+                        showToast('Record Voice Memory feature coming soon', 'info');
+                    } else {
+                        alert('Record Voice Memory feature coming soon');
+                    }
+                });
+            }
+
+            const shareMemoryBtn = document.getElementById('shareMemoryBtn');
+            if (shareMemoryBtn) {
+                shareMemoryBtn.addEventListener('click', function() {
+                    if (typeof showToast === 'function') {
+                        showToast('Share Memory feature coming soon', 'info');
+                    } else {
+                        alert('Share Memory feature coming soon');
+                    }
+                });
+            }
+
+            const viewFamilyTreeBtn = document.getElementById('viewFamilyTreeBtn');
+            if (viewFamilyTreeBtn) {
+                viewFamilyTreeBtn.addEventListener('click', function() {
+                    if (typeof showToast === 'function') {
+                        showToast('Family Tree feature coming soon', 'info');
+                    } else {
+                        alert('Family Tree feature coming soon');
+                    }
+                });
+            }
+
+            // Keyboard accessibility for span buttons (role="button")
+            const spanButtons = [addEventBtn, uploadPhotosBtn, addRecipeBtn, recordMemoryBtn];
+            spanButtons.forEach(btn => {
+                if (btn) {
+                    btn.addEventListener('keydown', function(event) {
+                        // Trigger click on Enter or Space key
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            this.click();
+                        }
+                    });
+                }
             });
         });
     </script>

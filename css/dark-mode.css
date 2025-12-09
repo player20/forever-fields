@@ -1,0 +1,436 @@
+/* ===================================================
+   DARK MODE SUPPORT
+   System-level dark mode using prefers-color-scheme
+   =================================================== */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Dark Mode Color Palette */
+        --sage-primary: #a7c9a2;
+        --sage-dark: #8bb085;
+        --sage-light: #4a5f47;
+        --sage-pale: #2a3a28;
+        --cream: #1a1a1a;
+        --cream-warm: #252525;
+        --warm-white: #1e1e1e;
+        --gray-body: #a0a0a0;
+        --gray-dark: #e0e0e0;
+        --gray-light: #707070;
+        --gold-muted: #d4af37;
+        --gold-primary: #d4af37;
+        --gold-light: #3a3528;
+        --gold-warm: #c9a227;
+        --gold-dark: #f5d061;
+        --lavender-subtle: #3a3547;
+        --twilight: #8a9aac;
+        --error: #ef5350;
+        --success: #66bb6a;
+
+        /* Dark Mode Shadows */
+        --shadow-soft: rgba(0, 0, 0, 0.3);
+        --shadow-medium: rgba(0, 0, 0, 0.4);
+        --shadow-gold: rgba(212, 175, 55, 0.2);
+        --shadow-hover: rgba(167, 201, 162, 0.2);
+    }
+
+    /* Base Elements */
+    body {
+        background: #1a1a1a;
+        color: #e0e0e0;
+    }
+
+    /* Headers */
+    h1, h2, h3, h4, h5, h6 {
+        color: #f5f5f5;
+    }
+
+    /* Links */
+    a {
+        color: var(--sage-primary);
+    }
+
+    a:hover {
+        color: var(--sage-dark);
+    }
+
+    /* Inputs */
+    input,
+    textarea,
+    select {
+        background: #2a2a2a;
+        color: #e0e0e0;
+        border-color: #404040;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+        background: #2f2f2f;
+        border-color: var(--sage-primary);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        color: #707070;
+    }
+
+    /* Buttons */
+    .btn-secondary {
+        background: #2a2a2a;
+        color: #e0e0e0;
+        border-color: #404040;
+    }
+
+    .btn-secondary:hover {
+        background: #353535;
+        border-color: #505050;
+    }
+
+    .btn-ghost {
+        color: #e0e0e0;
+    }
+
+    .btn-ghost:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Cards */
+    .card,
+    .feature-card,
+    .memorial-card {
+        background: #2a2a2a;
+        border-color: #404040;
+    }
+
+    /* Header */
+    .header {
+        background: rgba(26, 26, 26, 0.95);
+        border-bottom-color: #303030;
+    }
+
+    /* Hero Section */
+    .hero {
+        background: linear-gradient(180deg, #1a1a1a 0%, #252525 100%);
+    }
+
+    /* Footer */
+    .footer {
+        background: #1a1a1a;
+        border-top-color: #303030;
+    }
+
+    .footer-links a {
+        color: #a0a0a0;
+    }
+
+    .footer-links a:hover {
+        color: #e0e0e0;
+    }
+
+    /* Forms */
+    .form-group label {
+        color: #e0e0e0;
+    }
+
+    .field-hint {
+        color: #a0a0a0;
+    }
+
+    /* Modals */
+    .modal-overlay {
+        background: rgba(0, 0, 0, 0.85);
+    }
+
+    /* Memorial Page */
+    .memorial-hero {
+        background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+    }
+
+    .memorial-card {
+        background: #2a2a2a;
+    }
+
+    /* Timeline */
+    .timeline-item {
+        background: #2a2a2a;
+        border-left-color: var(--sage-primary);
+    }
+
+    /* Photo Gallery */
+    .photo-grid-item {
+        background: #2a2a2a;
+    }
+
+    /* Candle Lighting */
+    .candle {
+        background: rgba(255, 200, 100, 0.1);
+    }
+
+    .candle-flame {
+        background: radial-gradient(circle, #ffb347 0%, #ff8c00 50%, transparent 70%);
+    }
+
+    /* Toast Notifications */
+    .toast {
+        background: #2a2a2a;
+        color: #e0e0e0;
+        border-color: #404040;
+    }
+
+    .toast.success {
+        background: rgba(102, 187, 106, 0.2);
+        border-color: var(--success);
+    }
+
+    .toast.error {
+        background: rgba(239, 83, 80, 0.2);
+        border-color: var(--error);
+    }
+
+    /* Dashboard */
+    .dashboard-header {
+        background: #2a2a2a;
+        border-bottom-color: #404040;
+    }
+
+    .dashboard-sidebar {
+        background: #2a2a2a;
+        border-right-color: #404040;
+    }
+
+    .sidebar-link {
+        color: #a0a0a0;
+    }
+
+    .sidebar-link:hover,
+    .sidebar-link.active {
+        background: rgba(167, 201, 162, 0.1);
+        color: var(--sage-primary);
+    }
+
+    /* Memorial Creation Wizard */
+    .wizard-progress {
+        background: #2a2a2a;
+        border-bottom-color: #404040;
+    }
+
+    .wizard-progress-bar {
+        background: #404040;
+    }
+
+    .wizard-step-header {
+        color: #f5f5f5;
+    }
+
+    /* QR Code */
+    .qr-code-container {
+        background: white;
+    }
+
+    /* Loading States */
+    .skeleton {
+        background: linear-gradient(90deg, #2a2a2a 0%, #353535 50%, #2a2a2a 100%);
+        background-size: 200% 100%;
+    }
+
+    /* Social Links */
+    .social-link {
+        background: #2a2a2a;
+        border-color: #404040;
+    }
+
+    .social-link:hover {
+        background: #353535;
+    }
+
+    /* Recipe Cards */
+    .recipe-card {
+        background: #2a2a2a;
+        border-color: #404040;
+    }
+
+    /* Life Events */
+    .life-event-card {
+        background: #2a2a2a;
+        border-left-color: var(--gold-primary);
+    }
+
+    /* Voice Notes */
+    .voice-note-player {
+        background: #2a2a2a;
+        border-color: #404040;
+    }
+
+    /* Time Capsules */
+    .time-capsule-locked {
+        background: linear-gradient(135deg, #2a2a2a 0%, #353535 100%);
+    }
+
+    .time-capsule-unlocked {
+        background: rgba(167, 201, 162, 0.1);
+        border-color: var(--sage-primary);
+    }
+
+    /* Accessibility: Ensure sufficient contrast in dark mode */
+    .text-muted {
+        color: #a0a0a0 !important;
+    }
+
+    .text-body {
+        color: #e0e0e0 !important;
+    }
+
+    .text-dark {
+        color: #f5f5f5 !important;
+    }
+
+    /* Code blocks */
+    code,
+    pre {
+        background: #2a2a2a;
+        color: #e0e0e0;
+        border-color: #404040;
+    }
+
+    /* Tables */
+    table {
+        border-color: #404040;
+    }
+
+    th {
+        background: #2a2a2a;
+        color: #f5f5f5;
+    }
+
+    td {
+        border-color: #404040;
+    }
+
+    tr:hover {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Scrollbar (Webkit browsers) */
+    ::-webkit-scrollbar {
+        background: #1a1a1a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #404040;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #505050;
+    }
+
+    /* Selection */
+    ::selection {
+        background: rgba(167, 201, 162, 0.3);
+        color: #f5f5f5;
+    }
+
+    /* Image placeholders */
+    img[src=""],
+    img:not([src]) {
+        background: #2a2a2a;
+        border-color: #404040;
+    }
+
+    /* Dropdown menus */
+    .dropdown-menu {
+        background: #2a2a2a;
+        border-color: #404040;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    .dropdown-item {
+        color: #e0e0e0;
+    }
+
+    .dropdown-item:hover {
+        background: #353535;
+    }
+
+    /* Tooltips */
+    .tooltip {
+        background: #2a2a2a;
+        color: #e0e0e0;
+        border-color: #404040;
+    }
+
+    /* Progress bars */
+    .progress {
+        background: #2a2a2a;
+    }
+
+    .progress-bar {
+        background: linear-gradient(90deg, var(--sage-primary), var(--sage-dark));
+    }
+
+    /* Badges */
+    .badge {
+        background: #2a2a2a;
+        color: #e0e0e0;
+        border-color: #404040;
+    }
+
+    .badge-primary {
+        background: var(--sage-primary);
+        color: #1a1a1a;
+    }
+
+    .badge-gold {
+        background: var(--gold-primary);
+        color: #1a1a1a;
+    }
+
+    /* Alerts */
+    .alert {
+        background: #2a2a2a;
+        color: #e0e0e0;
+        border-color: #404040;
+    }
+
+    .alert-success {
+        background: rgba(102, 187, 106, 0.15);
+        border-color: var(--success);
+        color: var(--success);
+    }
+
+    .alert-error {
+        background: rgba(239, 83, 80, 0.15);
+        border-color: var(--error);
+        color: var(--error);
+    }
+
+    .alert-info {
+        background: rgba(167, 201, 162, 0.15);
+        border-color: var(--sage-primary);
+        color: var(--sage-primary);
+    }
+
+    /* Pagination */
+    .pagination-item {
+        background: #2a2a2a;
+        color: #e0e0e0;
+        border-color: #404040;
+    }
+
+    .pagination-item:hover {
+        background: #353535;
+    }
+
+    .pagination-item.active {
+        background: var(--sage-primary);
+        color: #1a1a1a;
+    }
+
+    /* Empty states */
+    .empty-state {
+        color: #a0a0a0;
+    }
+
+    .empty-state-icon {
+        opacity: 0.5;
+    }
+}
