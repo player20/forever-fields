@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui";
 
 type AgeGroup = "little" | "explorer" | "teen" | "adult";
@@ -71,10 +72,13 @@ export function KidsMemorialExplorer({
           <CardHeader className="text-center">
             {ancestor.profilePhotoUrl && (
               <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-sage-light">
-                <img
+                <Image
                   src={ancestor.profilePhotoUrl}
                   alt={fullName}
+                  width={96}
+                  height={96}
                   className="w-full h-full object-cover"
+                  unoptimized={ancestor.profilePhotoUrl.startsWith("blob:") || ancestor.profilePhotoUrl.startsWith("data:")}
                 />
               </div>
             )}
@@ -208,10 +212,13 @@ function GrandmasWorldPreview({ ancestor }: { ancestor: Ancestor }) {
         {/* Big friendly photo */}
         <div className="w-48 h-48 mx-auto mb-8 rounded-full overflow-hidden border-8 border-white shadow-xl">
           {ancestor.profilePhotoUrl ? (
-            <img
+            <Image
               src={ancestor.profilePhotoUrl}
               alt={fullName}
+              width={192}
+              height={192}
               className="w-full h-full object-cover"
+              unoptimized={ancestor.profilePhotoUrl.startsWith("blob:") || ancestor.profilePhotoUrl.startsWith("data:")}
             />
           ) : (
             <div className="w-full h-full bg-sage-light flex items-center justify-center">
@@ -272,7 +279,7 @@ function ExplorerModePreview({ ancestor }: { ancestor: Ancestor }) {
         <div className="flex items-center gap-4 mb-8">
           <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-sage">
             {ancestor.profilePhotoUrl ? (
-              <img src={ancestor.profilePhotoUrl} alt={ancestor.firstName} className="w-full h-full object-cover" />
+              <Image src={ancestor.profilePhotoUrl} alt={ancestor.firstName} width={80} height={80} className="w-full h-full object-cover" unoptimized={ancestor.profilePhotoUrl.startsWith("blob:") || ancestor.profilePhotoUrl.startsWith("data:")} />
             ) : (
               <div className="w-full h-full bg-sage-light flex items-center justify-center text-3xl">👵</div>
             )}
@@ -370,7 +377,7 @@ function TeenWisdomPreview({ ancestor }: { ancestor: Ancestor }) {
         <div className="text-center mb-8">
           <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-sage">
             {ancestor.profilePhotoUrl ? (
-              <img src={ancestor.profilePhotoUrl} alt={ancestor.firstName} className="w-full h-full object-cover" />
+              <Image src={ancestor.profilePhotoUrl} alt={ancestor.firstName} width={96} height={96} className="w-full h-full object-cover" unoptimized={ancestor.profilePhotoUrl.startsWith("blob:") || ancestor.profilePhotoUrl.startsWith("data:")} />
             ) : (
               <div className="w-full h-full bg-sage-light flex items-center justify-center text-4xl">👵</div>
             )}

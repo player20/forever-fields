@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Button, Card, CardContent } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
 
@@ -152,11 +153,14 @@ export function MilestoneMessages({
               {selectedMessage.photos && selectedMessage.photos.length > 0 && (
                 <div className="mt-6 grid grid-cols-2 gap-2">
                   {selectedMessage.photos.map((photo, i) => (
-                    <img
+                    <Image
                       key={i}
                       src={photo}
                       alt=""
+                      width={192}
+                      height={128}
                       className="rounded-lg w-full h-32 object-cover"
+                      unoptimized={photo.startsWith("blob:") || photo.startsWith("data:")}
                     />
                   ))}
                 </div>

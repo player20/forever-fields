@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import Image from "next/image";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Input } from "@/components/ui";
 
 interface SlideshowPhoto {
@@ -296,10 +297,12 @@ export function MemorialSlideshowMaker({
                   key={photo.id}
                   className="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden"
                 >
-                  <img
+                  <Image
                     src={photo.url}
                     alt={photo.caption || `Photo ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized={photo.url.startsWith("blob:") || photo.url.startsWith("data:")}
                   />
 
                   {/* Overlay controls */}
@@ -364,10 +367,13 @@ export function MemorialSlideshowMaker({
                 <h4 className="font-medium text-sage-dark">Photo Details</h4>
                 {config.photos.map((photo) => (
                   <div key={photo.id} className="flex gap-3 items-center p-3 bg-gray-50 rounded-lg">
-                    <img
+                    <Image
                       src={photo.url}
                       alt=""
+                      width={64}
+                      height={64}
                       className="w-16 h-16 object-cover rounded"
+                      unoptimized={photo.url.startsWith("blob:") || photo.url.startsWith("data:")}
                     />
                     <div className="flex-1 grid grid-cols-2 gap-2">
                       <Input
@@ -558,14 +564,16 @@ export function MemorialSlideshowMaker({
                       config.photos[currentSlide].transition === "fade" ? "ease-in-out" : ""
                     }`}
                   >
-                    <img
+                    <Image
                       src={config.photos[currentSlide].url}
                       alt=""
-                      className={`w-full h-full object-cover ${
+                      fill
+                      className={`object-cover ${
                         config.photos[currentSlide].transition === "zoom"
                           ? "animate-slow-zoom"
                           : ""
                       }`}
+                      unoptimized={config.photos[currentSlide].url.startsWith("blob:") || config.photos[currentSlide].url.startsWith("data:")}
                     />
 
                     {/* Gradient overlay */}
@@ -658,7 +666,7 @@ export function MemorialSlideshowMaker({
                     currentSlide === index ? "border-sage" : "border-transparent opacity-60 hover:opacity-100"
                   }`}
                 >
-                  <img src={photo.url} alt="" className="w-full h-full object-cover" />
+                  <Image src={photo.url} alt="" width={64} height={64} className="w-full h-full object-cover" unoptimized={photo.url.startsWith("blob:") || photo.url.startsWith("data:")} />
                 </button>
               ))}
             </div>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
+import { toast } from "sonner";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Textarea } from "@/components/ui";
 import { VideoPlayer } from "./VideoPlayer";
 
@@ -187,10 +189,13 @@ export function AnimatedMemoryGenerator({
                 <div className="border-2 border-dashed border-sage-light rounded-lg p-4 text-center hover:border-sage transition-colors">
                   {photoUrl ? (
                     <div className="relative">
-                      <img
+                      <Image
                         src={photoUrl}
                         alt="Selected photo"
+                        width={400}
+                        height={400}
                         className="w-full aspect-square object-cover rounded-lg"
+                        unoptimized={photoUrl.startsWith("blob:") || photoUrl.startsWith("data:")}
                       />
                       <button
                         onClick={() => setPhotoUrl(null)}
@@ -316,10 +321,13 @@ export function AnimatedMemoryGenerator({
             <div className="relative w-32 h-32 mx-auto mb-6">
               {/* Animated photo placeholder */}
               {photoUrl && (
-                <img
+                <Image
                   src={photoUrl}
                   alt="Processing"
+                  width={128}
+                  height={128}
                   className="w-full h-full object-cover rounded-full animate-pulse"
+                  unoptimized={photoUrl.startsWith("blob:") || photoUrl.startsWith("data:")}
                 />
               )}
               <div className="absolute inset-0 flex items-center justify-center">
@@ -382,7 +390,7 @@ export function AnimatedMemoryGenerator({
                     });
                   } else {
                     navigator.clipboard.writeText(generatedVideoUrl);
-                    alert("Video URL copied to clipboard!");
+                    toast.success("Video URL copied to clipboard!");
                   }
                 }}
               >

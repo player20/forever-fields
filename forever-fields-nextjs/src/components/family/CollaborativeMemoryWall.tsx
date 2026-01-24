@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Textarea, Input } from "@/components/ui";
 
 interface MemoryPost {
@@ -223,8 +224,10 @@ export function CollaborativeMemoryWall({
                 viewMode === "wall" ? "bg-sage text-white" : "bg-sage-pale text-sage-dark"
               }`}
               title="Wall view"
+              aria-label="Wall view"
+              aria-pressed={viewMode === "wall"}
             >
-              <span>⊞</span>
+              <span aria-hidden="true">⊞</span>
             </button>
             <button
               onClick={() => setViewMode("timeline")}
@@ -232,8 +235,10 @@ export function CollaborativeMemoryWall({
                 viewMode === "timeline" ? "bg-sage text-white" : "bg-sage-pale text-sage-dark"
               }`}
               title="Timeline view"
+              aria-label="Timeline view"
+              aria-pressed={viewMode === "timeline"}
             >
-              <span>☰</span>
+              <span aria-hidden="true">☰</span>
             </button>
           </div>
         </div>
@@ -309,10 +314,13 @@ export function CollaborativeMemoryWall({
               <div className="space-y-3">
                 {newPost.mediaUrl ? (
                   <div className="relative">
-                    <img
+                    <Image
                       src={newPost.mediaUrl}
                       alt="Upload preview"
+                      width={400}
+                      height={256}
                       className="w-full max-h-64 object-cover rounded-lg"
+                      unoptimized={newPost.mediaUrl.startsWith("blob:") || newPost.mediaUrl.startsWith("data:")}
                     />
                     <button
                       onClick={() => setNewPost({ ...newPost, mediaUrl: undefined })}
@@ -455,10 +463,13 @@ export function CollaborativeMemoryWall({
 
                   {/* Content */}
                   {post.type === "photo" && post.mediaUrl && (
-                    <img
+                    <Image
                       src={post.mediaUrl}
                       alt=""
+                      width={300}
+                      height={128}
                       className="w-full h-32 object-cover rounded-lg mb-3"
+                      unoptimized={post.mediaUrl.startsWith("blob:") || post.mediaUrl.startsWith("data:")}
                     />
                   )}
 
@@ -486,8 +497,9 @@ export function CollaborativeMemoryWall({
                             key={key}
                             onClick={() => handleReaction(post.id, key as keyof MemoryPost["reactions"])}
                             className="flex items-center gap-1 text-sm text-gray-500 hover:text-sage transition-colors"
+                            aria-label={`${reactionInfo[key as keyof typeof reactionInfo].label}${count > 0 ? ` (${count})` : ""}`}
                           >
-                            <span className="text-base">{icon}</span>
+                            <span className="text-base" aria-hidden="true">{icon}</span>
                             {count > 0 && <span>{count}</span>}
                           </button>
                         );
@@ -536,10 +548,13 @@ export function CollaborativeMemoryWall({
 
                     {/* Content */}
                     {post.type === "photo" && post.mediaUrl && (
-                      <img
+                      <Image
                         src={post.mediaUrl}
                         alt=""
+                        width={400}
+                        height={192}
                         className="w-full max-h-48 object-cover rounded-lg mb-3"
+                        unoptimized={post.mediaUrl.startsWith("blob:") || post.mediaUrl.startsWith("data:")}
                       />
                     )}
 
@@ -562,8 +577,9 @@ export function CollaborativeMemoryWall({
                             key={key}
                             onClick={() => handleReaction(post.id, key as keyof MemoryPost["reactions"])}
                             className="flex items-center gap-1 text-sm text-gray-500 hover:text-sage transition-colors"
+                            aria-label={`${reactionInfo[key as keyof typeof reactionInfo].label}${count > 0 ? ` (${count})` : ""}`}
                           >
-                            <span>{icon}</span>
+                            <span aria-hidden="true">{icon}</span>
                             {count > 0 && <span>{count}</span>}
                           </button>
                         );

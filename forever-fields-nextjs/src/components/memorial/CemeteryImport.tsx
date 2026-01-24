@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Input } from "@/components/ui";
 
 interface CemeteryRecord {
@@ -410,10 +411,13 @@ export function CemeteryImport({
             {/* Record Header */}
             <div className="flex items-start gap-4">
               {selectedRecord.headstonePhotoUrl ? (
-                <img
+                <Image
                   src={selectedRecord.headstonePhotoUrl}
                   alt="Headstone"
+                  width={96}
+                  height={96}
                   className="w-24 h-24 object-cover rounded-lg"
+                  unoptimized={selectedRecord.headstonePhotoUrl.startsWith("blob:") || selectedRecord.headstonePhotoUrl.startsWith("data:")}
                 />
               ) : (
                 <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center text-4xl">

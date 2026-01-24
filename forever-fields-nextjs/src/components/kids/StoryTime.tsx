@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { Button, Card, CardContent } from "@/components/ui";
 
 interface Story {
@@ -96,7 +97,7 @@ export function StoryTime({
           <div className="text-center mb-8">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-4 border-twilight/30">
               {ancestorPhoto ? (
-                <img src={ancestorPhoto} alt={ancestorName} className="w-full h-full object-cover" />
+                <Image src={ancestorPhoto} alt={ancestorName} width={80} height={80} className="w-full h-full object-cover" unoptimized={ancestorPhoto.startsWith("blob:") || ancestorPhoto.startsWith("data:")} />
               ) : (
                 <div className="w-full h-full bg-twilight/20 flex items-center justify-center text-3xl">
                   🌙
@@ -201,10 +202,13 @@ export function StoryTime({
           {/* Cover image */}
           <div className="h-48 bg-gradient-to-b from-sage-pale to-sage-light flex items-center justify-center">
             {currentStory.photos?.[0] ? (
-              <img
+              <Image
                 src={currentStory.photos[0]}
                 alt=""
+                width={400}
+                height={192}
                 className="w-full h-full object-cover"
+                unoptimized={currentStory.photos[0].startsWith("blob:") || currentStory.photos[0].startsWith("data:")}
               />
             ) : (
               <span className="text-6xl">📖</span>
@@ -258,15 +262,17 @@ export function StoryTime({
                       }
                     }}
                     className="w-12 h-12 rounded-full bg-sage-pale text-sage-dark hover:bg-sage-light transition-colors flex items-center justify-center"
+                    aria-label="Rewind 10 seconds"
                   >
-                    ⏪
+                    <span aria-hidden="true">⏪</span>
                   </button>
 
                   <button
                     onClick={() => setIsPlaying(!isPlaying)}
                     className="w-16 h-16 rounded-full bg-sage text-white hover:bg-sage-dark transition-colors flex items-center justify-center text-2xl"
+                    aria-label={isPlaying ? "Pause" : "Play"}
                   >
-                    {isPlaying ? "⏸️" : "▶️"}
+                    <span aria-hidden="true">{isPlaying ? "⏸️" : "▶️"}</span>
                   </button>
 
                   <button
@@ -276,8 +282,9 @@ export function StoryTime({
                       }
                     }}
                     className="w-12 h-12 rounded-full bg-sage-pale text-sage-dark hover:bg-sage-light transition-colors flex items-center justify-center"
+                    aria-label="Forward 10 seconds"
                   >
-                    ⏩
+                    <span aria-hidden="true">⏩</span>
                   </button>
                 </div>
               </>

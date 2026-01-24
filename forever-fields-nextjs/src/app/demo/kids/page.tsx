@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui";
 import { KidsMemorialExplorer, StoryTime, MilestoneMessages, MySpaceForGrandma } from "@/components/kids";
 import { LegacyCompanion, VoiceMemoryCapture } from "@/components/ai";
@@ -138,7 +139,7 @@ export default function KidsDemoPage() {
         <StoryTime
           ancestorName="Grandma Margaret"
           stories={sampleAncestor.stories}
-          onRecordStory={() => alert("Recording feature coming soon!")}
+          onRecordStory={() => toast.info("Recording feature coming soon!")}
         />
       </div>
     );
@@ -178,7 +179,7 @@ export default function KidsDemoPage() {
           creations={[]}
           onSave={(creation) => {
             console.log("Saved:", creation);
-            alert("Saved! (Demo mode)");
+            toast.success("Saved! (Demo mode)");
           }}
         />
       </div>
@@ -294,7 +295,7 @@ export default function KidsDemoPage() {
               if (personId === "grandma") {
                 setMode("explorer");
               } else {
-                alert(`Would navigate to memorial for ${personId}`);
+                toast.info(`Would navigate to memorial for ${personId}`);
               }
             }}
           />
@@ -316,7 +317,7 @@ export default function KidsDemoPage() {
           <GedcomImport
             onImport={(data) => {
               console.log("Imported family tree:", data);
-              alert(`Successfully imported ${Object.keys(data.people).length} family members!`);
+              toast.success(`Successfully imported ${Object.keys(data.people).length} family members!`);
               setMode("family");
             }}
             onCancel={() => setMode("menu")}
@@ -339,7 +340,7 @@ export default function KidsDemoPage() {
           <PhotoEnhancer
             onSave={(url, analysis) => {
               console.log("Enhanced photo:", url, analysis);
-              alert("Photo saved! (Demo mode)");
+              toast.success("Photo saved! (Demo mode)");
               setMode("menu");
             }}
             onCancel={() => setMode("menu")}
@@ -363,7 +364,7 @@ export default function KidsDemoPage() {
             ancestorName="Grandma Margaret"
             onComplete={(samples) => {
               console.log("Voice samples:", samples);
-              alert(`${samples.length} voice samples ready for cloning!`);
+              toast.success(`${samples.length} voice samples ready for cloning!`);
             }}
           />
           <VoiceMessageGenerator
@@ -375,7 +376,7 @@ export default function KidsDemoPage() {
             }}
             onMessageGenerated={(message) => {
               console.log("Generated message:", message);
-              alert("Voice message generated! (Demo mode - requires Replicate API key)");
+              toast.success("Voice message generated! (Demo mode - requires Replicate API key)");
             }}
           />
         </div>
@@ -419,7 +420,7 @@ export default function KidsDemoPage() {
             relationship="grandmother"
             onSave={(memory) => {
               console.log("Memory saved:", memory);
-              alert(`Memory saved!\n\nTitle: ${memory.title}\nKey Points: ${memory.keyPoints.length}`);
+              toast.success(`Memory saved! Title: ${memory.title}, Key Points: ${memory.keyPoints.length}`);
               setMode("menu");
             }}
             onCancel={() => setMode("menu")}
@@ -444,7 +445,7 @@ export default function KidsDemoPage() {
             currentUser="Emma"
             onAddLocation={(location) => {
               console.log("Added location:", location);
-              alert(`Location added: ${location.title}`);
+              toast.success(`Location added: ${location.title}`);
             }}
           />
         </div>
@@ -467,7 +468,7 @@ export default function KidsDemoPage() {
             currentUser="Emma"
             onAddRecipe={(recipe) => {
               console.log("Added recipe:", recipe);
-              alert(`Recipe added: ${recipe.title}`);
+              toast.success(`Recipe added: ${recipe.title}`);
             }}
           />
         </div>
@@ -491,7 +492,7 @@ export default function KidsDemoPage() {
             userRelationship="Granddaughter"
             onAddPost={(post) => {
               console.log("Added post:", post);
-              alert(`Memory shared: ${post.content.substring(0, 50)}...`);
+              toast.success(`Memory shared: ${post.content.substring(0, 50)}...`);
             }}
             onReact={(postId, type) => {
               console.log("Reaction:", postId, type);
@@ -518,10 +519,10 @@ export default function KidsDemoPage() {
             deathYear="2023"
             onSave={(config) => {
               console.log("Slideshow saved:", config);
-              alert(`Slideshow saved with ${config.photos.length} photos!`);
+              toast.success(`Slideshow saved with ${config.photos.length} photos!`);
             }}
             onExport={(format) => {
-              alert(`Export as ${format} - Coming soon!`);
+              toast.info(`Export as ${format} - Coming soon!`);
             }}
           />
         </div>
@@ -543,7 +544,7 @@ export default function KidsDemoPage() {
             defaultName="Margaret Johnson"
             onImport={(record) => {
               console.log("Cemetery record imported:", record);
-              alert(`Imported: ${record.firstName} ${record.lastName}\nCemetery: ${record.cemeteryName}`);
+              toast.success(`Imported: ${record.firstName} ${record.lastName} - Cemetery: ${record.cemeteryName}`);
               setMode("gravelocator");
             }}
             onCancel={() => setMode("menu")}
@@ -582,7 +583,7 @@ export default function KidsDemoPage() {
             showDirections={true}
             onVisitLogged={(visit) => {
               console.log("Visit logged:", visit);
-              alert(`Visit logged on ${visit.date.toLocaleDateString()}${visit.note ? `\nNote: ${visit.note}` : ""}`);
+              toast.success(`Visit logged on ${visit.date.toLocaleDateString()}${visit.note ? ` - Note: ${visit.note}` : ""}`);
             }}
           />
         </div>
@@ -603,7 +604,7 @@ export default function KidsDemoPage() {
           deceasedName="Margaret Johnson"
           onSave={(plan) => {
             console.log("Funeral plan saved:", plan);
-            alert("Funeral plan saved! (Demo mode)");
+            toast.success("Funeral plan saved! (Demo mode)");
           }}
         />
       </div>
@@ -624,7 +625,7 @@ export default function KidsDemoPage() {
           deceasedName="Margaret Johnson"
           onOrderComplete={(order) => {
             console.log("Order completed:", order);
-            alert(`Order ${order.id} placed successfully!`);
+            toast.success(`Order ${order.id} placed successfully!`);
           }}
         />
       </div>
@@ -647,7 +648,7 @@ export default function KidsDemoPage() {
           }}
           onComplete={(plan) => {
             console.log("Pre-plan completed:", plan);
-            alert("Your pre-plan has been saved and marked as complete!");
+            toast.success("Your pre-plan has been saved and marked as complete!");
           }}
         />
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { Button, Card, CardContent, Textarea } from "@/components/ui";
 
 interface Creation {
@@ -152,7 +153,7 @@ export function MySpaceForGrandma({
           <div className="text-center mb-8">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-4 border-sage">
               {ancestorPhoto ? (
-                <img src={ancestorPhoto} alt={ancestorName} className="w-full h-full object-cover" />
+                <Image src={ancestorPhoto} alt={ancestorName} width={80} height={80} className="w-full h-full object-cover" unoptimized={ancestorPhoto.startsWith("blob:") || ancestorPhoto.startsWith("data:")} />
               ) : (
                 <div className="w-full h-full bg-sage-light flex items-center justify-center text-3xl">
                   ❤️
@@ -472,10 +473,13 @@ export function MySpaceForGrandma({
               {creations.map((creation) => (
                 <Card key={creation.id} className="overflow-hidden">
                   {creation.type === "drawing" && (
-                    <img
+                    <Image
                       src={creation.content}
                       alt="Drawing"
+                      width={192}
+                      height={128}
                       className="w-full h-32 object-cover"
+                      unoptimized={creation.content.startsWith("blob:") || creation.content.startsWith("data:")}
                     />
                   )}
                   {creation.type === "letter" && (

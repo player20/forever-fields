@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, useState } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface AvatarProps {
@@ -64,6 +65,15 @@ const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
       "2xl": "w-28 h-28 text-2xl",
     };
 
+    const pixelSizes = {
+      xs: 24,
+      sm: 32,
+      md: 40,
+      lg: 56,
+      xl: 80,
+      "2xl": 112,
+    };
+
     const statusSizes = {
       xs: "w-1.5 h-1.5",
       sm: "w-2 h-2",
@@ -87,14 +97,17 @@ const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
     return (
       <div ref={ref} className={cn("relative inline-block", className)}>
         {showImage ? (
-          <img
+          <Image
             src={src}
             alt={alt || name || "Avatar"}
+            width={pixelSizes[size]}
+            height={pixelSizes[size]}
             className={cn(
               "rounded-full object-cover ring-2 ring-white",
               sizes[size]
             )}
             onError={() => setImageError(true)}
+            unoptimized={src.startsWith("blob:") || src.startsWith("data:")}
           />
         ) : (
           <div

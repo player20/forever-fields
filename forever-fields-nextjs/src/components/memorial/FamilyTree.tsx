@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import ReactFamilyTree from "react-family-tree";
 import type { Node as FamilyTreeNode } from "relatives-tree/lib/types";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui";
@@ -68,10 +69,13 @@ function FamilyTreeNode({
           } ${!person.photoUrl ? "bg-gray-200 flex items-center justify-center" : ""}`}
         >
           {person.photoUrl ? (
-            <img
+            <Image
               src={person.photoUrl}
               alt={person.name}
+              width={48}
+              height={48}
               className="w-full h-full object-cover"
+              unoptimized={person.photoUrl.startsWith("blob:") || person.photoUrl.startsWith("data:")}
             />
           ) : (
             <span className="text-xl">
@@ -225,10 +229,13 @@ export function FamilyTree({
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200">
                 {people[selectedPerson].photoUrl ? (
-                  <img
+                  <Image
                     src={people[selectedPerson].photoUrl}
                     alt={people[selectedPerson].name}
+                    width={64}
+                    height={64}
                     className="w-full h-full object-cover"
+                    unoptimized={people[selectedPerson].photoUrl.startsWith("blob:") || people[selectedPerson].photoUrl.startsWith("data:")}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-2xl">
@@ -323,10 +330,13 @@ export function SimpleFamilyTree({
                 } ${!person.photoUrl ? "bg-gray-200 flex items-center justify-center" : ""}`}
               >
                 {person.photoUrl ? (
-                  <img
+                  <Image
                     src={person.photoUrl}
                     alt={person.name}
+                    width={64}
+                    height={64}
                     className="w-full h-full object-cover"
+                    unoptimized={person.photoUrl.startsWith("blob:") || person.photoUrl.startsWith("data:")}
                   />
                 ) : (
                   <span className="text-2xl">👤</span>

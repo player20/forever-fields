@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui";
 import { BeforeAfterSlider } from "./BeforeAfterSlider";
 
@@ -191,10 +192,12 @@ export function PhotoEnhancer({ onSave, onCancel }: PhotoEnhancerProps) {
             {originalUrl && (
               <div className="space-y-4">
                 <div className="aspect-video relative bg-gray-100 rounded-lg overflow-hidden">
-                  <img
+                  <Image
                     src={originalUrl}
                     alt="Preview"
-                    className="absolute inset-0 w-full h-full object-contain"
+                    fill
+                    className="object-contain"
+                    unoptimized={originalUrl.startsWith("blob:") || originalUrl.startsWith("data:")}
                   />
                 </div>
 

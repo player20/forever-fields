@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import Image from "next/image";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui";
 
 interface GraveLocation {
@@ -259,10 +260,13 @@ export function GraveLocator({
           <div className="bg-sage-pale/30 rounded-lg p-4">
             <div className="flex items-start gap-4">
               {location.headstonePhotoUrl ? (
-                <img
+                <Image
                   src={location.headstonePhotoUrl}
                   alt="Headstone"
+                  width={80}
+                  height={80}
                   className="w-20 h-20 object-cover rounded-lg"
+                  unoptimized={location.headstonePhotoUrl.startsWith("blob:") || location.headstonePhotoUrl.startsWith("data:")}
                 />
               ) : (
                 <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-3xl">
@@ -368,7 +372,7 @@ export function GraveLocator({
           {showDirections && (
             <div>
               <h4 className="font-medium text-sage-dark mb-3">Get Directions</h4>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 sm:gap-3 gap-2">
                 <button
                   onClick={() => openInMaps("google")}
                   className="p-3 bg-white border rounded-lg hover:border-sage hover:shadow-sm transition-all text-center"

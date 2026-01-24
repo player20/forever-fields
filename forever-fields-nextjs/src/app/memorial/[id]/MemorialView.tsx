@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { toast } from "sonner";
 import { Button, Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
 import { MemoryAssistant, LegacyCompanion } from "@/components/ai";
 import { KidsMemorialExplorer, StoryTime, MilestoneMessages, MySpaceForGrandma } from "@/components/kids";
@@ -183,7 +184,7 @@ export function MemorialView({ memorial }: MemorialViewProps) {
           ancestorName={memorial.firstName}
           ancestorPhoto={memorial.profilePhotoUrl || undefined}
           stories={ancestorProfile.stories}
-          onRecordStory={() => alert("Voice recording coming soon!")}
+          onRecordStory={() => toast.info("Voice recording coming soon!")}
         />
       </div>
     );
@@ -204,7 +205,7 @@ export function MemorialView({ memorial }: MemorialViewProps) {
           ancestorName={memorial.firstName}
           ancestorPhoto={memorial.profilePhotoUrl || undefined}
           messages={milestoneMessages}
-          onCreateMessage={() => alert("Create message feature coming soon!")}
+          onCreateMessage={() => toast.info("Create message feature coming soon!")}
         />
       </div>
     );
@@ -227,7 +228,7 @@ export function MemorialView({ memorial }: MemorialViewProps) {
           creations={[]}
           onSave={(creation) => {
             console.log("Saving creation:", creation);
-            alert("Saved! (Demo mode)");
+            toast.success("Saved! (Demo mode)");
           }}
         />
       </div>
@@ -403,7 +404,7 @@ export function MemorialView({ memorial }: MemorialViewProps) {
                       onSave={(text) => {
                         console.log("Memory to save:", text);
                         // TODO: POST to /api/memorials/:id/memories
-                        alert("Memory saved! (Demo mode)");
+                        toast.success("Memory saved! (Demo mode)");
                         setShowMemoryAssistant(false);
                       }}
                     />

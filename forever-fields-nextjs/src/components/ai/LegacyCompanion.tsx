@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui";
 
 interface LegacyProfile {
@@ -121,10 +122,13 @@ export function LegacyCompanion({ profile, userRelationship }: LegacyCompanionPr
         <CardHeader className="text-center">
           <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden bg-sage-pale">
             {profile.profilePhotoUrl ? (
-              <img
+              <Image
                 src={profile.profilePhotoUrl}
                 alt={profile.name}
+                width={96}
+                height={96}
                 className="w-full h-full object-cover"
+                unoptimized={profile.profilePhotoUrl.startsWith("blob:") || profile.profilePhotoUrl.startsWith("data:")}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-sage-dark text-2xl font-display">
@@ -179,10 +183,13 @@ export function LegacyCompanion({ profile, userRelationship }: LegacyCompanionPr
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-full overflow-hidden bg-sage-pale">
             {profile.profilePhotoUrl ? (
-              <img
+              <Image
                 src={profile.profilePhotoUrl}
                 alt={profile.name}
+                width={48}
+                height={48}
                 className="w-full h-full object-cover"
+                unoptimized={profile.profilePhotoUrl.startsWith("blob:") || profile.profilePhotoUrl.startsWith("data:")}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-sage-dark font-display">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import Image from "next/image";
 
 interface BeforeAfterSliderProps {
   beforeImage: string;
@@ -85,11 +86,14 @@ export function BeforeAfterSlider({
     >
       {/* After image (full width, behind) */}
       <div className="relative w-full">
-        <img
+        <Image
           src={afterImage}
           alt={afterLabel}
+          width={800}
+          height={600}
           className="w-full h-auto block"
           draggable={false}
+          unoptimized={afterImage.startsWith("blob:") || afterImage.startsWith("data:")}
         />
       </div>
 
@@ -98,12 +102,15 @@ export function BeforeAfterSlider({
         className="absolute inset-0 overflow-hidden"
         style={{ width: `${sliderPosition}%` }}
       >
-        <img
+        <Image
           src={beforeImage}
           alt={beforeLabel}
+          width={800}
+          height={600}
           className="w-full h-auto block"
           style={{ width: `${100 / (sliderPosition / 100)}%`, maxWidth: "none" }}
           draggable={false}
+          unoptimized={beforeImage.startsWith("blob:") || beforeImage.startsWith("data:")}
         />
       </div>
 
@@ -113,8 +120,16 @@ export function BeforeAfterSlider({
         style={{ left: `${sliderPosition}%`, transform: "translateX(-50%)" }}
       >
         {/* Slider handle */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center">
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center"
+          role="slider"
+          aria-label="Image comparison slider"
+          aria-valuenow={Math.round(sliderPosition)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
           <svg
+            aria-hidden="true"
             width="20"
             height="20"
             viewBox="0 0 20 20"

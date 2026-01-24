@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui";
 
 interface Ancestor {
@@ -157,10 +158,13 @@ export function FamilyHistoryExplorer({ ancestors }: FamilyHistoryExplorerProps)
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full overflow-hidden bg-sage-pale flex-shrink-0">
                       {ancestor.profilePhotoUrl ? (
-                        <img
+                        <Image
                           src={ancestor.profilePhotoUrl}
                           alt={ancestor.name}
+                          width={48}
+                          height={48}
                           className="w-full h-full object-cover"
+                          unoptimized={ancestor.profilePhotoUrl.startsWith("blob:") || ancestor.profilePhotoUrl.startsWith("data:")}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-sage-dark font-display">
@@ -208,10 +212,13 @@ export function FamilyHistoryExplorer({ ancestors }: FamilyHistoryExplorerProps)
               </CardHeader>
               <CardContent className="space-y-4">
                 {selectedAncestor.profilePhotoUrl && (
-                  <img
+                  <Image
                     src={selectedAncestor.profilePhotoUrl}
                     alt={selectedAncestor.name}
+                    width={192}
+                    height={192}
                     className="w-48 h-48 object-cover rounded-lg mx-auto"
+                    unoptimized={selectedAncestor.profilePhotoUrl.startsWith("blob:") || selectedAncestor.profilePhotoUrl.startsWith("data:")}
                   />
                 )}
                 <div className="grid grid-cols-2 gap-4 text-sm">

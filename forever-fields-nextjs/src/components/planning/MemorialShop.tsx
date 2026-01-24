@@ -1643,7 +1643,7 @@ export function MemorialShop({
           {customOpts.allowDesign && (
             <Card className="p-6">
               <h3 className="font-semibold text-gray-900 mb-4">Choose a Design Template</h3>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {["Classic", "Modern", "Floral", "Religious", "Nature", "Custom"].map(design => (
                   <button
                     key={design}
