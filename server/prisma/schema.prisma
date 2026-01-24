@@ -34,6 +34,9 @@ model Memorial {
   privacy           Privacy          @default(private)
   songSpotifyUri    String?          @map("song_spotify_uri")
   songYoutubeUrl    String?          @map("song_youtube_url")
+  religion          String?
+  gender            String?
+  customPronouns    String?          @map("custom_pronouns")
   restingType       String?          @map("resting_type")
   restingLocation   Json?            @map("resting_location")
   createdAt         DateTime         @default(now()) @map("created_at")
@@ -274,6 +277,7 @@ model Report {
 
   @@index([memorialId])
   @@index([status])
+  @@index([memorialId, status])
   @@map("reports")
 }
 

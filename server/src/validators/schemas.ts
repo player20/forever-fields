@@ -35,13 +35,40 @@ const baseMemorialSchema = z.object({
   privacy: z.enum(['private', 'link', 'public']).default('private'),
   songSpotifyUri: z.string().max(500).optional().nullable(),
   songYoutubeUrl: z.string().url().optional().nullable(),
-  restingType: z.string().max(100).optional().nullable(),
+  religion: z.enum([
+    'Christian',
+    'Muslim',
+    'Jewish',
+    'Hindu',
+    'Buddhist',
+    'Atheist',
+    'Agnostic',
+    'Spiritual',
+    'Other',
+    'Prefer not to say'
+  ]).optional().nullable(),
+  gender: z.enum([
+    'Male',
+    'Female',
+    'Non-Binary',
+    'Other',
+    'Prefer not to say'
+  ]).optional().nullable(),
+  customPronouns: z.string().max(100, 'Pronouns too long').optional().nullable(),
+  restingType: z.enum([
+    'buried',
+    'cremated_home',
+    'cremated_scattered',
+    'prefer_not_to_say'
+  ]).optional().nullable(),
   restingLocation: z
     .object({
-      lat: z.number().min(-90).max(90),
-      lng: z.number().min(-180).max(180),
-      address: z.string().max(500).optional(),
-      name: z.string().max(200).optional(),
+      lat: z.number().min(-90).max(90).optional(),
+      lng: z.number().min(-180).max(180).optional(),
+      address: z.string().max(500).optional().nullable(),
+      name: z.string().max(200, 'Location name too long').optional().nullable(),
+      photoUrl: z.string().url('Invalid photo URL').optional().nullable(),
+      description: z.string().max(1000, 'Description too long').optional().nullable(),
     })
     .optional()
     .nullable(),

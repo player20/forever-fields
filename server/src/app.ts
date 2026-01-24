@@ -4,6 +4,7 @@
  */
 
 import express from 'express';
+import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import { env, isProd } from './config/env';
 import {
@@ -62,6 +63,23 @@ app.use(permissionsPolicyMiddleware);
 
 // CORS - Cross-origin resource sharing
 app.use(corsMiddleware);
+
+// ============================================
+// COMPRESSION (gzip/brotli)
+// ============================================
+
+// Compress all responses (JSON, HTML, CSS, JS)
+// Reduces payload size by 70-90%
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false; // Don't compress if client requests no compression
+    }
+    return compression.filter(req, res);
+  },
+  level: 6, // Balanced compression level (1-9, 6 is default)
+  threshold: 1024, // Only compress if response > 1KB
+}));
 
 // ============================================
 // BODY PARSING & COOKIES

@@ -17,6 +17,7 @@ const STATIC_ASSETS = [
     '/js/script.js',
     '/js/api-client.js',
     '/js/api-config.js',
+    '/js/memorial-helpers.js',
     '/js/modal-system.js',
     '/js/undo-system.js',
     '/js/keyboard-shortcuts.js',

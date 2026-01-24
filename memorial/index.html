@@ -1077,6 +1077,7 @@
         <div class="hero-portrait">👵</div>
         <h1 class="hero-name" data-no-translate>Margaret Louise Carter</h1>
         <p class="hero-dates" data-no-translate>March 15, 1938 — November 22, 2024</p>
+        <p class="hero-age" id="heroAge" style="display: none; color: rgba(255,255,255,0.85); font-size: 1.1rem; margin: -0.5rem 0 1rem; font-weight: 500;" data-no-translate></p>
         <p class="hero-epitaph" data-user-content data-no-translate>"She filled every room with warmth and left it smelling like fresh-baked cookies. A life of love, laughter, and lemon pound cake."</p>
 
         <div class="song-widget">
@@ -1092,6 +1093,51 @@
     <div class="memorial-layout">
         <!-- Main Content -->
         <main class="memorial-main">
+            <!-- Personal Details Section (Optional - shown if data exists) -->
+            <section class="section-card fade-in" id="personalDetailsSection" style="display: none;">
+                <div class="section-header">
+                    <h2 class="section-title">✨ Personal Details</h2>
+                </div>
+                <div class="personal-details-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <!-- Religion -->
+                    <div id="religionDetail" style="display: none;">
+                        <div style="font-size: 0.85rem; color: var(--gray-light); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.5px;">Faith Tradition</div>
+                        <div id="religionValue" style="font-size: 1.1rem; color: var(--gray-dark); font-weight: 500;"></div>
+                    </div>
+                    <!-- Gender/Pronouns -->
+                    <div id="pronounsDetail" style="display: none;">
+                        <div style="font-size: 0.85rem; color: var(--gray-light); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.5px;">Pronouns</div>
+                        <div id="pronounsValue" style="font-size: 1.1rem; color: var(--gray-dark); font-weight: 500;"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Resting Place Section (Optional - shown if data exists) -->
+            <section class="section-card fade-in" id="restingPlaceSection" style="display: none;">
+                <div class="section-header">
+                    <h2 class="section-title">🌹 Resting Place</h2>
+                </div>
+                <div id="restingPlaceContent">
+                    <p id="restingPlaceType" style="font-size: 1.1rem; color: var(--gray-dark); margin-bottom: 1rem;"></p>
+
+                    <!-- Map Container (shown for buried or cremated_scattered with coordinates) -->
+                    <div id="restingMapContainer" style="display: none;">
+                        <div id="restingMap" style="width: 100%; height: 300px; border-radius: 12px; margin-bottom: 1rem; border: 1px solid var(--sage-light);"></div>
+                        <div id="restingAddress" style="font-size: 0.95rem; color: var(--gray-light); margin-bottom: 1rem;"></div>
+                    </div>
+
+                    <!-- Photo (for scattered ashes) -->
+                    <div id="restingPhotoContainer" style="display: none; margin-bottom: 1rem;">
+                        <img id="restingPhoto" src="" alt="Resting place photo" style="width: 100%; max-width: 600px; height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    </div>
+
+                    <!-- Description -->
+                    <div id="restingDescription" style="display: none;">
+                        <p id="restingDescriptionText" style="font-size: 1rem; color: var(--gray-medium); line-height: 1.6; font-style: italic;"></p>
+                    </div>
+                </div>
+            </section>
+
             <!-- Timeline Section -->
             <section class="section-card fade-in">
                 <div class="section-header">
@@ -1351,8 +1397,48 @@
     <!-- Shared Scripts -->
     <script src="../js/moderation.js"></script>
     <script src="../js/api-client.js"></script>
+    <script src="../js/memorial-helpers.js"></script>
     <script src="../js/script.js"></script>
     <script src="../js/memorial-enhancements.js"></script>
+
+    <!-- Google Maps API - LAZY LOADED only when resting location exists -->
+    <script>
+        window.GOOGLE_MAPS_API_KEY = 'AIzaSyBbsT1odWLvITQugB4Gew8sHJcbpUfb-Yo';
+
+        // Lazy load Google Maps API
+        window.loadGoogleMapsAPI = function() {
+            return new Promise((resolve, reject) => {
+                // Already loaded
+                if (window.google && window.google.maps) {
+                    resolve(window.google.maps);
+                    return;
+                }
+
+                // Already loading
+                if (window.googleMapsLoading) {
+                    window.googleMapsLoading.then(resolve).catch(reject);
+                    return;
+                }
+
+                // Start loading
+                window.googleMapsLoading = new Promise((res, rej) => {
+                    const script = document.createElement('script');
+                    script.src = `https://maps.googleapis.com/maps/api/js?key=${window.GOOGLE_MAPS_API_KEY}&libraries=places`;
+                    script.async = true;
+                    script.defer = true;
+                    script.onload = () => {
+                        res(window.google.maps);
+                        resolve(window.google.maps);
+                    };
+                    script.onerror = (err) => {
+                        rej(err);
+                        reject(err);
+                    };
+                    document.head.appendChild(script);
+                });
+            });
+        };
+    </script>
 
     <!-- Interactive Systems -->
     <script src="../js/indexeddb-manager.js"></script>
@@ -1916,6 +2002,18 @@
                     heroDates.textContent = dateString;
                 }
 
+                // Display age (if available)
+                if (memorial.birthDate && memorial.deathDate && window.MemorialHelpers) {
+                    const age = window.MemorialHelpers.calculateAge(memorial.birthDate, memorial.deathDate);
+                    const formatted = window.MemorialHelpers.formatAge(age, memorial.isPet);
+
+                    const heroAge = document.getElementById('heroAge');
+                    if (heroAge && formatted) {
+                        heroAge.textContent = formatted;
+                        heroAge.style.display = 'block';
+                    }
+                }
+
                 // Update or hide epitaph quote
                 const heroEpitaph = document.querySelector('.hero-epitaph');
                 if (heroEpitaph) {
@@ -1938,6 +2036,132 @@
                     } else {
                         // No song data, hide widget
                         songWidget.style.display = 'none';
+                    }
+                }
+
+                // Display Personal Details Section
+                let hasPersonalDetails = false;
+                const personalDetailsSection = document.getElementById('personalDetailsSection');
+
+                // Religion
+                if (memorial.religion && memorial.religion !== 'Prefer not to say') {
+                    const religionDetail = document.getElementById('religionDetail');
+                    const religionValue = document.getElementById('religionValue');
+                    if (religionDetail && religionValue) {
+                        religionValue.textContent = memorial.religion;
+                        religionDetail.style.display = 'block';
+                        hasPersonalDetails = true;
+                    }
+                }
+
+                // Pronouns (derived from gender or custom)
+                if (window.MemorialHelpers) {
+                    const pronouns = window.MemorialHelpers.getPronounsDisplay(memorial.gender, memorial.customPronouns);
+                    if (pronouns) {
+                        const pronounsDetail = document.getElementById('pronounsDetail');
+                        const pronounsValue = document.getElementById('pronounsValue');
+                        if (pronounsDetail && pronounsValue) {
+                            pronounsValue.textContent = pronouns;
+                            pronounsDetail.style.display = 'block';
+                            hasPersonalDetails = true;
+                        }
+                    }
+                }
+
+                // Show personal details section if we have any data
+                if (hasPersonalDetails && personalDetailsSection) {
+                    personalDetailsSection.style.display = 'block';
+                }
+
+                // Display Resting Place Section
+                const restingPlaceSection = document.getElementById('restingPlaceSection');
+                const restingPlaceType = document.getElementById('restingPlaceType');
+
+                if (memorial.restingType && memorial.restingType !== 'prefer_not_to_say' && window.MemorialHelpers) {
+                    const locationText = window.MemorialHelpers.formatRestingLocation(
+                        memorial.restingType,
+                        memorial.restingLocation
+                    );
+
+                    if (locationText && restingPlaceType) {
+                        restingPlaceType.textContent = locationText;
+                        restingPlaceSection.style.display = 'block';
+
+                        // Show map if we have coordinates
+                        if (memorial.restingLocation?.lat && memorial.restingLocation?.lng) {
+                            const mapContainer = document.getElementById('restingMapContainer');
+                            const addressDiv = document.getElementById('restingAddress');
+
+                            if (mapContainer) {
+                                mapContainer.style.display = 'block';
+
+                                // Display address
+                                if (addressDiv && memorial.restingLocation.address) {
+                                    addressDiv.textContent = `📍 ${memorial.restingLocation.address}`;
+                                }
+
+                                // Lazy load Google Maps API, then initialize map
+                                window.loadGoogleMapsAPI().then(() => {
+                                    const mapElement = document.getElementById('restingMap');
+                                    if (mapElement) {
+                                        const map = new google.maps.Map(mapElement, {
+                                            center: {
+                                                lat: memorial.restingLocation.lat,
+                                                lng: memorial.restingLocation.lng
+                                            },
+                                            zoom: 15,
+                                            mapTypeControl: false,
+                                            styles: [
+                                                {
+                                                    featureType: 'all',
+                                                    elementType: 'geometry',
+                                                    stylers: [{ saturation: -20 }]
+                                                }
+                                            ]
+                                        });
+
+                                        // Add marker
+                                        new google.maps.Marker({
+                                            position: {
+                                                lat: memorial.restingLocation.lat,
+                                                lng: memorial.restingLocation.lng
+                                            },
+                                            map: map,
+                                            title: memorial.restingLocation.name || 'Resting Place'
+                                        });
+                                    }
+                                }).catch(error => {
+                                    console.error('Failed to load Google Maps:', error);
+                                    // Show fallback message
+                                    const mapElement = document.getElementById('restingMap');
+                                    if (mapElement) {
+                                        mapElement.innerHTML = '<p style="text-align: center; padding: 20px;">Map failed to load. Please refresh the page.</p>';
+                                    }
+                                });
+                            }
+                        }
+
+                        // Show photo if available (for scattered ashes)
+                        if (memorial.restingLocation?.photoUrl && memorial.restingType === 'cremated_scattered') {
+                            const photoContainer = document.getElementById('restingPhotoContainer');
+                            const photoImg = document.getElementById('restingPhoto');
+
+                            if (photoContainer && photoImg) {
+                                photoImg.src = memorial.restingLocation.photoUrl;
+                                photoContainer.style.display = 'block';
+                            }
+                        }
+
+                        // Show description if available
+                        if (memorial.restingLocation?.description) {
+                            const descriptionDiv = document.getElementById('restingDescription');
+                            const descriptionText = document.getElementById('restingDescriptionText');
+
+                            if (descriptionDiv && descriptionText) {
+                                descriptionText.textContent = memorial.restingLocation.description;
+                                descriptionDiv.style.display = 'block';
+                            }
+                        }
                     }
                 }
 

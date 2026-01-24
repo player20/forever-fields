@@ -15,6 +15,50 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
+    <!-- Google Maps API for address autocomplete -->
+    <!-- Google Maps API - LAZY LOADED only when user reaches resting location step -->
+    <script>
+        window.GOOGLE_MAPS_API_KEY = 'AIzaSyBbsT1odWLvITQugB4Gew8sHJcbpUfb-Yo';
+
+        // Lazy load Google Maps API with Places library
+        window.loadGoogleMapsAPI = function() {
+            return new Promise((resolve, reject) => {
+                // Already loaded
+                if (window.google && window.google.maps) {
+                    resolve(window.google.maps);
+                    return;
+                }
+
+                // Already loading
+                if (window.googleMapsLoading) {
+                    window.googleMapsLoading.then(resolve).catch(reject);
+                    return;
+                }
+
+                // Start loading
+                window.googleMapsLoading = new Promise((res, rej) => {
+                    const script = document.createElement('script');
+                    script.src = `https://maps.googleapis.com/maps/api/js?key=${window.GOOGLE_MAPS_API_KEY}&libraries=places`;
+                    script.async = true;
+                    script.defer = true;
+                    script.onload = () => {
+                        res(window.google.maps);
+                        resolve(window.google.maps);
+                        // Initialize autocomplete after loading
+                        if (window.initRestingLocationAutocomplete) {
+                            window.initRestingLocationAutocomplete();
+                        }
+                    };
+                    script.onerror = (err) => {
+                        rej(err);
+                        reject(err);
+                    };
+                    document.head.appendChild(script);
+                });
+            });
+        };
+    </script>
+
     <!-- Shared Styles -->
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/dark-mode.css">
@@ -1030,6 +1074,113 @@
                     </div>
                 </div>
 
+                <!-- Age Display (Auto-calculated) -->
+                <div id="ageDisplay" style="display: none; margin-top: 0.75rem; padding: 1rem; background: var(--sage-pale); border-radius: 12px; border: 1px solid var(--sage-light);" role="status" aria-live="polite">
+                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-bottom: 0.25rem;">
+                        Age at passing:
+                    </p>
+                    <p style="font-family: var(--font-serif); font-size: 1.25rem; color: var(--sage-primary); margin: 0;" id="calculatedAge">
+                        <!-- Age will appear here -->
+                    </p>
+                </div>
+
+                <!-- Optional Personal Details -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="religion">
+                            Religion/Faith <span class="optional">(optional)</span>
+                        </label>
+                        <select id="religion" name="religion" aria-label="Select religion or faith tradition">
+                            <option value="">Prefer not to say</option>
+                            <option value="Christian">Christian</option>
+                            <option value="Muslim">Muslim</option>
+                            <option value="Jewish">Jewish</option>
+                            <option value="Hindu">Hindu</option>
+                            <option value="Buddhist">Buddhist</option>
+                            <option value="Atheist">Atheist</option>
+                            <option value="Agnostic">Agnostic</option>
+                            <option value="Spiritual">Spiritual (non-religious)</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span class="field-hint">Optional - helps personalize the memorial's tone and imagery</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">
+                            Gender <span class="optional">(optional)</span>
+                        </label>
+                        <select id="gender" name="gender" aria-label="Select gender">
+                            <option value="">Prefer not to say</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Non-Binary">Non-Binary</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span class="field-hint">Helps us use the right pronouns throughout the memorial</span>
+                    </div>
+                </div>
+
+                <!-- Custom Pronouns (shown when gender is Non-Binary or Other) -->
+                <div class="form-group" id="pronounsGroup" style="display: none;">
+                    <label for="customPronouns">
+                        Preferred Pronouns <span class="optional">(optional)</span>
+                    </label>
+                    <input type="text" id="customPronouns" name="customPronouns" placeholder="e.g., they/them, xe/xem, he/they" maxlength="100" aria-label="Enter preferred pronouns">
+                    <span class="field-hint">Let us know how they liked to be referred to</span>
+                </div>
+
+                <!-- Resting Place Details -->
+                <div class="form-group">
+                    <label for="restingType">
+                        Resting Place <span class="optional">(optional)</span>
+                    </label>
+                    <select id="restingType" name="restingType" aria-label="Select type of resting place">
+                        <option value="">Prefer not to say</option>
+                        <option value="buried">Buried at cemetery</option>
+                        <option value="cremated_home">Cremated - remains at home</option>
+                        <option value="cremated_scattered">Cremated - ashes scattered</option>
+                        <option value="prefer_not_to_say">Prefer not to say</option>
+                    </select>
+                    <span class="field-hint">Share where their final resting place is, if you'd like</span>
+                </div>
+
+                <!-- Location Details (shown for buried or cremated_scattered) -->
+                <div id="restingLocationFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="restingLocationName">
+                            Location Name <span class="optional">(optional)</span>
+                        </label>
+                        <input type="text" id="restingLocationName" name="restingLocationName" placeholder="e.g., Forest Lawn Cemetery, Pacific Ocean" maxlength="200" aria-label="Name of resting location">
+                        <span class="field-hint">Name of the cemetery or place where ashes were scattered</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="restingLocationAddress">
+                            Address <span class="optional">(optional)</span>
+                        </label>
+                        <input type="text" id="restingLocationAddress" name="restingLocationAddress" placeholder="Start typing to search for address..." maxlength="500" aria-label="Address of resting location" autocomplete="off">
+                        <input type="hidden" id="restingLocationLat" name="restingLocationLat">
+                        <input type="hidden" id="restingLocationLng" name="restingLocationLng">
+                        <span class="field-hint">We'll show a map to help visitors find the location</span>
+                    </div>
+
+                    <!-- Photo for Scattered Ashes -->
+                    <div class="form-group" id="scatteredPhotoGroup" style="display: none;">
+                        <label for="scatteredPhoto">
+                            Photo of Location <span class="optional">(optional)</span>
+                        </label>
+                        <input type="file" id="scatteredPhoto" name="scatteredPhoto" accept="image/*" aria-label="Upload photo of scattered ashes location">
+                        <span class="field-hint">Share a photo of the special place where their ashes were scattered</span>
+                    </div>
+
+                    <div class="form-group" id="locationDescriptionGroup">
+                        <label for="restingLocationDescription">
+                            Description <span class="optional">(optional)</span>
+                        </label>
+                        <textarea id="restingLocationDescription" name="restingLocationDescription" placeholder="Share why this place was special..." maxlength="1000" aria-label="Description of resting location"></textarea>
+                        <div class="char-counter" aria-live="polite"><span id="locationDescCharCount">0</span>/1000</div>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="shortBio">A Few Words About Them <span class="optional">(optional)</span></label>
                     <textarea id="shortBio" name="shortBio" placeholder="A loving parent, loyal friend, always had a smile ready. What would you want someone to know about who they were?" maxlength="500"></textarea>
@@ -1463,6 +1614,7 @@
     <link rel="stylesheet" href="../memorial-template/css/memorial.css">
     <script src="../js/api-config.js"></script>
     <script src="../js/api-client.js"></script>
+    <script src="../js/memorial-helpers.js"></script>
     <script src="../memorial-template/js/photo-uploader.js"></script>
 
     <!-- Wizard Scripts -->
@@ -1482,6 +1634,179 @@
 
             // Initialize
             updateProgress();
+
+            // ============================================
+            // NEW PERSONALIZATION FIELDS INITIALIZATION
+            // ============================================
+
+            // Age Calculation - Auto-update when birth/death dates change
+            const birthDateInput = document.getElementById('birthDate');
+            const passingDateInput = document.getElementById('passingDate');
+            const ageDisplay = document.getElementById('ageDisplay');
+            const calculatedAge = document.getElementById('calculatedAge');
+
+            function updateAgeDisplay() {
+                if (birthDateInput && passingDateInput && ageDisplay && calculatedAge) {
+                    const birthDate = birthDateInput.value;
+                    const deathDate = passingDateInput.value;
+
+                    if (birthDate && deathDate && window.MemorialHelpers) {
+                        const age = window.MemorialHelpers.calculateAge(birthDate, deathDate);
+                        const formatted = window.MemorialHelpers.formatAge(age, false);
+
+                        if (formatted) {
+                            calculatedAge.textContent = formatted;
+                            ageDisplay.style.display = 'block';
+                            ageDisplay.classList.add('fade-in');
+                        } else {
+                            ageDisplay.style.display = 'none';
+                        }
+                    } else {
+                        ageDisplay.style.display = 'none';
+                    }
+                }
+            }
+
+            if (birthDateInput) {
+                birthDateInput.addEventListener('change', updateAgeDisplay);
+                birthDateInput.addEventListener('input', updateAgeDisplay);
+            }
+            if (passingDateInput) {
+                passingDateInput.addEventListener('change', updateAgeDisplay);
+                passingDateInput.addEventListener('input', updateAgeDisplay);
+            }
+
+            // Pronouns Field Toggle - Show when gender is Non-Binary or Other
+            const genderSelect = document.getElementById('gender');
+            const pronounsGroup = document.getElementById('pronounsGroup');
+
+            function updatePronounsVisibility() {
+                if (genderSelect && pronounsGroup) {
+                    const gender = genderSelect.value;
+                    if (gender === 'Non-Binary' || gender === 'Other') {
+                        pronounsGroup.style.display = 'block';
+                    } else {
+                        pronounsGroup.style.display = 'none';
+                        // Clear value when hidden
+                        const pronounsInput = document.getElementById('customPronouns');
+                        if (pronounsInput) pronounsInput.value = '';
+                    }
+                }
+            }
+
+            if (genderSelect) {
+                genderSelect.addEventListener('change', updatePronounsVisibility);
+            }
+
+            // Resting Location Fields Toggle
+            const restingTypeSelect = document.getElementById('restingType');
+            const restingLocationFields = document.getElementById('restingLocationFields');
+            const scatteredPhotoGroup = document.getElementById('scatteredPhotoGroup');
+
+            function updateRestingLocationVisibility() {
+                if (restingTypeSelect && restingLocationFields) {
+                    const restingType = restingTypeSelect.value;
+
+                    if (restingType === 'buried' || restingType === 'cremated_scattered') {
+                        restingLocationFields.style.display = 'block';
+                        restingLocationFields.setAttribute('aria-hidden', 'false');
+
+                        // Lazy load Google Maps API when location fields are shown
+                        if (window.loadGoogleMapsAPI && !window.googleMapsInitialized) {
+                            window.loadGoogleMapsAPI().catch(error => {
+                                console.error('Failed to load Google Maps API:', error);
+                            });
+                            window.googleMapsInitialized = true;
+                        }
+
+                        // Show photo field only for scattered ashes
+                        if (scatteredPhotoGroup) {
+                            scatteredPhotoGroup.style.display =
+                                restingType === 'cremated_scattered' ? 'block' : 'none';
+                        }
+                    } else {
+                        restingLocationFields.style.display = 'none';
+                        restingLocationFields.setAttribute('aria-hidden', 'true');
+
+                        if (scatteredPhotoGroup) {
+                            scatteredPhotoGroup.style.display = 'none';
+                        }
+
+                        // Clear location fields when hidden
+                        const nameInput = document.getElementById('restingLocationName');
+                        const addressInput = document.getElementById('restingLocationAddress');
+                        const latInput = document.getElementById('restingLocationLat');
+                        const lngInput = document.getElementById('restingLocationLng');
+                        const descInput = document.getElementById('restingLocationDescription');
+
+                        if (nameInput) nameInput.value = '';
+                        if (addressInput) addressInput.value = '';
+                        if (latInput) latInput.value = '';
+                        if (lngInput) lngInput.value = '';
+                        if (descInput) descInput.value = '';
+                    }
+                }
+            }
+
+            if (restingTypeSelect) {
+                restingTypeSelect.addEventListener('change', updateRestingLocationVisibility);
+            }
+
+            // Character Counter for Location Description
+            const locationDescTextarea = document.getElementById('restingLocationDescription');
+            const locationDescCharCount = document.getElementById('locationDescCharCount');
+
+            if (locationDescTextarea && locationDescCharCount) {
+                locationDescTextarea.addEventListener('input', function() {
+                    const count = this.value.length;
+                    locationDescCharCount.textContent = count;
+
+                    const counter = locationDescCharCount.parentElement;
+                    counter.classList.remove('warning', 'limit');
+                    if (count > 900) counter.classList.add('warning');
+                    if (count >= 1000) counter.classList.add('limit');
+                });
+            }
+
+            // Google Maps Autocomplete for Address
+            // Note: This requires Google Maps API to be loaded
+            // Will be initialized after Maps API loads
+            window.initRestingLocationAutocomplete = function() {
+                const addressInput = document.getElementById('restingLocationAddress');
+                const latInput = document.getElementById('restingLocationLat');
+                const lngInput = document.getElementById('restingLocationLng');
+
+                if (window.google && window.google.maps && addressInput) {
+                    try {
+                        const autocomplete = new google.maps.places.Autocomplete(addressInput, {
+                            types: ['geocode', 'establishment'],
+                            fields: ['formatted_address', 'geometry', 'name'],
+                        });
+
+                        autocomplete.addListener('place_changed', () => {
+                            const place = autocomplete.getPlace();
+
+                            if (place.geometry && place.geometry.location) {
+                                const lat = place.geometry.location.lat();
+                                const lng = place.geometry.location.lng();
+
+                                if (latInput) latInput.value = lat;
+                                if (lngInput) lngInput.value = lng;
+
+                                console.log('[Maps] Address selected:', {
+                                    address: place.formatted_address || place.name,
+                                    lat,
+                                    lng,
+                                });
+                            }
+                        });
+
+                        console.log('[Maps] Autocomplete initialized for resting location');
+                    } catch (error) {
+                        console.error('[Maps] Error initializing autocomplete:', error);
+                    }
+                }
+            };
 
             // Navigation
             nextBtn.addEventListener('click', function() {
@@ -2133,6 +2458,31 @@
                         shortBio: document.getElementById('shortBio')?.value || null,
                         privacy: document.querySelector('input[name="privacy"]:checked')?.value || 'private',
                         isPet: false, // Could add a toggle for this in the form
+
+                        // New personalization fields
+                        religion: document.getElementById('religion')?.value || null,
+                        gender: document.getElementById('gender')?.value || null,
+                        customPronouns: document.getElementById('customPronouns')?.value || null,
+                        restingType: document.getElementById('restingType')?.value || null,
+                        restingLocation: (() => {
+                            const lat = document.getElementById('restingLocationLat')?.value;
+                            const lng = document.getElementById('restingLocationLng')?.value;
+                            const name = document.getElementById('restingLocationName')?.value;
+                            const address = document.getElementById('restingLocationAddress')?.value;
+                            const description = document.getElementById('restingLocationDescription')?.value;
+
+                            // Only include location if we have at least name or address
+                            if (name || address || (lat && lng)) {
+                                return {
+                                    lat: lat ? parseFloat(lat) : null,
+                                    lng: lng ? parseFloat(lng) : null,
+                                    name: name || null,
+                                    address: address || null,
+                                    description: description || null,
+                                };
+                            }
+                            return null;
+                        })(),
 
                         // Song URL - detect if Spotify or YouTube
                         songSpotifyUri: (songUrl && songUrl.includes('spotify')) ? songUrl : null,

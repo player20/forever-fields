@@ -10,6 +10,7 @@ import { requireMemorialOwner } from '../middleware/authorization';
 import { validate } from '../middleware/validate';
 import { apiRateLimiter } from '../middleware/security';
 import { asyncHandler, createError, logError } from '../middleware/error-handler';
+import { cacheMiddleware, invalidateCacheMiddleware, memorialCache } from '../middleware/cache';
 import {
   createMemorialSchema,
   updateMemorialSchema,
@@ -53,6 +54,7 @@ router.post(
   '/',
   requireAuth,
   apiRateLimiter,
+  invalidateCacheMiddleware(memorialCache, '/api/memorials'), // Invalidate cache
   validate(createMemorialSchema),
   asyncHandler(async (req, res) => {
     const {
@@ -66,6 +68,9 @@ router.post(
       privacy,
       songSpotifyUri,
       songYoutubeUrl,
+      religion,
+      gender,
+      customPronouns,
       restingType,
       restingLocation,
     } = req.body;
@@ -104,6 +109,9 @@ router.post(
         privacy: privacy || 'private',
         songSpotifyUri: songSpotifyUri || null,
         songYoutubeUrl: songYoutubeUrl || null,
+        religion: religion || null,
+        gender: gender || null,
+        customPronouns: customPronouns || null,
         restingType: restingType || null,
         restingLocation: restingLocation || null,
       },
@@ -116,10 +124,13 @@ router.post(
 /**
  * GET /api/memorials/:id
  * Get a single memorial (public or authenticated)
+ * OPTIMIZED: Only loads essential data + counts. Frontend fetches additional data via paginated endpoints.
  */
 router.get(
   '/:id',
   optionalAuth,
+  apiRateLimiter,
+  cacheMiddleware(memorialCache), // Cache for 5 minutes
   validate(memorialIdSchema, 'params'),
   asyncHandler(async (req, res) => {
     const { id } = req.params;
@@ -127,36 +138,26 @@ router.get(
     const memorial = await prisma.memorial.findUnique({
       where: { id },
       include: {
+        // Load small previews only
         candles: {
           orderBy: { createdAt: 'desc' },
-          take: 50, // Limit to most recent 50 candles
+          take: 5, // Preview only - frontend fetches more via /api/candles/:memorialId
         },
         timeCapsules: {
           where: {
             unlockDate: { lte: new Date() }, // Only show unlocked capsules
           },
           orderBy: { unlockDate: 'desc' },
+          take: 3, // Preview only
         },
-        socialLinks: true,
-        qrCode: true,
-        photos: {
-          orderBy: { createdAt: 'desc' },
-          take: 50, // Limit to most recent 50 photos
-        },
-        lifeEvents: {
-          orderBy: { eventOrder: 'asc' },
-        },
-        recipes: {
-          orderBy: { createdAt: 'desc' },
-        },
-        memories: {
-          orderBy: { createdAt: 'desc' },
-          take: 50,
-        },
-        voiceNotes: {
-          orderBy: { createdAt: 'desc' },
-          take: 20,
-        },
+        socialLinks: true, // Small data, ok to include
+        qrCode: true, // Small data, ok to include
+        // Don't load these - frontend fetches via separate endpoints
+        // photos: use GET /api/photos/:memorialId
+        // lifeEvents: use GET /api/life-events/:memorialId
+        // recipes: use GET /api/recipes/:memorialId
+        // memories: use GET /api/memories/:memorialId
+        // voiceNotes: use GET /api/voice-notes/:memorialId
         _count: {
           select: {
             candles: true,
@@ -221,6 +222,7 @@ router.put(
   requireAuth,
   requireMemorialOwner,
   apiRateLimiter,
+  invalidateCacheMiddleware(memorialCache, '/api/memorials'), // Invalidate cache
   validate(memorialIdSchema, 'params'),
   validate(updateMemorialSchema),
   asyncHandler(async (req, res) => {
@@ -247,6 +249,9 @@ router.put(
     if (req.body.privacy !== undefined) updateData.privacy = req.body.privacy;
     if (req.body.songSpotifyUri !== undefined) updateData.songSpotifyUri = req.body.songSpotifyUri;
     if (req.body.songYoutubeUrl !== undefined) updateData.songYoutubeUrl = req.body.songYoutubeUrl;
+    if (req.body.religion !== undefined) updateData.religion = req.body.religion;
+    if (req.body.gender !== undefined) updateData.gender = req.body.gender;
+    if (req.body.customPronouns !== undefined) updateData.customPronouns = req.body.customPronouns;
     if (req.body.restingType !== undefined) updateData.restingType = req.body.restingType;
     if (req.body.restingLocation !== undefined) updateData.restingLocation = req.body.restingLocation;
 
@@ -268,6 +273,7 @@ router.delete(
   requireAuth,
   requireMemorialOwner,
   apiRateLimiter,
+  invalidateCacheMiddleware(memorialCache, '/api/memorials'), // Invalidate cache
   validate(memorialIdSchema, 'params'),
   asyncHandler(async (req, res) => {
     const { id } = req.params;

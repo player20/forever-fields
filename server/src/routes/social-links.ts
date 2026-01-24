@@ -6,6 +6,7 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../config/database';
 import { requireAuth } from '../middleware/auth';
+import { requireMemorialOwner } from '../middleware/authorization';
 import { apiRateLimiter, strictRateLimiter } from '../middleware/security';
 import { logger } from '../utils/logger';
 import { validateSocialUrl, validateSocialUrls } from '../utils/validators';
@@ -74,24 +75,12 @@ router.get('/:memorialId', async (req: Request, res: Response) => {
 // Update social links for a memorial
 // ============================================
 
-router.put('/:memorialId', strictRateLimiter, async (req: Request, res: Response) => {
+router.put('/:memorialId', requireMemorialOwner, strictRateLimiter, async (req: Request, res: Response) => {
   try {
     const { memorialId } = req.params;
     const data = socialLinksSchema.parse(req.body);
 
-    // Verify memorial ownership
-    const memorial = await prisma.memorial.findUnique({
-      where: { id: memorialId },
-      select: { ownerId: true },
-    });
-
-    if (!memorial) {
-      return res.status(404).json({ error: 'Memorial not found' });
-    }
-
-    if (memorial.ownerId !== req.user!.id) {
-      return res.status(403).json({ error: 'Only memorial owner can update social links' });
-    }
+    // Ownership already verified by requireMemorialOwner middleware
 
     // Validate and sanitize URLs using centralized validator
     let validatedData: { facebook: string | null; instagram: string | null; tiktok: string | null };
@@ -157,23 +146,11 @@ router.put('/:memorialId', strictRateLimiter, async (req: Request, res: Response
 // Remove all social links for a memorial
 // ============================================
 
-router.delete('/:memorialId', strictRateLimiter, async (req: Request, res: Response) => {
+router.delete('/:memorialId', requireMemorialOwner, strictRateLimiter, async (req: Request, res: Response) => {
   try {
     const { memorialId } = req.params;
 
-    // Verify memorial ownership
-    const memorial = await prisma.memorial.findUnique({
-      where: { id: memorialId },
-      select: { ownerId: true },
-    });
-
-    if (!memorial) {
-      return res.status(404).json({ error: 'Memorial not found' });
-    }
-
-    if (memorial.ownerId !== req.user!.id) {
-      return res.status(403).json({ error: 'Only memorial owner can remove social links' });
-    }
+    // Ownership already verified by requireMemorialOwner middleware
 
     // Delete social links
     await prisma.socialLink.delete({

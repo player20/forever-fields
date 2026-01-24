@@ -26,8 +26,8 @@ import {
   loginSchema,
   forgotPasswordSchema,
 } from '../validators/schemas';
-import { generateSecureToken, getMagicLinkExpiration } from '../utils/tokens';
-import { sendMagicLink, sendPasswordResetEmail } from '../services/email';
+import { generateSecureToken, getMagicLinkExpiration, getSessionTokenExpiration, hashToken, verifyToken } from '../utils/tokens';
+import { sendMagicLink, sendPasswordResetEmail, sendPasswordChangeNotification } from '../services/email';
 import { env } from '../config/env';
 import { z } from 'zod';
 import { checkLockoutStatus, recordLoginAttempt } from '../utils/account-lockout';
@@ -633,22 +633,23 @@ router.post(
       console.log(`[AUTH] User lookup for password reset: ${email} - ${user ? 'FOUND' : 'NOT FOUND'}`);
 
       // Always generate token to maintain constant time
-      const token = generateSecureToken();
+      const plainToken = generateSecureToken(); // Plaintext token for email
+      const hashedToken = hashToken(plainToken); // Hashed token for database
       const expiresAt = getMagicLinkExpiration();
 
       if (user) {
-        // Create password reset token in database
+        // Create password reset token in database (HASHED for security)
         const createdToken = await prisma.magicLink.create({
           data: {
             email,
-            token,
+            token: hashedToken, // Store hashed token
             expiresAt,
           },
         });
 
-        // Send branded password reset email via Resend
+        // Send branded password reset email via Resend (with plaintext token)
         try {
-          await sendPasswordResetEmail(email, token);
+          await sendPasswordResetEmail(email, plainToken); // Send plaintext token in email
           console.log(`[AUTH] Password reset email sent successfully to ${email}`);
         } catch (err) {
           // Delete token if email failed to send (prevent orphaned tokens)
@@ -687,42 +688,62 @@ router.post(
 
 /**
  * GET /api/auth/reset-password?token=xxx
- * Handle password reset link click - verifies token and logs user in
+ * Handle password reset link click - verifies token and creates session
+ * Security: Uses timing-safe comparison, creates one-time session to avoid token in URL
  */
 router.get(
   '/reset-password',
   validate(authCallbackSchema, 'query'),
   async (req: Request, res: Response) => {
     try {
-      const { token } = req.query as { token: string };
+      const { token: plainToken } = req.query as { token: string };
       const ipAddress = (req.ip || req.connection.remoteAddress || 'unknown').replace('::ffff:', '');
 
       console.log(`[AUTH] Password reset link clicked from ${ipAddress}`);
 
-      // Find and validate magic link (password reset uses same token system)
-      const magicLink = await prisma.magicLink.findUnique({
-        where: { token },
+      const hashedToken = hashToken(plainToken);
+
+      // Get all unused, non-expired tokens (timing-safe search)
+      const candidates = await prisma.magicLink.findMany({
+        where: {
+          usedAt: null,
+          expiresAt: { gte: new Date() },
+        },
       });
 
-      if (!magicLink) {
-        console.warn(`[AUTH] Invalid password reset token from ${ipAddress}`);
+      // Find matching token using timing-safe comparison
+      const validToken = candidates.find((candidate) => verifyToken(plainToken, candidate.token));
+
+      if (!validToken) {
+        console.warn(`[AUTH] Invalid or expired password reset token from ${ipAddress}`);
         return res.redirect(`${env.FRONTEND_URL}/login?error=invalid_token`);
       }
 
-      if (magicLink.usedAt) {
-        console.warn(`[AUTH] Password reset token already used`);
-        return res.redirect(`${env.FRONTEND_URL}/login?error=token_used`);
-      }
+      // Create a one-time session token (prevents token exposure in URL)
+      const sessionToken = generateSecureToken();
+      const sessionExpiry = getSessionTokenExpiration();
 
-      if (new Date() > magicLink.expiresAt) {
-        console.warn(`[AUTH] Password reset token expired`);
-        return res.redirect(`${env.FRONTEND_URL}/login?error=token_expired`);
-      }
+      // Store session token with reference to the password reset token
+      await prisma.session.create({
+        data: {
+          userId: validToken.email, // Use email as temporary identifier
+          token: sessionToken,
+          ipAddress: req.ip || 'unknown',
+          userAgent: req.get('user-agent') || null,
+          expiresAt: sessionExpiry,
+        },
+      });
 
-      // Token is valid - redirect to password reset page with token
-      // DO NOT mark as used yet - only mark used after password is actually changed
-      console.log(`[AUTH] Valid reset token - redirecting to reset page`);
-      return res.redirect(302, `${env.FRONTEND_URL}/reset-password?token=${token}`);
+      // Mark original token as validated (prevent reuse of email link)
+      await prisma.magicLink.update({
+        where: { id: validToken.id },
+        data: { usedAt: new Date() },
+      });
+
+      console.log(`[AUTH] Valid reset token - created secure session`);
+
+      // Redirect with session token instead of password reset token
+      return res.redirect(302, `${env.FRONTEND_URL}/reset-password?session=${sessionToken}`);
     } catch (error) {
       console.error('[AUTH] Password reset error:', error);
       return res.redirect(`${env.FRONTEND_URL}/login?error=reset_failed`);
@@ -733,13 +754,14 @@ router.get(
 /**
  * POST /api/auth/reset-password
  * Complete password reset by setting new password
+ * Uses session token (not password reset token) for security
  */
 router.post(
   '/reset-password',
   authRateLimiter,
   validate(
     z.object({
-      token: z.string().min(32, 'Invalid token'),
+      session: z.string().min(32, 'Invalid session token'),
       newPassword: z
         .string()
         .min(8, 'Password must be at least 8 characters')
@@ -752,32 +774,33 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     try {
-      const { token, newPassword } = req.body;
+      const { session: sessionToken, newPassword } = req.body;
       const ipAddress = (req.ip || req.connection.remoteAddress || 'unknown').replace('::ffff:', '');
 
       console.log(`[AUTH] Completing password reset from ${ipAddress}`);
 
-      // Find and validate token
-      const magicLink = await prisma.magicLink.findUnique({
-        where: { token },
+      // Find and validate session token
+      const session = await prisma.session.findUnique({
+        where: { id: sessionToken },
       });
 
-      if (!magicLink) {
-        return res.status(400).json({ error: 'Invalid or expired reset token' });
+      if (!session) {
+        return res.status(400).json({ error: 'Invalid or expired session' });
       }
 
-      if (magicLink.usedAt) {
-        return res.status(400).json({ error: 'Reset link has already been used' });
+      if (new Date() > session.expiresAt) {
+        // Clean up expired session
+        await prisma.session.delete({ where: { id: sessionToken } });
+        return res.status(400).json({ error: 'Session has expired. Please request a new password reset link.' });
       }
 
-      if (new Date() > magicLink.expiresAt) {
-        return res.status(400).json({ error: 'Reset link has expired' });
-      }
+      // Extract email from session (userId field stores email temporarily)
+      const email = session.userId;
 
       // Check if new password has been exposed in data breaches
       const isBreached = await checkPasswordBreach(newPassword);
       if (isBreached) {
-        console.warn(`[SECURITY] Breached password rejected for reset: ${magicLink.email}`);
+        console.warn(`[SECURITY] Breached password rejected for reset: ${email}`);
         return res.status(400).json({
           error: 'This password has been exposed in a data breach. Please choose a different password.',
         });
@@ -785,12 +808,12 @@ router.post(
 
       // Look up user in our database
       const user = await prisma.user.findUnique({
-        where: { email: magicLink.email },
+        where: { email },
       });
 
       if (!user) {
         // User doesn't exist - they need to sign up first
-        console.warn(`[AUTH] Password reset attempted for non-existent user: ${magicLink.email}`);
+        console.warn(`[AUTH] Password reset attempted for non-existent user: ${email}`);
         return res.status(400).json({
           error: 'No account found with this email address. Please sign up first.',
         });
@@ -808,10 +831,26 @@ router.post(
         return res.status(500).json({ error: 'Failed to update password. Please try again.' });
       }
 
-      // Mark token as used AFTER successful password update
-      await prisma.magicLink.update({
-        where: { token },
-        data: { usedAt: new Date() },
+      // SECURITY: Revoke all existing sessions after password change
+      // This forces re-authentication on all devices to prevent unauthorized access
+      const deletedSessions = await prisma.session.deleteMany({
+        where: { userId: user.id },
+      });
+
+      console.log(`[SECURITY] Revoked ${deletedSessions.count} session(s) for user ${user.email} after password reset`);
+
+      // Also delete the password reset session token
+      await prisma.session.delete({
+        where: { id: sessionToken },
+      }).catch(() => {
+        // Session might already be deleted in the deleteMany above, ignore error
+      });
+
+      // Send password change notification email (non-blocking)
+      // Don't await - if email fails, password change should still succeed
+      sendPasswordChangeNotification(user.email, ipAddress, new Date()).catch((error) => {
+        console.error('[EMAIL] Failed to send password change notification:', error);
+        // Non-critical - password change was successful regardless
       });
 
       console.log(`[AUTH] Password reset successful for ${user.email}`);

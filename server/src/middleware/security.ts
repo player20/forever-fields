@@ -7,6 +7,18 @@ import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import { env, isProd } from '../config/env';
+import {
+  RATE_LIMIT_WINDOW_MS,
+  RATE_LIMIT_WINDOW_1MIN_MS,
+  AUTH_RATE_LIMIT_PROD,
+  AUTH_RATE_LIMIT_DEV,
+  API_RATE_LIMIT,
+  CANDLE_RATE_LIMIT,
+  UPLOAD_RATE_LIMIT,
+  STRICT_RATE_LIMIT,
+  HSTS_MAX_AGE,
+  CORS_MAX_AGE,
+} from '../config/constants';
 
 // ============================================
 // HELMET - Security Headers
@@ -28,7 +40,7 @@ export const helmetMiddleware = helmet({
     },
   },
   hsts: {
-    maxAge: 31536000, // 1 year
+    maxAge: HSTS_MAX_AGE,
     includeSubDomains: true,
     preload: true,
   },
@@ -83,7 +95,7 @@ export const corsMiddleware = cors({
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  maxAge: 86400, // 24 hours
+  maxAge: CORS_MAX_AGE,
 });
 
 // ============================================
@@ -92,14 +104,14 @@ export const corsMiddleware = cors({
 
 // Auth endpoints: Stricter in production, relaxed in development
 export const authRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProd ? 10 : 100, // Production: 10 attempts, Development: 100 attempts
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  max: isProd ? AUTH_RATE_LIMIT_PROD : AUTH_RATE_LIMIT_DEV,
   message: 'Too many authentication attempts, please try again later',
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: false,
   validate: { trustProxy: true }, // Trust proxy headers (matches app.ts config)
-  handler: (req, res) => {
+  handler: (_req, res) => {
     res.status(429).json({
       error: 'Too many authentication requests. Please try again in a few minutes.',
       retryAfter: '15 minutes',
@@ -109,13 +121,13 @@ export const authRateLimiter = rateLimit({
 
 // General API endpoints: 100 requests per 15 minutes
 export const apiRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  max: API_RATE_LIMIT,
   message: 'Too many requests, please slow down',
   standardHeaders: true,
   legacyHeaders: false,
   validate: { trustProxy: true }, // Trust proxy headers (matches app.ts config)
-  handler: (req, res) => {
+  handler: (_req, res) => {
     res.status(429).json({
       error: 'Rate limit exceeded',
       retryAfter: '15 minutes',
@@ -125,13 +137,13 @@ export const apiRateLimiter = rateLimit({
 
 // Candle lighting: 3 per minute (prevent spam)
 export const candleRateLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 3,
+  windowMs: RATE_LIMIT_WINDOW_1MIN_MS,
+  max: CANDLE_RATE_LIMIT,
   message: 'Please wait before lighting another candle',
   standardHeaders: true,
   legacyHeaders: false,
   validate: { trustProxy: true }, // Trust proxy headers (matches app.ts config)
-  handler: (req, res) => {
+  handler: (_req, res) => {
     res.status(429).json({
       error: 'Too many candles lit',
       retryAfter: '1 minute',
@@ -141,13 +153,13 @@ export const candleRateLimiter = rateLimit({
 
 // Upload endpoints: 10 per 15 minutes
 export const uploadRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  max: UPLOAD_RATE_LIMIT,
   message: 'Too many upload requests',
   standardHeaders: true,
   legacyHeaders: false,
   validate: { trustProxy: true }, // Trust proxy headers (matches app.ts config)
-  handler: (req, res) => {
+  handler: (_req, res) => {
     res.status(429).json({
       error: 'Upload rate limit exceeded',
       retryAfter: '15 minutes',
@@ -157,13 +169,13 @@ export const uploadRateLimiter = rateLimit({
 
 // Strict rate limiter: 10 requests per minute (for sensitive operations)
 export const strictRateLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 10,
+  windowMs: RATE_LIMIT_WINDOW_1MIN_MS,
+  max: STRICT_RATE_LIMIT,
   message: 'Too many requests. Please slow down.',
   standardHeaders: true,
   legacyHeaders: false,
   validate: { trustProxy: true },
-  handler: (req, res) => {
+  handler: (_req, res) => {
     res.status(429).json({
       error: 'Rate limit exceeded',
       retryAfter: '1 minute',
