@@ -1,0 +1,227 @@
+// Forever Fields Database Schema
+// Using Prisma with Supabase (PostgreSQL)
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum SubscriptionTier {
+  free
+  remember
+  heritage
+  legacy
+}
+
+enum PrivacyLevel {
+  public
+  unlisted
+  private
+  family_only
+}
+
+enum CollaboratorRole {
+  owner
+  editor
+  viewer
+}
+
+// ============================================
+// CORE MODELS
+// ============================================
+
+model User {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email             String           @unique
+  firstName         String?          @map("first_name")
+  lastName          String?          @map("last_name")
+  phone             String?
+  timezone          String           @default("America/New_York")
+  subscriptionTier  SubscriptionTier @default(free) @map("subscription_tier")
+  stripeCustomerId  String?          @map("stripe_customer_id")
+  avatarUrl         String?          @map("avatar_url")
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  memorials         Memorial[]       @relation("MemorialOwner")
+  collaborations    Collaborator[]
+  photos            Photo[]          @relation("PhotoUploader")
+  stories           Story[]          @relation("StoryAuthor")
+  candleLightings   CandleLighting[] @relation("CandleLighter")
+
+  @@map("users")
+}
+
+model Memorial {
+  id                   String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String         @map("user_id") @db.Uuid
+  slug                 String         @unique
+  firstName            String         @map("first_name")
+  middleName           String?        @map("middle_name")
+  lastName             String         @map("last_name")
+  nickname             String?
+  birthDate            DateTime?      @map("birth_date") @db.Date
+  deathDate            DateTime?      @map("death_date") @db.Date
+  birthPlace           String?        @map("birth_place")
+  restingPlace         String?        @map("resting_place")
+  obituary             String?        @db.Text
+  profilePhotoUrl      String?        @map("profile_photo_url")
+  privacyLevel         PrivacyLevel   @default(private) @map("privacy_level")
+  isPublic             Boolean        @default(false) @map("is_public")
+  allowGuestbook       Boolean        @default(true) @map("allow_guestbook")
+  allowCandleLighting  Boolean        @default(true) @map("allow_candle_lighting")
+  allowContributions   Boolean        @default(true) @map("allow_contributions")
+  viewCount            Int            @default(0) @map("view_count")
+  theme                String?
+  createdAt            DateTime       @default(now()) @map("created_at")
+  updatedAt            DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  owner                User           @relation("MemorialOwner", fields: [userId], references: [id], onDelete: Cascade)
+  collaborators        Collaborator[]
+  photos               Photo[]
+  albums               Album[]
+  stories              Story[]
+  guestbookEntries     GuestbookEntry[]
+  candleLightings      CandleLighting[]
+
+  @@index([userId])
+  @@index([slug])
+  @@index([isPublic])
+  @@map("memorials")
+}
+
+model Collaborator {
+  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memorialId   String           @map("memorial_id") @db.Uuid
+  userId       String?          @map("user_id") @db.Uuid
+  role         CollaboratorRole
+  invitedEmail String?          @map("invited_email")
+  inviteToken  String?          @unique @map("invite_token")
+  acceptedAt   DateTime?        @map("accepted_at")
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  memorial     Memorial         @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+  user         User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([memorialId, userId])
+  @@index([memorialId])
+  @@index([inviteToken])
+  @@map("collaborators")
+}
+
+// ============================================
+// MEDIA MODELS
+// ============================================
+
+model Photo {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memorialId       String    @map("memorial_id") @db.Uuid
+  uploadedBy       String?   @map("uploaded_by") @db.Uuid
+  url              String
+  thumbnailUrl     String?   @map("thumbnail_url")
+  caption          String?   @db.Text
+  estimatedDecade  String?   @map("estimated_decade")
+  isProfilePhoto   Boolean   @default(false) @map("is_profile_photo")
+  isColorized      Boolean   @default(false) @map("is_colorized")
+  isEnhanced       Boolean   @default(false) @map("is_enhanced")
+  originalUrl      String?   @map("original_url")
+  albumId          String?   @map("album_id") @db.Uuid
+  sortOrder        Int       @default(0) @map("sort_order")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  memorial         Memorial  @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+  uploader         User?     @relation("PhotoUploader", fields: [uploadedBy], references: [id], onDelete: SetNull)
+  album            Album?    @relation(fields: [albumId], references: [id], onDelete: SetNull)
+
+  @@index([memorialId])
+  @@index([albumId])
+  @@map("photos")
+}
+
+model Album {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memorialId    String    @map("memorial_id") @db.Uuid
+  name          String
+  description   String?   @db.Text
+  coverPhotoId  String?   @map("cover_photo_id") @db.Uuid
+  sortOrder     Int       @default(0) @map("sort_order")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  memorial      Memorial  @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+  photos        Photo[]
+
+  @@index([memorialId])
+  @@map("albums")
+}
+
+// ============================================
+// CONTENT MODELS
+// ============================================
+
+model Story {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memorialId   String    @map("memorial_id") @db.Uuid
+  authorId     String?   @map("author_id") @db.Uuid
+  authorName   String?   @map("author_name")
+  title        String?
+  content      String    @db.Text
+  isApproved   Boolean   @default(false) @map("is_approved")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  memorial     Memorial  @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+  author       User?     @relation("StoryAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([memorialId])
+  @@map("stories")
+}
+
+model GuestbookEntry {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memorialId   String    @map("memorial_id") @db.Uuid
+  authorName   String    @map("author_name")
+  authorEmail  String?   @map("author_email")
+  message      String    @db.Text
+  isApproved   Boolean   @default(true) @map("is_approved")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  memorial     Memorial  @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@index([memorialId])
+  @@map("guestbook_entries")
+}
+
+model CandleLighting {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memorialId   String    @map("memorial_id") @db.Uuid
+  litByName    String?   @map("lit_by_name")
+  litByUserId  String?   @map("lit_by_user_id") @db.Uuid
+  message      String?   @db.Text
+  createdAt    DateTime  @default(now()) @map("created_at")
+  expiresAt    DateTime  @map("expires_at")
+
+  // Relations
+  memorial     Memorial  @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+  litByUser    User?     @relation("CandleLighter", fields: [litByUserId], references: [id], onDelete: SetNull)
+
+  @@index([memorialId])
+  @@index([expiresAt])
+  @@map("candle_lightings")
+}

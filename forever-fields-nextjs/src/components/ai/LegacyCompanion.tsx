@@ -27,9 +27,53 @@ interface Message {
 interface LegacyCompanionProps {
   profile: LegacyProfile;
   userRelationship: string;
+  demoMode?: boolean;
 }
 
-export function LegacyCompanion({ profile, userRelationship }: LegacyCompanionProps) {
+// Demo responses for offline mode
+const DEMO_RESPONSES: Record<string, string[]> = {
+  life: [
+    "Life was a beautiful journey filled with so many precious moments. I remember the simple joys - morning coffee, walks in the garden, and the laughter we shared around the dinner table. Every day was a gift, and I tried to make the most of each one.",
+    "I lived fully, loved deeply, and tried to leave the world a little better than I found it. The relationships I built with family and friends were my greatest treasures.",
+  ],
+  advice: [
+    "My dear, the best advice I can give you is to cherish every moment with the people you love. Don't wait for the perfect time - there is no perfect time. Tell them you love them today.",
+    "Be kind to yourself and others. Life is too short for grudges. And remember, it's never too late to learn something new or to change direction. I believe in you.",
+  ],
+  memory: [
+    "Oh, there are so many wonderful memories! I especially treasure the quiet moments - when we'd sit together without needing to say anything, just enjoying each other's company. Those were the moments that mattered most.",
+    "I remember your laughter most of all. It could light up the darkest room. Those memories bring me such joy.",
+  ],
+  young: [
+    "When I was young, the world seemed so different! We didn't have all the technology you have now, but we had community. Neighbors knew each other, and Sunday dinners were sacred. I learned the value of hard work and the importance of family.",
+    "My youth was filled with dreams and possibilities. I made mistakes, learned lessons, and slowly became the person I was meant to be. Every experience shaped me.",
+  ],
+  default: [
+    "Thank you for talking with me. It means so much to stay connected with you. Remember, love transcends all boundaries - even time itself.",
+    "I'm always here with you, in your heart and memories. Never forget how much you are loved.",
+  ],
+};
+
+function getDemoResponse(message: string, name: string): string {
+  const lowerMessage = message.toLowerCase();
+  let responses: string[];
+
+  if (lowerMessage.includes("life") || lowerMessage.includes("lived")) {
+    responses = DEMO_RESPONSES.life;
+  } else if (lowerMessage.includes("advice") || lowerMessage.includes("tell me")) {
+    responses = DEMO_RESPONSES.advice;
+  } else if (lowerMessage.includes("memory") || lowerMessage.includes("remember") || lowerMessage.includes("together")) {
+    responses = DEMO_RESPONSES.memory;
+  } else if (lowerMessage.includes("young") || lowerMessage.includes("childhood") || lowerMessage.includes("grew up")) {
+    responses = DEMO_RESPONSES.young;
+  } else {
+    responses = DEMO_RESPONSES.default;
+  }
+
+  return responses[Math.floor(Math.random() * responses.length)];
+}
+
+export function LegacyCompanion({ profile, userRelationship, demoMode = true }: LegacyCompanionProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -51,6 +95,33 @@ export function LegacyCompanion({ profile, userRelationship }: LegacyCompanionPr
     setInput("");
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setIsLoading(true);
+
+    // Demo mode - simulate AI response locally
+    if (demoMode) {
+      const demoResponse = getDemoResponse(userMessage, profile.name);
+
+      // Simulate typing effect
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+      let currentText = "";
+      const words = demoResponse.split(" ");
+
+      for (let i = 0; i < words.length; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 50 + Math.random() * 50));
+        currentText += (i > 0 ? " " : "") + words[i];
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            role: "assistant",
+            content: currentText,
+          };
+          return updated;
+        });
+      }
+
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch("/api/ai/legacy-companion", {

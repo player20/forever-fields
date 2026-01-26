@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button, Card, Badge, Avatar } from "@/components/ui";
+import { Button, Card, Badge } from "@/components/ui";
 import { Header } from "@/components/layout";
-import { FadeIn, SlideUp } from "@/components/motion";
+import { FadeIn } from "@/components/motion";
 import { toast } from "sonner";
 import {
   ChevronRight,
@@ -24,6 +24,7 @@ import {
   FileText,
 } from "lucide-react";
 import { ObituaryWriter } from "@/components/ai/ObituaryWriter";
+import { DistrictSelector, type District } from "@/components/cemetery";
 
 // Step definitions
 const steps = [
@@ -35,8 +36,14 @@ const steps = [
   { id: 6, title: "Review", icon: Check },
 ];
 
-// Relationship options
-const relationships = [
+// Memorial types
+const memorialTypes = [
+  { id: "human", label: "Person", icon: "👤", description: "Honor a loved one" },
+  { id: "pet", label: "Pet", icon: "🐾", description: "Remember a beloved companion" },
+];
+
+// Human relationship options
+const humanRelationships = [
   "Parent",
   "Grandparent",
   "Sibling",
@@ -48,6 +55,26 @@ const relationships = [
   "Other",
 ];
 
+// Pet relationship options
+const petRelationships = [
+  "My Pet",
+  "Family Pet",
+  "Childhood Pet",
+  "Other",
+];
+
+// Pet types
+const petTypes = [
+  { id: "dog", label: "Dog", icon: "🐕" },
+  { id: "cat", label: "Cat", icon: "🐈" },
+  { id: "bird", label: "Bird", icon: "🦜" },
+  { id: "fish", label: "Fish", icon: "🐠" },
+  { id: "rabbit", label: "Rabbit", icon: "🐰" },
+  { id: "hamster", label: "Hamster", icon: "🐹" },
+  { id: "horse", label: "Horse", icon: "🐴" },
+  { id: "other", label: "Other", icon: "🐾" },
+];
+
 export default function CreateMemorialPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
@@ -55,6 +82,9 @@ export default function CreateMemorialPage() {
 
   // Form state
   const [formData, setFormData] = useState({
+    // Memorial Type
+    memorialType: "human" as "human" | "pet",
+    petType: "",
     // Basic Info
     firstName: "",
     middleName: "",
@@ -76,7 +106,12 @@ export default function CreateMemorialPage() {
     inviteEmails: [""],
     // Settings
     isPublic: false,
+    // District
+    district: null as District | null,
   });
+
+  // Get the right relationships based on memorial type
+  const relationships = formData.memorialType === "pet" ? petRelationships : humanRelationships;
 
   const updateFormData = (field: string, value: unknown) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -126,21 +161,78 @@ export default function CreateMemorialPage() {
     }
   };
 
+  // Demo mode - enable when backend is not configured
+  const DEMO_MODE = true;
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Demo mode - simulate successful creation
+    if (DEMO_MODE) {
+      await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate network delay
+      const demoSlug = `${formData.firstName.toLowerCase()}-${
+        formData.memorialType === "human"
+          ? formData.lastName.toLowerCase()
+          : formData.petType
+      }-demo`.replace(/[^a-z0-9]+/g, "-");
 
-    toast.success("Memorial created successfully!");
+      toast.success("Memorial created successfully! (Demo Mode)");
+      toast.info("In production, this would save to the database and redirect to the memorial page.");
 
-    // Navigate to the new memorial (using a placeholder ID)
-    router.push("/memorial/new-memorial");
+      // Reset form for demo
+      setIsSubmitting(false);
+      setCurrentStep(1);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/memorials", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          memorialType: formData.memorialType,
+          petType: formData.memorialType === "pet" ? formData.petType : null,
+          firstName: formData.firstName,
+          middleName: formData.memorialType === "human" ? formData.middleName : null,
+          lastName: formData.memorialType === "human" ? formData.lastName : formData.lastName, // For pets, this stores breed
+          nickname: formData.nickname,
+          birthDate: formData.birthDate,
+          deathDate: formData.deathDate,
+          birthPlace: formData.birthPlace,
+          restingPlace: formData.restingPlace,
+          obituary: formData.obituary,
+          profilePhotoUrl: formData.profilePhotoPreview, // TODO: Upload to storage first
+          isPublic: formData.isPublic,
+          inviteEmails: formData.inviteEmails.filter((e) => e.trim()),
+          districtId: formData.district?.id || null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create memorial");
+      }
+
+      toast.success("Memorial created successfully!");
+      router.push(`/memorial/${data.slug}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to create memorial";
+      toast.error(message);
+      setIsSubmitting(false);
+    }
   };
 
   const canProceed = () => {
     switch (currentStep) {
       case 1:
+        if (formData.memorialType === "pet") {
+          // Pets need: name, pet type, and relationship
+          return formData.firstName && formData.petType && formData.relationship;
+        }
+        // Humans need: first name, last name, and relationship
         return formData.firstName && formData.lastName && formData.relationship;
       case 2:
         return formData.birthDate && formData.deathDate;
@@ -249,10 +341,72 @@ export default function CreateMemorialPage() {
                   </div>
 
                   <div className="space-y-6">
+                    {/* Memorial Type Selector */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-dark mb-3">
+                        Who are you creating a memorial for? *
+                      </label>
+                      <div className="grid grid-cols-2 gap-4">
+                        {memorialTypes.map((type) => (
+                          <button
+                            key={type.id}
+                            type="button"
+                            onClick={() => {
+                              updateFormData("memorialType", type.id);
+                              // Reset relationship when switching types
+                              updateFormData("relationship", "");
+                              if (type.id === "human") {
+                                updateFormData("petType", "");
+                              }
+                            }}
+                            className={`p-4 rounded-xl border-2 text-left transition-all ${
+                              formData.memorialType === type.id
+                                ? "border-sage bg-sage-pale ring-2 ring-sage/20"
+                                : "border-sage-pale hover:border-sage hover:bg-sage-pale/30"
+                            }`}
+                          >
+                            <span className="text-2xl mb-2 block">{type.icon}</span>
+                            <span className="font-medium text-gray-dark block">
+                              {type.label}
+                            </span>
+                            <span className="text-sm text-gray-body">
+                              {type.description}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Pet Type Selector (only for pets) */}
+                    {formData.memorialType === "pet" && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-dark mb-3">
+                          What type of pet? *
+                        </label>
+                        <div className="grid grid-cols-4 gap-2">
+                          {petTypes.map((pet) => (
+                            <button
+                              key={pet.id}
+                              type="button"
+                              onClick={() => updateFormData("petType", pet.id)}
+                              className={`p-3 rounded-lg border text-center transition-all ${
+                                formData.petType === pet.id
+                                  ? "border-sage bg-sage-pale text-sage-dark"
+                                  : "border-sage-pale hover:border-sage hover:bg-sage-pale/50"
+                              }`}
+                            >
+                              <span className="text-xl block mb-1">{pet.icon}</span>
+                              <span className="text-xs">{pet.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-dark mb-2">
-                          First Name *
+                          {formData.memorialType === "pet" ? "Pet's Name *" : "First Name *"}
                         </label>
                         <input
                           type="text"
@@ -261,40 +415,76 @@ export default function CreateMemorialPage() {
                             updateFormData("firstName", e.target.value)
                           }
                           className="w-full px-4 py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
-                          placeholder="First name"
+                          placeholder={formData.memorialType === "pet" ? "Pet's name" : "First name"}
                         />
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-dark mb-2">
-                          Middle Name
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.middleName}
-                          onChange={(e) =>
-                            updateFormData("middleName", e.target.value)
-                          }
-                          className="w-full px-4 py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
-                          placeholder="Middle name (optional)"
-                        />
-                      </div>
+                      {formData.memorialType === "human" ? (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-dark mb-2">
+                            Middle Name
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.middleName}
+                            onChange={(e) =>
+                              updateFormData("middleName", e.target.value)
+                            }
+                            className="w-full px-4 py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
+                            placeholder="Middle name (optional)"
+                          />
+                        </div>
+                      ) : (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-dark mb-2">
+                            Breed/Species
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.lastName}
+                            onChange={(e) =>
+                              updateFormData("lastName", e.target.value)
+                            }
+                            className="w-full px-4 py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
+                            placeholder="e.g., Golden Retriever"
+                          />
+                        </div>
+                      )}
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-dark mb-2">
-                          Last Name *
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.lastName}
-                          onChange={(e) =>
-                            updateFormData("lastName", e.target.value)
-                          }
-                          className="w-full px-4 py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
-                          placeholder="Last name"
-                        />
+                    {formData.memorialType === "human" && (
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-dark mb-2">
+                            Last Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.lastName}
+                            onChange={(e) =>
+                              updateFormData("lastName", e.target.value)
+                            }
+                            className="w-full px-4 py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
+                            placeholder="Last name"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-dark mb-2">
+                            Nickname
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.nickname}
+                            onChange={(e) =>
+                              updateFormData("nickname", e.target.value)
+                            }
+                            className="w-full px-4 py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
+                            placeholder="What did you call them?"
+                          />
+                        </div>
                       </div>
+                    )}
+
+                    {formData.memorialType === "pet" && (
                       <div>
                         <label className="block text-sm font-medium text-gray-dark mb-2">
                           Nickname
@@ -306,10 +496,10 @@ export default function CreateMemorialPage() {
                             updateFormData("nickname", e.target.value)
                           }
                           className="w-full px-4 py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
-                          placeholder="What did you call them?"
+                          placeholder="Any special names or nicknames?"
                         />
                       </div>
-                    </div>
+                    )}
 
                     <div>
                       <label className="block text-sm font-medium text-gray-dark mb-2">
@@ -348,7 +538,9 @@ export default function CreateMemorialPage() {
                         Dates & Location
                       </h2>
                       <p className="text-sm text-gray-body">
-                        When and where they lived
+                        {formData.memorialType === "pet"
+                          ? "When and where your companion lived"
+                          : "When and where they lived"}
                       </p>
                     </div>
                   </div>
@@ -357,7 +549,9 @@ export default function CreateMemorialPage() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-dark mb-2">
-                          Date of Birth *
+                          {formData.memorialType === "pet"
+                            ? "Date Welcomed *"
+                            : "Date of Birth *"}
                         </label>
                         <input
                           type="date"
@@ -386,7 +580,9 @@ export default function CreateMemorialPage() {
                     <div>
                       <label className="block text-sm font-medium text-gray-dark mb-2">
                         <MapPin className="w-4 h-4 inline mr-1" />
-                        Place of Birth
+                        {formData.memorialType === "pet"
+                          ? "Where did they come from?"
+                          : "Place of Birth"}
                       </label>
                       <input
                         type="text"
@@ -395,7 +591,11 @@ export default function CreateMemorialPage() {
                           updateFormData("birthPlace", e.target.value)
                         }
                         className="w-full px-4 py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
-                        placeholder="City, State/Country"
+                        placeholder={
+                          formData.memorialType === "pet"
+                            ? "Breeder, shelter, etc."
+                            : "City, State/Country"
+                        }
                       />
                     </div>
 
@@ -411,7 +611,11 @@ export default function CreateMemorialPage() {
                           updateFormData("restingPlace", e.target.value)
                         }
                         className="w-full px-4 py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
-                        placeholder="Cemetery name, City"
+                        placeholder={
+                          formData.memorialType === "pet"
+                            ? "Pet cemetery, home garden, etc."
+                            : "Cemetery name, City"
+                        }
                       />
                     </div>
                   </div>
@@ -514,16 +718,24 @@ export default function CreateMemorialPage() {
                     </div>
                     <div>
                       <h2 className="text-xl font-serif font-semibold text-gray-dark">
-                        Their Story
+                        {formData.memorialType === "pet"
+                          ? "Their Story"
+                          : "Their Story"}
                       </h2>
                       <p className="text-sm text-gray-body">
-                        Write an obituary or life story
+                        {formData.memorialType === "pet"
+                          ? "Share memories of your beloved companion"
+                          : "Write an obituary or life story"}
                       </p>
                     </div>
                   </div>
 
                   <ObituaryWriter
-                    deceasedName={`${formData.firstName} ${formData.lastName}`}
+                    deceasedName={
+                      formData.memorialType === "pet"
+                        ? formData.firstName
+                        : `${formData.firstName} ${formData.lastName}`
+                    }
                     relationship={formData.relationship}
                     birthDate={formData.birthDate}
                     deathDate={formData.deathDate}
@@ -634,14 +846,35 @@ export default function CreateMemorialPage() {
                         />
                       ) : (
                         <div className="w-24 h-24 rounded-full bg-sage-pale flex items-center justify-center mx-auto mb-4">
-                          <Flower2 className="w-10 h-10 text-sage" />
+                          {formData.memorialType === "pet" ? (
+                            <span className="text-4xl">
+                              {petTypes.find((p) => p.id === formData.petType)?.icon || "🐾"}
+                            </span>
+                          ) : (
+                            <Flower2 className="w-10 h-10 text-sage" />
+                          )}
                         </div>
                       )}
+                      {formData.memorialType === "pet" && formData.petType && (
+                        <Badge variant="secondary" className="mb-2">
+                          {petTypes.find((p) => p.id === formData.petType)?.icon}{" "}
+                          {petTypes.find((p) => p.id === formData.petType)?.label}
+                        </Badge>
+                      )}
                       <h3 className="text-2xl font-serif font-bold text-gray-dark">
-                        {formData.firstName}{" "}
-                        {formData.middleName && `${formData.middleName} `}
-                        {formData.lastName}
+                        {formData.memorialType === "pet" ? (
+                          formData.firstName
+                        ) : (
+                          <>
+                            {formData.firstName}{" "}
+                            {formData.middleName && `${formData.middleName} `}
+                            {formData.lastName}
+                          </>
+                        )}
                       </h3>
+                      {formData.memorialType === "pet" && formData.lastName && (
+                        <p className="text-gray-body text-sm">{formData.lastName}</p>
+                      )}
                       {formData.nickname && (
                         <p className="text-gray-body">&ldquo;{formData.nickname}&rdquo;</p>
                       )}
@@ -657,14 +890,30 @@ export default function CreateMemorialPage() {
                     {/* Summary */}
                     <div className="space-y-3">
                       <div className="flex justify-between py-2 border-b border-sage-pale/50">
+                        <span className="text-gray-body">Memorial Type</span>
+                        <span className="font-medium text-gray-dark">
+                          {formData.memorialType === "pet" ? "Pet" : "Person"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-sage-pale/50">
                         <span className="text-gray-body">Relationship</span>
                         <span className="font-medium text-gray-dark">
                           {formData.relationship}
                         </span>
                       </div>
+                      {formData.memorialType === "pet" && formData.lastName && (
+                        <div className="flex justify-between py-2 border-b border-sage-pale/50">
+                          <span className="text-gray-body">Breed/Species</span>
+                          <span className="font-medium text-gray-dark">
+                            {formData.lastName}
+                          </span>
+                        </div>
+                      )}
                       {formData.birthPlace && (
                         <div className="flex justify-between py-2 border-b border-sage-pale/50">
-                          <span className="text-gray-body">Birth Place</span>
+                          <span className="text-gray-body">
+                            {formData.memorialType === "pet" ? "Origin" : "Birth Place"}
+                          </span>
                           <span className="font-medium text-gray-dark">
                             {formData.birthPlace}
                           </span>
@@ -711,6 +960,24 @@ export default function CreateMemorialPage() {
                         )}
                       </div>
                     )}
+
+                    {/* District Selection */}
+                    <div className="mt-6 pt-6 border-t border-sage-pale/50">
+                      <DistrictSelector
+                        selectedDistrict={formData.district?.id}
+                        onSelect={(district) => updateFormData("district", district)}
+                        userTier="free"
+                        compact
+                      />
+                      {formData.district && (
+                        <div className="mt-4 flex justify-between py-2 bg-sage-pale/30 rounded-lg px-4">
+                          <span className="text-gray-body">Selected District</span>
+                          <span className="font-medium text-gray-dark">
+                            {formData.district.name}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </Card>
               )}

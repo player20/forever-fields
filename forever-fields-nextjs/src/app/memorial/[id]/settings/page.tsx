@@ -66,7 +66,7 @@ const sampleCollaborators: Collaborator[] = [
 export default function MemorialSettingsPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const memorialId = params.id as string;
 
   const [privacy, setPrivacy] = useState<PrivacyLevel>("unlisted");
@@ -315,7 +315,7 @@ export default function MemorialSettingsPage() {
 
             <div className="space-y-3">
               {collaborators.map((collaborator) => {
-                const RoleIcon = roleLabels[collaborator.role].icon;
+                const _RoleIcon = roleLabels[collaborator.role].icon;
                 const isOwner = collaborator.role === "owner";
                 const isPending = !collaborator.acceptedAt;
 

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Button, Card, Badge, Avatar } from "@/components/ui";
+import { Button, Card, Badge, Avatar, Skeleton } from "@/components/ui";
 import { Header } from "@/components/layout";
 import { FadeIn, SlideUp, Stagger, StaggerItem } from "@/components/motion";
+import { useAuth, useRequireAuth } from "@/hooks/useAuth";
 import {
   Plus,
   Heart,
@@ -16,7 +17,6 @@ import {
   ChevronRight,
   Flower2,
   MapPin,
-  Calendar,
   TrendingUp,
   Clock,
   MessageSquare,
@@ -25,48 +25,25 @@ import {
   Star,
 } from "lucide-react";
 
-// Sample data - would come from API
-const userMemorials = [
-  {
-    id: "1",
-    name: "Margaret Rose Sullivan",
-    dates: "1932 - 2023",
-    location: "Boston, MA",
-    photo: null,
-    memoriesCount: 47,
-    photosCount: 23,
-    candlesCount: 156,
-    viewsThisMonth: 234,
-    role: "creator",
-    lastActivity: "2 hours ago",
-  },
-  {
-    id: "2",
-    name: "Robert James Williams",
-    dates: "1945 - 2022",
-    location: "Chicago, IL",
-    photo: null,
-    memoriesCount: 31,
-    photosCount: 18,
-    candlesCount: 89,
-    viewsThisMonth: 145,
-    role: "contributor",
-    lastActivity: "1 day ago",
-  },
-  {
-    id: "3",
-    name: "Eleanor Grace Chen",
-    dates: "1958 - 2024",
-    location: "San Francisco, CA",
-    photo: null,
-    memoriesCount: 62,
-    photosCount: 45,
-    candlesCount: 203,
-    viewsThisMonth: 412,
-    role: "creator",
-    lastActivity: "3 hours ago",
-  },
-];
+interface Memorial {
+  id: string;
+  slug: string;
+  first_name: string;
+  middle_name: string | null;
+  last_name: string;
+  birth_date: string | null;
+  death_date: string | null;
+  birth_place: string | null;
+  resting_place: string | null;
+  profile_photo_url: string | null;
+  view_count: number;
+  created_at: string;
+  updated_at: string;
+  photos?: { id: string }[];
+  stories?: { id: string }[];
+  candle_lightings?: { id: string }[];
+  collaborators?: { role: string; user_id: string }[];
+}
 
 const recentActivity = [
   {
@@ -135,16 +112,81 @@ const quickActions = [
 ];
 
 export default function DashboardPage() {
-  const [filter, setFilter] = useState<"all" | "creator" | "contributor">("all");
+  // Require authentication
+  const { user, isLoading: authLoading } = useRequireAuth();
 
-  const filteredMemorials = userMemorials.filter((m) =>
+  const [filter, setFilter] = useState<"all" | "creator" | "contributor">("all");
+  const [memorials, setMemorials] = useState<Memorial[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch memorials
+  useEffect(() => {
+    async function fetchMemorials() {
+      if (!user) return;
+
+      try {
+        setIsLoading(true);
+        const response = await fetch("/api/memorials");
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to fetch memorials");
+        }
+
+        setMemorials(data.memorials || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load memorials");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchMemorials();
+  }, [user]);
+
+  // Transform memorial data for display
+  const transformedMemorials = memorials.map((m) => {
+    const role = m.collaborators?.find((c) => c.user_id === user?.id)?.role || "creator";
+    const birthYear = m.birth_date ? new Date(m.birth_date).getFullYear() : "?";
+    const deathYear = m.death_date ? new Date(m.death_date).getFullYear() : "?";
+
+    return {
+      id: m.id,
+      slug: m.slug,
+      name: `${m.first_name}${m.middle_name ? " " + m.middle_name : ""} ${m.last_name}`,
+      dates: `${birthYear} - ${deathYear}`,
+      location: m.resting_place || m.birth_place || "Location not set",
+      photo: m.profile_photo_url,
+      memoriesCount: m.stories?.length || 0,
+      photosCount: m.photos?.length || 0,
+      candlesCount: m.candle_lightings?.length || 0,
+      viewsThisMonth: m.view_count,
+      role: role === "owner" ? "creator" : "contributor",
+      lastActivity: new Date(m.updated_at).toLocaleDateString(),
+    };
+  });
+
+  const filteredMemorials = transformedMemorials.filter((m) =>
     filter === "all" ? true : m.role === filter
   );
 
   // Calculate stats
-  const totalMemories = userMemorials.reduce((sum, m) => sum + m.memoriesCount, 0);
-  const totalCandles = userMemorials.reduce((sum, m) => sum + m.candlesCount, 0);
-  const totalViews = userMemorials.reduce((sum, m) => sum + m.viewsThisMonth, 0);
+  const totalMemories = transformedMemorials.reduce((sum, m) => sum + m.memoriesCount, 0);
+  const totalCandles = transformedMemorials.reduce((sum, m) => sum + m.candlesCount, 0);
+  const totalViews = transformedMemorials.reduce((sum, m) => sum + m.viewsThisMonth, 0);
+
+  // Show loading state while auth is being checked
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="text-center">
+          <Flower2 className="w-12 h-12 text-sage animate-pulse mx-auto mb-4" />
+          <p className="text-gray-body">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -180,7 +222,7 @@ export default function DashboardPage() {
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
                   <Bell className="w-4 h-4" />
                   Notifications
-                  <Badge variant="primary" size="sm" pill>3</Badge>
+                  <Badge variant="default" size="sm" pill>3</Badge>
                 </Button>
                 <Link href="/settings">
                   <Button variant="ghost" size="sm">
@@ -205,7 +247,7 @@ export default function DashboardPage() {
                       <Flower2 className="w-5 h-5 text-sage" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-gray-dark">{userMemorials.length}</p>
+                      <p className="text-2xl font-bold text-gray-dark">{transformedMemorials.length}</p>
                       <p className="text-sm text-gray-body">Memorials</p>
                     </div>
                   </div>
@@ -308,11 +350,32 @@ export default function DashboardPage() {
                 </div>
               </div>
 
+              {isLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i} className="p-4">
+                      <div className="flex items-start gap-4">
+                        <Skeleton className="w-12 h-12 rounded-full" />
+                        <div className="flex-1">
+                          <Skeleton className="h-5 w-48 mb-2" />
+                          <Skeleton className="h-4 w-32 mb-2" />
+                          <Skeleton className="h-4 w-40" />
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : error ? (
+                <Card className="p-8 text-center">
+                  <p className="text-red-600 mb-4">{error}</p>
+                  <Button onClick={() => window.location.reload()}>Try Again</Button>
+                </Card>
+              ) : (
               <Stagger staggerDelay={0.05}>
                 <div className="space-y-4">
                   {filteredMemorials.map((memorial) => (
                     <StaggerItem key={memorial.id}>
-                      <Link href={`/memorial/${memorial.id}`}>
+                      <Link href={`/memorial/${memorial.slug}`}>
                         <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
                           <Card className="p-4 hover:shadow-md transition-shadow">
                             <div className="flex items-start gap-4">
@@ -323,7 +386,7 @@ export default function DashboardPage() {
                                     {memorial.name}
                                   </h3>
                                   <Badge
-                                    variant={memorial.role === "creator" ? "primary" : "secondary"}
+                                    variant={memorial.role === "creator" ? "default" : "secondary"}
                                     size="sm"
                                   >
                                     {memorial.role}
@@ -370,8 +433,9 @@ export default function DashboardPage() {
                   ))}
                 </div>
               </Stagger>
+              )}
 
-              {filteredMemorials.length === 0 && (
+              {!isLoading && !error && filteredMemorials.length === 0 && (
                 <Card className="p-8 text-center">
                   <Flower2 className="w-12 h-12 text-sage mx-auto mb-3" />
                   <h3 className="font-serif text-lg font-semibold text-gray-dark mb-2">
