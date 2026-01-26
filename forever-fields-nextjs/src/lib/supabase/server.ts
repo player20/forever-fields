@@ -36,6 +36,21 @@ export async function createServerSupabaseClient() {
   );
 }
 
+/**
+ * Require authentication for API routes
+ * Returns authenticated user or error response
+ */
+export async function requireAuth() {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    return { user: null, error: 'Unauthorized' };
+  }
+
+  return { user, error: null };
+}
+
 // Service role client for admin operations (server-side only)
 export async function createServiceRoleClient() {
   const cookieStore = await cookies();

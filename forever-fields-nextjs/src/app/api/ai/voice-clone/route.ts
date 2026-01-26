@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Replicate from "replicate";
+import { requireAuth } from "@/lib/supabase/server";
 
 // Voice cloning via Replicate
 // Uses F5-TTS for zero-shot voice cloning from short audio samples
@@ -10,6 +11,12 @@ const replicate = new Replicate({
 
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const { user, error: authError } = await requireAuth();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const {
       referenceAudioUrl,
       referenceText,
@@ -72,6 +79,12 @@ export async function POST(request: NextRequest) {
 // Alternative endpoint for Chatterbox (emotion control)
 export async function PUT(request: NextRequest) {
   try {
+    // Require authentication
+    const { user, error: authError } = await requireAuth();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const {
       referenceAudioUrl,
       targetText,

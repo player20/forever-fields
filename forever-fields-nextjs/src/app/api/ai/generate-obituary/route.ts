@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest } from "next/server";
+import { requireAuth } from "@/lib/supabase/server";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -51,6 +52,15 @@ interface RequestBody {
 
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const { user, error: authError } = await requireAuth();
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     const body = (await request.json()) as RequestBody;
     const {
       deceasedName,

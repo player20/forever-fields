@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { requireAuth } from "@/lib/supabase/server";
 
 // Scan recipe cards/photos and extract structured recipe data
 // Uses Claude Vision to read handwritten or printed recipes
@@ -10,6 +11,12 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const { user, error: authError } = await requireAuth();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { image, familyName } = await request.json();
 
     if (!image) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Replicate from "replicate";
+import { requireAuth } from "@/lib/supabase/server";
 
 // DeOldify colorization via Replicate
 // Model: arielreplicate/deoldify_image
@@ -10,6 +11,12 @@ const replicate = new Replicate({
 
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const { user, error: authError } = await requireAuth();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { imageUrl, renderFactor } = await request.json();
 
     if (!imageUrl) {

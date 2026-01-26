@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { requireAuth } from "@/lib/supabase/server";
 
 // Claude Vision for photo analysis
 // - Auto-generate captions
@@ -12,6 +13,12 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const { user, error: authError } = await requireAuth();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { imageUrl, imageBase64, analysisType } = await request.json();
 
     if (!imageUrl && !imageBase64) {

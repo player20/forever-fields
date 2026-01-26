@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Replicate from "replicate";
+import { requireAuth } from "@/lib/supabase/server";
 
 // GFPGAN face restoration via Replicate
 // Restores blurry/damaged faces in old photos
@@ -10,6 +11,12 @@ const replicate = new Replicate({
 
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const { user, error: authError } = await requireAuth();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { imageUrl, version, scale } = await request.json();
 
     if (!imageUrl) {

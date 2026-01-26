@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { requireAuth } from "@/lib/supabase/server";
 
 // Transcribe audio and extract key points from spoken memories
 // Uses Claude to structure raw thoughts into organized memory content
@@ -10,6 +11,12 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const { user, error: authError } = await requireAuth();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { transcript, deceasedName, relationship } = await request.json();
 
     if (!transcript) {

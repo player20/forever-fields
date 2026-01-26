@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Replicate from "replicate";
+import { requireAuth } from "@/lib/supabase/server";
 
 // SadTalker - Animate photos with audio to create talking head videos
 // Creates realistic face animations from a single photo + audio
@@ -10,6 +11,12 @@ const replicate = new Replicate({
 
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const { user, error: authError } = await requireAuth();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const {
       imageUrl,
       audioUrl,
@@ -76,6 +83,12 @@ export async function POST(request: NextRequest) {
 // LivePortrait alternative (newer, potentially better quality)
 export async function PUT(request: NextRequest) {
   try {
+    // Require authentication
+    const { user, error: authError } = await requireAuth();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const {
       imageUrl,
       audioUrl,
