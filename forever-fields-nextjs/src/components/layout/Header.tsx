@@ -31,6 +31,7 @@ import {
   Flower2,
   Search,
   Plus,
+  LayoutDashboard,
 } from "lucide-react";
 
 interface HeaderProps {
@@ -109,10 +110,12 @@ export function Header({ user, notifications = 0, className }: HeaderProps) {
             </button>
 
             {/* Create new button */}
-            <Button size="sm" className="hidden sm:flex items-center gap-1">
-              <Plus className="w-4 h-4" />
-              <span className="hidden lg:inline">Create Memorial</span>
-            </Button>
+            <Link href="/create">
+              <Button size="sm" className="hidden sm:flex items-center gap-1">
+                <Plus className="w-4 h-4" />
+                <span className="hidden lg:inline">Create Memorial</span>
+              </Button>
+            </Link>
 
             {/* Notifications */}
             {user && (
@@ -154,29 +157,45 @@ export function Header({ user, notifications = 0, className }: HeaderProps) {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Settings className="w-4 h-4 mr-2" />
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <HelpCircle className="w-4 h-4 mr-2" />
-                    Help & Support
-                  </DropdownMenuItem>
+                  <Link href="/dashboard">
+                    <DropdownMenuItem>
+                      <LayoutDashboard className="w-4 h-4 mr-2" />
+                      Dashboard
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href="/settings">
+                    <DropdownMenuItem>
+                      <Settings className="w-4 h-4 mr-2" />
+                      Settings
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href="/help">
+                    <DropdownMenuItem>
+                      <HelpCircle className="w-4 h-4 mr-2" />
+                      Help & Support
+                    </DropdownMenuItem>
+                  </Link>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem destructive>
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Sign out
-                  </DropdownMenuItem>
+                  <Link href="/login">
+                    <DropdownMenuItem destructive>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign out
+                    </DropdownMenuItem>
+                  </Link>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm">
-                  Sign in
-                </Button>
-                <Button size="sm" className="hidden sm:flex">
-                  Get Started
-                </Button>
+                <Link href="/login">
+                  <Button variant="ghost" size="sm">
+                    Sign in
+                  </Button>
+                </Link>
+                <Link href="/signup">
+                  <Button size="sm" className="hidden sm:flex">
+                    Get Started
+                  </Button>
+                </Link>
               </div>
             )}
 
@@ -228,10 +247,12 @@ export function Header({ user, notifications = 0, className }: HeaderProps) {
 
                 {/* Mobile Create button */}
                 <div className="pt-4 px-4">
-                  <Button className="w-full flex items-center justify-center gap-2">
-                    <Plus className="w-5 h-5" />
-                    Create Memorial
-                  </Button>
+                  <Link href="/create" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="w-full flex items-center justify-center gap-2">
+                      <Plus className="w-5 h-5" />
+                      Create Memorial
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </motion.div>

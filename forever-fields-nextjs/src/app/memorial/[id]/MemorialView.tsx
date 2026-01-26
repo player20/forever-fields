@@ -1,13 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button, Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
 import { MemoryAssistant, LegacyCompanion } from "@/components/ai";
 import { KidsMemorialExplorer, StoryTime, MilestoneMessages, MySpaceForGrandma } from "@/components/kids";
 import { QRMemorialCode, SimpleFamilyTree } from "@/components/memorial";
 import { formatDate, calculateAge } from "@/lib/utils";
+import {
+  Share2,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Heart,
+  Copy,
+  Facebook,
+  Twitter,
+} from "lucide-react";
 
 interface Memorial {
   id: string;
@@ -59,10 +71,37 @@ interface MemorialViewProps {
 
 type ViewMode = "default" | "kids" | "companion" | "stories" | "milestones" | "create";
 
+// Animation variants
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
+const stagger = {
+  visible: { transition: { staggerChildren: 0.1 } },
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
+};
+
 export function MemorialView({ memorial }: MemorialViewProps) {
   const [activeTab, setActiveTab] = useState<"memories" | "photos" | "timeline" | "family" | "candles">("memories");
   const [showMemoryAssistant, setShowMemoryAssistant] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("default");
+
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  // Share modal state
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  // Candle modal state
+  const [showCandleModal, setShowCandleModal] = useState(false);
+  const [candleMessage, setCandleMessage] = useState("");
+  const [candleName, setCandleName] = useState("");
 
   const fullName = `${memorial.firstName} ${memorial.lastName}`;
   const age = memorial.birthDate && memorial.deathDate
@@ -124,6 +163,74 @@ export function MemorialView({ memorial }: MemorialViewProps) {
       isUnlocked: false,
     },
   ];
+
+  // Lightbox navigation
+  const openLightbox = useCallback((index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  }, []);
+
+  const closeLightbox = useCallback(() => {
+    setLightboxOpen(false);
+  }, []);
+
+  const nextPhoto = useCallback(() => {
+    setLightboxIndex((prev) => (prev + 1) % memorial.photos.length);
+  }, [memorial.photos.length]);
+
+  const prevPhoto = useCallback(() => {
+    setLightboxIndex((prev) => (prev - 1 + memorial.photos.length) % memorial.photos.length);
+  }, [memorial.photos.length]);
+
+  // Share functions
+  const shareUrl = typeof window !== "undefined" ? window.location.href : `/memorial/${memorial.slug}`;
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied to clipboard!");
+    } catch {
+      toast.error("Failed to copy link");
+    }
+  };
+
+  const shareToFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, "_blank");
+  };
+
+  const shareToTwitter = () => {
+    const text = `Remembering ${fullName} - Forever Fields Memorial`;
+    window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${fullName} - Memorial`,
+          text: `Remembering ${fullName}`,
+          url: shareUrl,
+        });
+      } catch {
+        // User cancelled or error
+      }
+    } else {
+      setShowShareModal(true);
+    }
+  };
+
+  // Light a candle
+  const handleLightCandle = () => {
+    if (!candleName.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+    // TODO: POST to /api/memorials/:id/candles
+    toast.success("Candle lit in loving memory");
+    setShowCandleModal(false);
+    setCandleMessage("");
+    setCandleName("");
+  };
 
   // Kids Explorer Mode
   if (viewMode === "kids") {
@@ -251,13 +358,33 @@ export function MemorialView({ memorial }: MemorialViewProps) {
           <div className="absolute inset-0 bg-gradient-to-b from-sage to-sage-dark" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+
+        {/* Share Button */}
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          onClick={handleNativeShare}
+          className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2 hover:bg-white transition-colors"
+        >
+          <Share2 className="w-4 h-4" />
+          <span className="text-sm font-medium">Share</span>
+        </motion.button>
       </div>
 
       {/* Profile Section */}
       <div className="max-w-4xl mx-auto px-4 -mt-20 relative z-10">
-        <div className="flex flex-col md:flex-row items-center md:items-end gap-6">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={stagger}
+          className="flex flex-col md:flex-row items-center md:items-end gap-6"
+        >
           {/* Profile Photo */}
-          <div className="w-40 h-40 rounded-full border-4 border-cream shadow-xl overflow-hidden bg-sage-pale">
+          <motion.div
+            variants={scaleIn}
+            className="w-40 h-40 rounded-full border-4 border-cream shadow-xl overflow-hidden bg-sage-pale"
+          >
             {memorial.profilePhotoUrl ? (
               <Image
                 src={memorial.profilePhotoUrl}
@@ -271,10 +398,10 @@ export function MemorialView({ memorial }: MemorialViewProps) {
                 {memorial.firstName[0]}{memorial.lastName[0]}
               </div>
             )}
-          </div>
+          </motion.div>
 
           {/* Name & Dates */}
-          <div className="text-center md:text-left pb-4">
+          <motion.div variants={fadeIn} className="text-center md:text-left pb-4">
             <h1 className="font-display text-4xl md:text-5xl text-sage-dark">
               {fullName}
             </h1>
@@ -284,8 +411,8 @@ export function MemorialView({ memorial }: MemorialViewProps) {
               {memorial.deathDate && formatDate(memorial.deathDate)}
               {age && <span className="ml-2 text-sage">({age} years)</span>}
             </p>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Biography */}
         {memorial.biography && (
@@ -443,7 +570,7 @@ export function MemorialView({ memorial }: MemorialViewProps) {
 
           {/* Photos Tab */}
           {activeTab === "photos" && (
-            <div>
+            <motion.div initial="hidden" animate="visible" variants={fadeIn}>
               <h2 className="font-display text-2xl text-sage-dark mb-6">
                 Photo Gallery
               </h2>
@@ -456,11 +583,19 @@ export function MemorialView({ memorial }: MemorialViewProps) {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {memorial.photos.map((photo) => (
-                    <div
+                <motion.div
+                  variants={stagger}
+                  initial="hidden"
+                  animate="visible"
+                  className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+                >
+                  {memorial.photos.map((photo, index) => (
+                    <motion.div
                       key={photo.id}
-                      className="aspect-square rounded-lg overflow-hidden bg-sage-pale relative group"
+                      variants={scaleIn}
+                      whileHover={{ scale: 1.02 }}
+                      onClick={() => openLightbox(index)}
+                      className="aspect-square rounded-lg overflow-hidden bg-sage-pale relative group cursor-pointer"
                     >
                       <Image
                         src={photo.url}
@@ -473,11 +608,11 @@ export function MemorialView({ memorial }: MemorialViewProps) {
                           <p className="text-white text-sm">{photo.caption}</p>
                         </div>
                       )}
-                    </div>
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               )}
-            </div>
+            </motion.div>
           )}
 
           {/* Timeline Tab */}
@@ -560,17 +695,23 @@ export function MemorialView({ memorial }: MemorialViewProps) {
 
           {/* Candles Tab */}
           {activeTab === "candles" && (
-            <div>
+            <motion.div initial="hidden" animate="visible" variants={fadeIn}>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="font-display text-2xl text-sage-dark">
                   Virtual Candles
                 </h2>
-                <Button variant="secondary">
+                <Button variant="secondary" onClick={() => setShowCandleModal(true)}>
+                  <Heart className="w-4 h-4 mr-2" />
                   Light a Candle
                 </Button>
               </div>
 
-              <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+              <motion.div
+                variants={stagger}
+                initial="hidden"
+                animate="visible"
+                className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4"
+              >
                 {memorial.candles.length === 0 ? (
                   <div className="col-span-full">
                     <Card>
@@ -578,13 +719,22 @@ export function MemorialView({ memorial }: MemorialViewProps) {
                         <p className="text-gray-500">
                           Be the first to light a candle in remembrance.
                         </p>
+                        <Button
+                          variant="outline"
+                          className="mt-4"
+                          onClick={() => setShowCandleModal(true)}
+                        >
+                          Light the First Candle
+                        </Button>
                       </CardContent>
                     </Card>
                   </div>
                 ) : (
                   memorial.candles.map((candle) => (
-                    <div
+                    <motion.div
                       key={candle.id}
+                      variants={scaleIn}
+                      whileHover={{ scale: 1.1 }}
                       className="flex flex-col items-center group cursor-pointer"
                       title={candle.message || `Lit by ${candle.lighterName || "Anonymous"}`}
                     >
@@ -592,11 +742,11 @@ export function MemorialView({ memorial }: MemorialViewProps) {
                       <span className="text-xs text-gray-500 mt-1 truncate max-w-full">
                         {candle.lighterName || "Anonymous"}
                       </span>
-                    </div>
+                    </motion.div>
                   ))
                 )}
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           )}
         </div>
 
@@ -613,6 +763,214 @@ export function MemorialView({ memorial }: MemorialViewProps) {
           />
         </div>
       </div>
+
+      {/* Photo Lightbox Modal */}
+      <AnimatePresence>
+        {lightboxOpen && memorial.photos.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+            onClick={closeLightbox}
+          >
+            {/* Close button */}
+            <button
+              onClick={closeLightbox}
+              className="absolute top-4 right-4 text-white/80 hover:text-white p-2"
+            >
+              <X className="w-8 h-8" />
+            </button>
+
+            {/* Previous button */}
+            {memorial.photos.length > 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); prevPhoto(); }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-2 bg-black/20 rounded-full"
+              >
+                <ChevronLeft className="w-8 h-8" />
+              </button>
+            )}
+
+            {/* Image */}
+            <motion.div
+              key={lightboxIndex}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="relative max-w-5xl max-h-[80vh] mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Image
+                src={memorial.photos[lightboxIndex].url}
+                alt={memorial.photos[lightboxIndex].caption || "Memorial photo"}
+                width={1200}
+                height={800}
+                className="max-h-[80vh] w-auto object-contain"
+              />
+              {memorial.photos[lightboxIndex].caption && (
+                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                  <p className="text-white text-center">{memorial.photos[lightboxIndex].caption}</p>
+                </div>
+              )}
+            </motion.div>
+
+            {/* Next button */}
+            {memorial.photos.length > 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); nextPhoto(); }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-2 bg-black/20 rounded-full"
+              >
+                <ChevronRight className="w-8 h-8" />
+              </button>
+            )}
+
+            {/* Photo counter */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 text-sm">
+              {lightboxIndex + 1} / {memorial.photos.length}
+            </div>
+
+            {/* Download button */}
+            <a
+              href={memorial.photos[lightboxIndex].url}
+              download
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-4 right-4 text-white/80 hover:text-white p-2 bg-black/20 rounded-full"
+            >
+              <Download className="w-6 h-6" />
+            </a>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Share Modal */}
+      <AnimatePresence>
+        {showShareModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+            onClick={() => setShowShareModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-display text-xl text-sage-dark">Share Memorial</h3>
+                <button onClick={() => setShowShareModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <p className="text-gray-600 text-sm mb-6">
+                Share {fullName}&apos;s memorial with family and friends.
+              </p>
+
+              <div className="space-y-3">
+                <button
+                  onClick={copyToClipboard}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-sage-pale hover:bg-sage-pale/30 transition-colors"
+                >
+                  <Copy className="w-5 h-5 text-sage" />
+                  <span>Copy Link</span>
+                </button>
+
+                <button
+                  onClick={shareToFacebook}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-sage-pale hover:bg-sage-pale/30 transition-colors"
+                >
+                  <Facebook className="w-5 h-5 text-blue-600" />
+                  <span>Share on Facebook</span>
+                </button>
+
+                <button
+                  onClick={shareToTwitter}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-sage-pale hover:bg-sage-pale/30 transition-colors"
+                >
+                  <Twitter className="w-5 h-5 text-sky-500" />
+                  <span>Share on Twitter</span>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Light a Candle Modal */}
+      <AnimatePresence>
+        {showCandleModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+            onClick={() => setShowCandleModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center mb-6">
+                <div className="text-6xl mb-4 animate-pulse">🕯️</div>
+                <h3 className="font-display text-xl text-sage-dark">Light a Candle</h3>
+                <p className="text-gray-600 text-sm mt-1">
+                  In loving memory of {memorial.firstName}
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Your Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={candleName}
+                    onChange={(e) => setCandleName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="w-full px-4 py-2 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Message (optional)
+                  </label>
+                  <textarea
+                    value={candleMessage}
+                    onChange={(e) => setCandleMessage(e.target.value)}
+                    placeholder="Share a thought or memory..."
+                    rows={3}
+                    className="w-full px-4 py-2 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage resize-none"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setShowCandleModal(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button className="flex-1" onClick={handleLightCandle}>
+                    <Heart className="w-4 h-4 mr-2" />
+                    Light Candle
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

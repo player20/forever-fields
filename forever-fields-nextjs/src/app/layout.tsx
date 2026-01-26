@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
+import { InstallPrompt } from "@/components/pwa";
+import { Providers } from "@/components/providers";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -24,6 +26,15 @@ export const metadata: Metadata = {
   keywords: ["memorial", "tribute", "obituary", "remembrance", "legacy", "family history"],
   authors: [{ name: "Forever Fields" }],
   creator: "Forever Fields",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Forever Fields",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -50,6 +61,15 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
 };
 
 export const viewport: Viewport = {
@@ -66,8 +86,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <body className="min-h-screen font-sans antialiased">
-        {children}
-        <ToastProvider />
+        <Providers>
+          {children}
+          <ToastProvider />
+          <InstallPrompt />
+        </Providers>
       </body>
     </html>
   );
