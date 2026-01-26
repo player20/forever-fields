@@ -140,7 +140,7 @@ router.get('/:memorialId', optionalAuth, async (req, res) => {
  * POST /api/time-capsules/:id/open
  * Mark a time capsule as opened (for statistics)
  */
-router.post('/:id/open', apiRateLimiter, async (req, res) => {
+router.post('/:id/open', optionalAuth, apiRateLimiter, async (req, res) => {
   try {
     const { id } = req.params;
 
