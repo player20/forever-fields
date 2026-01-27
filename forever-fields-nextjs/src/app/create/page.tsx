@@ -359,7 +359,7 @@ export default function CreateMemorialPage() {
                                 updateFormData("petType", "");
                               }
                             }}
-                            className={`p-4 rounded-xl border-2 text-left transition-all ${
+                            className={`p-4 rounded-xl border-2 text-left transition-all focus:outline-none focus:ring-2 focus:ring-sage focus:ring-offset-2 ${
                               formData.memorialType === type.id
                                 ? "border-sage bg-sage-pale ring-2 ring-sage/20"
                                 : "border-sage-pale hover:border-sage hover:bg-sage-pale/30"
@@ -389,7 +389,7 @@ export default function CreateMemorialPage() {
                               key={pet.id}
                               type="button"
                               onClick={() => updateFormData("petType", pet.id)}
-                              className={`p-3 rounded-lg border text-center transition-all ${
+                              className={`p-3 rounded-lg border text-center transition-all focus:outline-none focus:ring-2 focus:ring-sage focus:ring-offset-2 ${
                                 formData.petType === pet.id
                                   ? "border-sage bg-sage-pale text-sage-dark"
                                   : "border-sage-pale hover:border-sage hover:bg-sage-pale/50"
@@ -511,7 +511,7 @@ export default function CreateMemorialPage() {
                             key={rel}
                             type="button"
                             onClick={() => updateFormData("relationship", rel)}
-                            className={`px-4 py-2 rounded-lg border text-sm transition-colors ${
+                            className={`px-4 py-2 rounded-lg border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-sage focus:ring-offset-2 ${
                               formData.relationship === rel
                                 ? "border-sage bg-sage-pale text-sage-dark"
                                 : "border-sage-pale hover:border-sage hover:bg-sage-pale/50"
