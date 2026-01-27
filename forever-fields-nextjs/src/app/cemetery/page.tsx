@@ -104,7 +104,8 @@ export default function VirtualCemeteryPage() {
                       </h3>
                       <button
                         onClick={() => setSelectedPlot(null)}
-                        className="text-gray-400 hover:text-gray-600"
+                        className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-sage focus:ring-offset-2 rounded"
+                        aria-label="Close plot details"
                       >
                         <X className="w-5 h-5" />
                       </button>

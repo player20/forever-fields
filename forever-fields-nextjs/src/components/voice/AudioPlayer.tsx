@@ -122,7 +122,23 @@ export function AudioPlayer({
         <div
           ref={progressRef}
           onClick={handleSeek}
-          className="relative h-12 bg-sage-light/30 rounded cursor-pointer mb-3 overflow-hidden"
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight") {
+              e.preventDefault();
+              if (audioRef.current) audioRef.current.currentTime = Math.min(duration, currentTime + 5);
+            } else if (e.key === "ArrowLeft") {
+              e.preventDefault();
+              if (audioRef.current) audioRef.current.currentTime = Math.max(0, currentTime - 5);
+            }
+          }}
+          tabIndex={0}
+          role="slider"
+          aria-label="Audio progress"
+          aria-valuemin={0}
+          aria-valuemax={duration}
+          aria-valuenow={currentTime}
+          aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
+          className="relative h-12 bg-sage-light/30 rounded cursor-pointer mb-3 overflow-hidden focus:outline-none focus:ring-2 focus:ring-sage focus:ring-offset-2"
         >
           {/* Fake waveform bars */}
           <div className="absolute inset-0 flex items-center justify-around px-1">
@@ -160,7 +176,23 @@ export function AudioPlayer({
         <div
           ref={progressRef}
           onClick={handleSeek}
-          className="h-2 bg-sage-light/50 rounded-full cursor-pointer mb-3 overflow-hidden"
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight") {
+              e.preventDefault();
+              if (audioRef.current) audioRef.current.currentTime = Math.min(duration, currentTime + 5);
+            } else if (e.key === "ArrowLeft") {
+              e.preventDefault();
+              if (audioRef.current) audioRef.current.currentTime = Math.max(0, currentTime - 5);
+            }
+          }}
+          tabIndex={0}
+          role="slider"
+          aria-label="Audio progress"
+          aria-valuemin={0}
+          aria-valuemax={duration}
+          aria-valuenow={currentTime}
+          aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
+          className="h-2 bg-sage-light/50 rounded-full cursor-pointer mb-3 overflow-hidden focus:outline-none focus:ring-2 focus:ring-sage focus:ring-offset-2"
         >
           <div
             className="h-full bg-sage transition-all"

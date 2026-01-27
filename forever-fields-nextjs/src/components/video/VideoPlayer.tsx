@@ -205,8 +205,17 @@ export function VideoPlayer({
         {/* Play Button Overlay (when paused) */}
         {!isPlaying && !isLoading && (
           <div
-            className="absolute inset-0 flex items-center justify-center cursor-pointer"
+            className="absolute inset-0 flex items-center justify-center cursor-pointer focus:outline-none"
             onClick={togglePlay}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                togglePlay();
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label="Play video"
           >
             <div className="w-20 h-20 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg">
               <svg

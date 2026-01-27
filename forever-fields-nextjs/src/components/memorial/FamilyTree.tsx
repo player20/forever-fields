@@ -46,10 +46,21 @@ function FamilyTreeNode({
     ? `${person.birthYear}${person.deathYear ? ` - ${person.deathYear}` : ""}`
     : "";
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.key === "Enter" || e.key === " ") && onClick) {
+      e.preventDefault();
+      onClick();
+    }
+  };
+
   return (
     <div
       onClick={onClick}
-      className={`relative cursor-pointer transition-all hover:scale-105 ${
+      onKeyDown={handleKeyDown}
+      tabIndex={onClick ? 0 : undefined}
+      role={onClick ? "button" : undefined}
+      aria-label={`View ${person.name}'s memorial`}
+      className={`relative cursor-pointer transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-sage focus:ring-offset-2 rounded-lg ${
         onClick ? "cursor-pointer" : ""
       }`}
     >
