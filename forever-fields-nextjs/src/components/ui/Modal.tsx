@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, ReactNode } from "react";
+import { Fragment, ReactNode, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 
 export interface ModalProps {
@@ -22,6 +22,59 @@ export function Modal({
   size = "md",
   showCloseButton = true,
 }: ModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
+
+  const getFocusableElements = useCallback(() => {
+    if (!modalRef.current) return [];
+    return Array.from(
+      modalRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+    ).filter((el) => !el.hasAttribute("disabled"));
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      previousActiveElement.current = document.activeElement as HTMLElement;
+      const focusable = getFocusableElements();
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+    }
+    return () => {
+      if (previousActiveElement.current) {
+        previousActiveElement.current.focus();
+      }
+    };
+  }, [isOpen, getFocusableElements]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      if (e.key === "Tab") {
+        const focusable = getFocusableElements();
+        if (focusable.length === 0) return;
+
+        const firstElement = focusable[0];
+        const lastElement = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    },
+    [onClose, getFocusableElements]
+  );
+
   if (!isOpen) return null;
 
   const sizes = {
@@ -33,12 +86,6 @@ export function Modal({
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
       onClose();
     }
   };
@@ -59,6 +106,7 @@ export function Modal({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Modal content */}
           <div
+            ref={modalRef}
             className={cn(
               "w-full bg-white rounded-xl shadow-lg",
               "transform transition-all duration-300",

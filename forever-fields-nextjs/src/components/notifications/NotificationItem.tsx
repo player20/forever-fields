@@ -105,16 +105,29 @@ export function NotificationItem({
   const config = typeConfig[notification.type];
   const Icon = config.icon;
 
+  const handleMarkAsRead = () => {
+    if (!notification.isRead && onMarkAsRead) {
+      onMarkAsRead(notification.id);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleMarkAsRead();
+    }
+  };
+
   const content = (
     <div
-      className={`flex gap-3 p-3 rounded-lg transition-colors hover:bg-sage-pale/20 ${
+      className={`flex gap-3 p-3 rounded-lg transition-colors hover:bg-sage-pale/20 focus:outline-none focus:ring-2 focus:ring-sage focus:ring-offset-2 ${
         !notification.isRead ? "bg-sage-pale/10" : ""
       }`}
-      onClick={() => {
-        if (!notification.isRead && onMarkAsRead) {
-          onMarkAsRead(notification.id);
-        }
-      }}
+      onClick={handleMarkAsRead}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="button"
+      aria-label={`${notification.isRead ? "" : "Mark as read: "}${notification.title}`}
     >
       {/* Icon */}
       <div
