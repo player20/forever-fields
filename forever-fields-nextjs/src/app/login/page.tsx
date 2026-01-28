@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -33,9 +33,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated (use useEffect to avoid setState during render)
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push(redirectTo);
+    }
+  }, [isAuthenticated, redirectTo, router]);
+
+  // Show nothing while redirecting
   if (isAuthenticated) {
-    router.push(redirectTo);
     return null;
   }
 

@@ -36,7 +36,7 @@ const planningFeatures = [
     icon: Mic,
     title: "Preserve Your Voice",
     description:
-      "Record stories and messages so your voice can comfort loved ones forever.",
+      "Record stories and messages so your voice can comfort loved ones for years to come.",
   },
   {
     icon: Gift,
@@ -69,7 +69,7 @@ const pricingPlans = [
       "Text-based memories",
       "Family tree (3 generations)",
     ],
-    cta: "Get Started",
+    cta: "Create Memorial",
     highlighted: false,
   },
   {
@@ -85,11 +85,11 @@ const pricingPlans = [
       "Milestone messages",
       "Priority support",
     ],
-    cta: "Start Free Trial",
-    highlighted: true,
+    cta: "Try It Free",
+    highlighted: false,
   },
   {
-    name: "Forever",
+    name: "Legacy",
     price: "$299",
     period: "one-time",
     description: "Perpetual preservation",
@@ -101,7 +101,7 @@ const pricingPlans = [
       "Legacy Companion AI",
       "Family concierge",
     ],
-    cta: "Contact Sales",
+    cta: "Learn More",
     highlighted: false,
   },
 ];
@@ -125,15 +125,15 @@ export default function PlanningPage() {
                 Pre-Planning
               </Badge>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-gray-dark mb-4">
-                Plan Your Legacy Today
+                Share Your Story, In Your Own Words
               </h1>
               <p className="text-lg text-gray-body mb-8">
-                Give your family the gift of peace of mind. Document your wishes,
+                Create something meaningful for those you love. Document your wishes,
                 preserve your voice, and create lasting messages for the future.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg">
-                  Start Planning
+                  Begin When You&apos;re Ready
                   <ChevronRight className="w-5 h-5 ml-1" />
                 </Button>
                 <Button variant="outline" size="lg">
@@ -152,8 +152,8 @@ export default function PlanningPage() {
             {[
               {
                 icon: Heart,
-                title: "Ease Their Burden",
-                desc: "Remove uncertainty for your loved ones",
+                title: "Give Them Peace",
+                desc: "Help your loved ones when the time comes",
               },
               {
                 icon: Clock,
@@ -235,13 +235,13 @@ export default function PlanningPage() {
           <SlideUp>
             <div className="text-center max-w-3xl mx-auto mb-16">
               <Badge variant="secondary" pill className="mb-4">
-                Pricing
+                Options
               </Badge>
               <h2 className="text-3xl sm:text-4xl font-serif font-bold text-gray-dark mb-4">
-                Choose Your Plan
+                Tools to Help You
               </h2>
               <p className="text-lg text-gray-body">
-                Start free and upgrade when you&apos;re ready.
+                Start free. Add more when it feels right.
               </p>
             </div>
           </SlideUp>

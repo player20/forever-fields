@@ -24,7 +24,6 @@ import {
   Heart,
   ShoppingBag,
   FileText,
-  Users,
   Settings,
   LogOut,
   HelpCircle,
@@ -32,6 +31,8 @@ import {
   Search,
   Plus,
   LayoutDashboard,
+  TreeDeciduous,
+  CreditCard,
 } from "lucide-react";
 
 interface HeaderProps {
@@ -47,9 +48,9 @@ interface HeaderProps {
 const navigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Memorials", href: "/memorials", icon: Heart },
+  { name: "Family Tree", href: "/family-tree", icon: TreeDeciduous },
+  { name: "Pricing", href: "/pricing", icon: CreditCard },
   { name: "Shop", href: "/shop", icon: ShoppingBag },
-  { name: "Planning", href: "/planning", icon: FileText },
-  { name: "Family", href: "/family", icon: Users },
 ];
 
 export function Header({ user, notifications = 0, className }: HeaderProps) {

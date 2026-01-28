@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -33,9 +33,17 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Profile form
-  const [name, setName] = useState(user?.name || "");
-  const [email, setEmail] = useState(user?.email || "");
+  // Profile form - initialize with user data when available
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+
+  // Update form when user data loads
+  useEffect(() => {
+    if (user) {
+      setName(user.name || "");
+      setEmail(user.email || "");
+    }
+  }, [user]);
 
   // Password form
   const [currentPassword, setCurrentPassword] = useState("");
@@ -638,7 +646,7 @@ export default function SettingsPage() {
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  "Delete Forever"
+                  "Delete Permanently"
                 )}
               </Button>
             </div>

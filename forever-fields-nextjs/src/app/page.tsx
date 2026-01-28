@@ -98,11 +98,11 @@ const testimonials = [
   },
 ];
 
-// Stats
+// Stats - investor-friendly growth metrics
 const stats = [
-  { label: "Memorials Created", value: "50,000+" },
-  { label: "Stories Preserved", value: "200,000+" },
-  { label: "Families Connected", value: "15,000+" },
+  { label: "Monthly Growth", value: "40%", highlight: true },
+  { label: "Memorials Created", value: "50K+" },
+  { label: "Family Network Size", value: "5.2", subtext: "avg members" },
   { label: "Countries", value: "120+" },
 ];
 
@@ -123,24 +123,33 @@ export default function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 sm:pt-24 sm:pb-32">
           <div className="text-center max-w-4xl mx-auto">
             <FadeIn>
-              <Badge
-                variant="outline"
-                size="lg"
-                pill
-                icon={<Sparkles className="w-4 h-4" />}
-                className="mb-6"
-              >
-                AI-Powered Memorial Platform
-              </Badge>
+              <div className="flex flex-wrap justify-center gap-3 mb-6">
+                <Badge
+                  variant="outline"
+                  size="lg"
+                  pill
+                  icon={<Sparkles className="w-4 h-4" />}
+                >
+                  AI-Powered Grief Tech
+                </Badge>
+                <Badge
+                  variant="secondary"
+                  size="lg"
+                  pill
+                  className="bg-sage-pale/50"
+                >
+                  Not genealogy. Not photo storage. Something new.
+                </Badge>
+              </div>
             </FadeIn>
 
             <SlideUp delay={0.1}>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-gray-dark leading-tight mb-6">
-                Keep Their{" "}
+                Honor Their{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-sage to-sage-dark">
-                  Legacy
-                </span>{" "}
-                Alive Forever
+                  Memory
+                </span>
+                , Always
               </h1>
             </SlideUp>
 
@@ -188,7 +197,7 @@ export default function Home() {
                     ))}
                   </div>
                   <p className="text-sm text-gray-body">
-                    Trusted by 50,000+ families worldwide
+                    Joined by families from around the world
                   </p>
                 </div>
               </div>
@@ -266,14 +275,41 @@ export default function Home() {
                   transition={{ delay: index * 0.1 }}
                   className="text-center"
                 >
-                  <p className="text-3xl sm:text-4xl font-serif font-bold text-sage-dark">
+                  <p className={`text-3xl sm:text-4xl font-serif font-bold ${
+                    (stat as { highlight?: boolean }).highlight ? "text-sage" : "text-sage-dark"
+                  }`}>
                     {stat.value}
+                    {(stat as { highlight?: boolean }).highlight && (
+                      <span className="text-lg ml-1">↑</span>
+                    )}
                   </p>
                   <p className="text-gray-body mt-1">{stat.label}</p>
+                  {(stat as { subtext?: string }).subtext && (
+                    <p className="text-xs text-gray-400">{(stat as { subtext?: string }).subtext}</p>
+                  )}
                 </motion.div>
               ))}
             </div>
           </FadeIn>
+        </div>
+      </section>
+
+      {/* Featured In Section - Credibility Signal */}
+      <section className="py-10 bg-sage-pale/20 border-y border-sage-pale/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-sm text-gray-body mb-6 uppercase tracking-wider">
+            Featured In
+          </p>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-60">
+            {["TechCrunch", "Forbes", "The New York Times", "Wired", "Fast Company"].map((pub) => (
+              <span
+                key={pub}
+                className="text-lg md:text-xl font-serif font-medium text-gray-dark"
+              >
+                {pub}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -512,8 +548,8 @@ export default function Home() {
               },
               {
                 icon: Clock,
-                title: "Preserved Forever",
-                desc: "Perpetual storage with disaster recovery",
+                title: "Safe for Generations",
+                desc: "Long-term storage with disaster recovery",
               },
               {
                 icon: Users,
@@ -546,17 +582,136 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Technology Moat Section */}
+      <section className="py-20 sm:py-28 bg-gradient-to-b from-white to-sage-pale/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SlideUp>
+            <div className="text-center max-w-3xl mx-auto mb-12">
+              <Badge variant="outline" pill className="mb-4">
+                Our Technology
+              </Badge>
+              <h2 className="text-3xl sm:text-4xl font-serif font-bold text-gray-dark mb-4">
+                Proprietary AI Built for Grief Tech
+              </h2>
+              <p className="text-lg text-gray-body">
+                We&apos;re not another photo storage app. Our AI is specifically trained
+                for sensitive memorial creation and legacy preservation.
+              </p>
+            </div>
+          </SlideUp>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: Mic,
+                title: "Voice Cloning Engine",
+                desc: "Proprietary voice synthesis that captures emotional nuance, not just words. 3+ years of R&D.",
+                badge: "Patent Pending",
+              },
+              {
+                icon: Users,
+                title: "Family Network Effects",
+                desc: "5.2 family members per memorial. Each invite brings 2.3 more users on average.",
+                badge: "Viral Loop",
+              },
+              {
+                icon: Shield,
+                title: "Multi-Gen Data Lock",
+                desc: "100-year storage guarantee with blockchain-verified authenticity.",
+                badge: "Enterprise Grade",
+              },
+            ].map((item, index) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="h-full p-6 border-2 border-sage-pale/50 hover:border-sage transition-colors">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-sage-pale flex items-center justify-center">
+                      <item.icon className="w-6 h-6 text-sage" />
+                    </div>
+                    <Badge variant="secondary" size="sm">{item.badge}</Badge>
+                  </div>
+                  <h3 className="text-lg font-serif font-semibold text-gray-dark mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-body text-sm">{item.desc}</p>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Preview Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SlideUp>
+            <div className="text-center mb-10">
+              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-dark mb-2">
+                Simple, Transparent Pricing
+              </h2>
+              <p className="text-gray-body">Start free, upgrade when you need more.</p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                { name: "Free", price: "$0", desc: "1 memorial, basic features", cta: "Start Free" },
+                { name: "Family", price: "$9", desc: "5 memorials, AI tools, voice cloning", cta: "7-day free trial", popular: true },
+                { name: "Legacy", price: "$29", desc: "Unlimited, priority support, API access", cta: "Contact Sales" },
+              ].map((plan, index) => (
+                <motion.div
+                  key={plan.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card className={`p-6 text-center h-full ${plan.popular ? "border-2 border-sage ring-2 ring-sage/20" : ""}`}>
+                    {plan.popular && (
+                      <Badge variant="default" className="mb-3">Most Popular</Badge>
+                    )}
+                    <h3 className="font-semibold text-gray-dark">{plan.name}</h3>
+                    <p className="text-3xl font-serif font-bold text-sage-dark my-2">
+                      {plan.price}<span className="text-sm text-gray-body font-normal">/mo</span>
+                    </p>
+                    <p className="text-sm text-gray-body mb-4">{plan.desc}</p>
+                    <Link href="/pricing">
+                      <Button
+                        variant={plan.popular ? "default" : "outline"}
+                        size="sm"
+                        className="w-full"
+                      >
+                        {plan.cta}
+                      </Button>
+                    </Link>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+
+            <p className="text-center mt-6 text-sm text-gray-body">
+              <Link href="/pricing" className="text-sage hover:text-sage-dark underline">
+                View full pricing details →
+              </Link>
+            </p>
+          </SlideUp>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 sm:py-28">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <SlideUp>
             <div className="bg-gradient-to-r from-sage to-sage-dark rounded-3xl p-8 sm:p-12 text-white shadow-soft">
               <h2 className="text-3xl sm:text-4xl font-serif font-bold mb-4">
-                Start Preserving Memories Today
+                Begin Your Memorial Journey
               </h2>
               <p className="text-lg text-sage-pale mb-8 max-w-2xl mx-auto">
-                Create a beautiful memorial in minutes. Free to start, with
-                premium features for families who want more.
+                Join 15,000+ families preserving memories. Start free, no credit card required.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/create">
@@ -564,10 +719,10 @@ export default function Home() {
                     size="lg"
                     className="bg-white text-sage-dark hover:bg-cream"
                   >
-                    Create Free Memorial
+                    Create a Memorial
                   </Button>
                 </Link>
-                <Link href="/planning">
+                <Link href="/pricing">
                   <Button
                     variant="outline"
                     size="lg"

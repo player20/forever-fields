@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// Demo mode for local development - bypass auth checks
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
 // Routes that require authentication
 const protectedRoutes = [
   "/dashboard",
@@ -30,6 +33,11 @@ function isAuthRoute(path: string): boolean {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // In demo mode, skip all auth checks
+  if (DEMO_MODE) {
+    return NextResponse.next();
+  }
 
   // Get auth token from cookies
   const token = request.cookies.get("auth_token")?.value;

@@ -19,6 +19,9 @@ import {
   Copy,
   Facebook,
   Twitter,
+  MessageCircle,
+  Linkedin,
+  Mail,
 } from "lucide-react";
 
 interface Memorial {
@@ -201,6 +204,21 @@ export function MemorialView({ memorial }: MemorialViewProps) {
   const shareToTwitter = () => {
     const text = `Remembering ${fullName} - Forever Fields Memorial`;
     window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const shareToWhatsApp = () => {
+    const text = `Remembering ${fullName} - View their memorial: ${shareUrl}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const shareToLinkedIn = () => {
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, "_blank");
+  };
+
+  const shareViaEmail = () => {
+    const subject = `Remembering ${fullName} - Forever Fields Memorial`;
+    const body = `I wanted to share this memorial with you:\n\n${fullName}\n\nView the memorial: ${shareUrl}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   const handleNativeShare = async () => {
@@ -871,7 +889,7 @@ export function MemorialView({ memorial }: MemorialViewProps) {
                 Share {fullName}&apos;s memorial with family and friends.
               </p>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <button
                   onClick={copyToClipboard}
                   className="w-full flex items-center gap-3 p-3 rounded-lg border border-sage-pale hover:bg-sage-pale/30 transition-colors"
@@ -881,20 +899,43 @@ export function MemorialView({ memorial }: MemorialViewProps) {
                 </button>
 
                 <button
-                  onClick={shareToFacebook}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-sage-pale hover:bg-sage-pale/30 transition-colors"
+                  onClick={shareToWhatsApp}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-sage-pale hover:bg-green-50 transition-colors"
                 >
-                  <Facebook className="w-5 h-5 text-blue-600" />
-                  <span>Share on Facebook</span>
+                  <MessageCircle className="w-5 h-5 text-green-500" />
+                  <span>Share via WhatsApp</span>
                 </button>
 
                 <button
-                  onClick={shareToTwitter}
+                  onClick={shareViaEmail}
                   className="w-full flex items-center gap-3 p-3 rounded-lg border border-sage-pale hover:bg-sage-pale/30 transition-colors"
                 >
-                  <Twitter className="w-5 h-5 text-sky-500" />
-                  <span>Share on Twitter</span>
+                  <Mail className="w-5 h-5 text-gray-600" />
+                  <span>Send via Email</span>
                 </button>
+
+                <div className="flex gap-2 pt-2 border-t border-sage-pale/50">
+                  <button
+                    onClick={shareToFacebook}
+                    className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-lg border border-sage-pale hover:bg-blue-50 transition-colors"
+                  >
+                    <Facebook className="w-5 h-5 text-blue-600" />
+                  </button>
+
+                  <button
+                    onClick={shareToTwitter}
+                    className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-lg border border-sage-pale hover:bg-sky-50 transition-colors"
+                  >
+                    <Twitter className="w-5 h-5 text-sky-500" />
+                  </button>
+
+                  <button
+                    onClick={shareToLinkedIn}
+                    className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-lg border border-sage-pale hover:bg-blue-50 transition-colors"
+                  >
+                    <Linkedin className="w-5 h-5 text-blue-700" />
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>

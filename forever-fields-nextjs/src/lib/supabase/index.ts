@@ -1,6 +1,7 @@
-// Supabase client exports
+// Supabase client exports (client-side only)
 export { createClient, getSupabaseClient } from './client';
-export { createServerSupabaseClient, createServiceRoleClient } from './server';
+// Note: Server exports (createServerSupabaseClient, createServiceRoleClient)
+// must be imported directly from '@/lib/supabase/server' in API routes
 
 // Auth utilities
 export {

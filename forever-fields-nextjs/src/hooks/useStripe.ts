@@ -4,8 +4,8 @@
 
 import { useState, useCallback } from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
-import { STRIPE_PUBLIC_KEY, SUBSCRIPTION_TIERS, ONE_TIME_PRODUCTS } from "@/lib/stripe/config";
-import type { SubscriptionTier, OneTimeProduct } from "@/lib/stripe/config";
+import { STRIPE_PUBLIC_KEY, SUBSCRIPTION_TIERS, ONE_TIME_PRODUCTS } from "@/lib/stripe/client-config";
+import type { SubscriptionTier, OneTimeProduct } from "@/lib/stripe/client-config";
 
 // Initialize Stripe
 let stripePromise: Promise<Stripe | null> | null = null;

@@ -2,9 +2,81 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { nanoid } from 'nanoid';
 
+// Demo mode for local development without real Supabase credentials
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
+// Demo memorials for auditing/demo purposes
+const DEMO_MEMORIALS = [
+  {
+    id: "demo-memorial-1",
+    slug: "margaret-rose-sullivan",
+    first_name: "Margaret",
+    middle_name: "Rose",
+    last_name: "Sullivan",
+    nickname: "Maggie",
+    birth_date: "1935-06-15",
+    death_date: "2023-11-28",
+    birth_place: "Boston, MA",
+    resting_place: "Oak Hill Cemetery, Boston",
+    profile_photo_url: null,
+    view_count: 342,
+    created_at: "2023-12-01T10:00:00Z",
+    updated_at: "2024-01-15T14:30:00Z",
+    photos: [{ id: "p1" }, { id: "p2" }, { id: "p3" }],
+    stories: [{ id: "s1" }, { id: "s2" }],
+    candle_lightings: [{ id: "c1" }, { id: "c2" }, { id: "c3" }, { id: "c4" }],
+    collaborators: [{ role: "owner", user_id: "demo-user-123" }],
+  },
+  {
+    id: "demo-memorial-2",
+    slug: "robert-james-chen",
+    first_name: "Robert",
+    middle_name: "James",
+    last_name: "Chen",
+    nickname: "Bobby",
+    birth_date: "1942-03-22",
+    death_date: "2024-01-05",
+    birth_place: "San Francisco, CA",
+    resting_place: "Golden Gate Memorial Park",
+    profile_photo_url: null,
+    view_count: 156,
+    created_at: "2024-01-10T09:00:00Z",
+    updated_at: "2024-01-20T11:00:00Z",
+    photos: [{ id: "p4" }, { id: "p5" }],
+    stories: [{ id: "s3" }],
+    candle_lightings: [{ id: "c5" }, { id: "c6" }],
+    collaborators: [{ role: "owner", user_id: "demo-user-123" }],
+  },
+  {
+    id: "demo-memorial-3",
+    slug: "eleanor-grace-williams",
+    first_name: "Eleanor",
+    middle_name: "Grace",
+    last_name: "Williams",
+    nickname: null,
+    birth_date: "1948-09-10",
+    death_date: "2023-08-15",
+    birth_place: "Chicago, IL",
+    resting_place: "Rosehill Cemetery, Chicago",
+    profile_photo_url: null,
+    view_count: 89,
+    created_at: "2023-08-20T15:00:00Z",
+    updated_at: "2023-12-01T09:00:00Z",
+    photos: [{ id: "p6" }],
+    stories: [],
+    candle_lightings: [{ id: "c7" }],
+    collaborators: [{ role: "editor", user_id: "demo-user-123" }],
+  },
+];
+
 // GET /api/memorials - List user's memorials
 export async function GET(request: NextRequest) {
   try {
+    // In demo mode, return mock memorials
+    if (DEMO_MODE) {
+      return NextResponse.json({ memorials: DEMO_MEMORIALS });
+    }
+
     const supabase = await createServerSupabaseClient();
 
     // Get authenticated user
@@ -39,6 +111,27 @@ export async function GET(request: NextRequest) {
 // POST /api/memorials - Create a new memorial
 export async function POST(request: NextRequest) {
   try {
+    const body = await request.json();
+
+    // In demo mode, return a mock created memorial
+    if (DEMO_MODE) {
+      const { firstName, lastName } = body;
+      const baseSlug = `${firstName}-${lastName}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const slug = `${baseSlug}-${nanoid(6)}`;
+
+      const mockMemorial = {
+        id: `demo-memorial-${nanoid(8)}`,
+        slug,
+        first_name: firstName,
+        last_name: lastName,
+        ...body,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      return NextResponse.json({ memorial: mockMemorial, slug }, { status: 201 });
+    }
+
     const supabase = await createServerSupabaseClient();
 
     // Get authenticated user
@@ -47,8 +140,6 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    const body = await request.json();
     const {
       firstName,
       middleName,

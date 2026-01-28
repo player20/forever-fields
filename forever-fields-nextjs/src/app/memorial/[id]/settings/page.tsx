@@ -521,7 +521,7 @@ export default function MemorialSettingsPage() {
                   {isLoading ? (
                     <Flower2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    "Delete Forever"
+                    "Delete Permanently"
                   )}
                 </Button>
               </div>

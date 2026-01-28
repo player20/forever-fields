@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Flower2, ArrowLeft } from "lucide-react";
+import { Flower2, ArrowLeft, Shield, Heart, Lock, Eye, Users, Download, Mail } from "lucide-react";
 
 export const metadata = {
   title: "Privacy Policy",
@@ -31,15 +31,51 @@ export default function PrivacyPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-12">
-        <article className="bg-white rounded-xl shadow-sm p-8 md:p-12">
-          <h1 className="text-3xl font-serif font-bold text-gray-dark mb-2">
-            Privacy Policy
+        {/* Warm introduction */}
+        <div className="text-center mb-10">
+          <div className="w-16 h-16 rounded-full bg-sage-pale/50 flex items-center justify-center mx-auto mb-4">
+            <Shield className="w-8 h-8 text-sage" />
+          </div>
+          <h1 className="text-3xl font-serif font-bold text-gray-dark mb-3">
+            Your Privacy Matters
           </h1>
-          <p className="text-gray-body mb-8">
+          <p className="text-lg text-gray-body max-w-2xl mx-auto">
+            We understand that the memories you share with us are deeply personal.
+            This page explains how we protect and care for your information.
+          </p>
+        </div>
+
+        {/* Key highlights */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+          <div className="bg-white rounded-xl p-5 shadow-sm border border-sage-pale/30">
+            <div className="w-10 h-10 rounded-lg bg-sage-pale/50 flex items-center justify-center mb-3">
+              <Heart className="w-5 h-5 text-sage" />
+            </div>
+            <h3 className="font-semibold text-gray-dark mb-1">Your Data, Your Control</h3>
+            <p className="text-sm text-gray-body">You decide who sees your memorials and can export or delete your data anytime.</p>
+          </div>
+          <div className="bg-white rounded-xl p-5 shadow-sm border border-sage-pale/30">
+            <div className="w-10 h-10 rounded-lg bg-sage-pale/50 flex items-center justify-center mb-3">
+              <Lock className="w-5 h-5 text-sage" />
+            </div>
+            <h3 className="font-semibold text-gray-dark mb-1">Secure & Protected</h3>
+            <p className="text-sm text-gray-body">Industry-standard encryption keeps your memories safe and private.</p>
+          </div>
+          <div className="bg-white rounded-xl p-5 shadow-sm border border-sage-pale/30">
+            <div className="w-10 h-10 rounded-lg bg-sage-pale/50 flex items-center justify-center mb-3">
+              <Users className="w-5 h-5 text-sage" />
+            </div>
+            <h3 className="font-semibold text-gray-dark mb-1">Never Sold</h3>
+            <p className="text-sm text-gray-body">We never sell your personal information to third parties.</p>
+          </div>
+        </div>
+
+        <article className="bg-white rounded-xl shadow-sm p-8 md:p-12">
+          <p className="text-sm text-gray-body mb-8 pb-6 border-b border-sage-pale/30">
             Last updated: January 2026
           </p>
 
-          <div className="prose prose-sage max-w-none space-y-8">
+          <div className="prose prose-sage max-w-none space-y-10">
             <section>
               <h2 className="text-xl font-serif font-bold text-gray-dark mb-4">
                 1. Introduction
@@ -257,23 +293,46 @@ export default function PrivacyPage() {
               <h2 className="text-xl font-serif font-bold text-gray-dark mb-4">
                 14. Contact Us
               </h2>
-              <p className="text-gray-body leading-relaxed">
-                If you have questions about this Privacy Policy or our data practices:
+              <p className="text-gray-body leading-relaxed mb-6">
+                If you have questions about this Privacy Policy or our data practices,
+                we&apos;re here to help.
               </p>
-              <p className="text-gray-body mt-4">
-                <strong>Email:</strong> privacy@foreverfields.com<br />
-                <strong>Data Protection Officer:</strong> dpo@foreverfields.com<br />
-                <strong>Address:</strong> Forever Fields, Inc.<br />
-                123 Memorial Lane<br />
-                San Francisco, CA 94102
-              </p>
+              <div className="bg-sage-pale/20 rounded-lg p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-sage-pale/50 flex items-center justify-center shrink-0">
+                    <Mail className="w-5 h-5 text-sage" />
+                  </div>
+                  <div>
+                    <p className="text-gray-body">
+                      <strong className="text-gray-dark">General Inquiries:</strong> privacy@foreverfields.com
+                    </p>
+                    <p className="text-gray-body mt-2">
+                      <strong className="text-gray-dark">Data Protection Officer:</strong> dpo@foreverfields.com
+                    </p>
+                    <p className="text-gray-body mt-4 text-sm">
+                      Forever Fields, Inc.<br />
+                      123 Memorial Lane<br />
+                      San Francisco, CA 94102
+                    </p>
+                  </div>
+                </div>
+              </div>
             </section>
           </div>
         </article>
 
-        <div className="mt-8 text-center">
+        {/* Footer links */}
+        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
           <Link href="/terms" className="text-sage hover:text-sage-dark">
-            Read our Terms of Service →
+            Terms of Service
+          </Link>
+          <span className="hidden sm:block text-sage-pale">|</span>
+          <Link href="/contact" className="text-sage hover:text-sage-dark">
+            Contact Us
+          </Link>
+          <span className="hidden sm:block text-sage-pale">|</span>
+          <Link href="/" className="text-sage hover:text-sage-dark">
+            Return Home
           </Link>
         </div>
       </main>

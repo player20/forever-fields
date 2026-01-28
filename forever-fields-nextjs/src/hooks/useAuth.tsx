@@ -18,6 +18,19 @@ import {
 import type { User, SubscriptionTier } from "@/lib/supabase/types";
 import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
 
+// Demo mode for local development without real Supabase credentials
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
+const DEMO_USER: AppUser = {
+  id: "demo-user-123",
+  email: "demo@foreverfields.com",
+  name: "Demo User",
+  firstName: "Demo",
+  lastName: "User",
+  avatarUrl: undefined,
+  subscriptionTier: "premium",
+};
+
 // User type that matches what the rest of the app expects
 export interface AppUser {
   id: string;
@@ -69,9 +82,9 @@ function toAppUser(supabaseUser: SupabaseUser | null, profile?: User | null): Ap
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
-    user: null,
-    isLoading: true,
-    isAuthenticated: false,
+    user: DEMO_MODE ? DEMO_USER : null,
+    isLoading: DEMO_MODE ? false : true,
+    isAuthenticated: DEMO_MODE ? true : false,
     error: null,
   });
 
@@ -83,6 +96,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Fetch session and user profile
   const refreshSession = useCallback(async () => {
+    // In demo mode, always return the demo user
+    if (DEMO_MODE) {
+      setState({
+        user: DEMO_USER,
+        isLoading: false,
+        isAuthenticated: true,
+        error: null,
+      });
+      return;
+    }
+
     try {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
@@ -119,6 +143,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Listen to auth state changes
   useEffect(() => {
+    // In demo mode, skip Supabase auth
+    if (DEMO_MODE) {
+      return;
+    }
+
     // Initial session check
     refreshSession();
 
@@ -158,6 +187,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Login with email and password
   const login = async (email: string, password: string) => {
+    // In demo mode, just set the demo user
+    if (DEMO_MODE) {
+      setState({
+        user: DEMO_USER,
+        isLoading: false,
+        isAuthenticated: true,
+        error: null,
+      });
+      return;
+    }
+
     try {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
@@ -190,6 +230,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Register new account
   const register = async (email: string, password: string, name?: string) => {
+    // In demo mode, just set the demo user
+    if (DEMO_MODE) {
+      setState({
+        user: DEMO_USER,
+        isLoading: false,
+        isAuthenticated: true,
+        error: null,
+      });
+      return;
+    }
+
     try {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
@@ -256,6 +307,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Request magic link (passwordless)
   const requestMagicLink = async (email: string) => {
+    // In demo mode, simulate magic link sent and auto-login
+    if (DEMO_MODE) {
+      setState((prev) => ({ ...prev, isLoading: false }));
+      // Don't auto-login here - let the UI show "magic link sent" message
+      return;
+    }
+
     try {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
@@ -279,6 +337,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Login with Google
   const loginWithGoogle = async () => {
+    // In demo mode, just set the demo user
+    if (DEMO_MODE) {
+      setState({
+        user: DEMO_USER,
+        isLoading: false,
+        isAuthenticated: true,
+        error: null,
+      });
+      return;
+    }
+
     try {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 

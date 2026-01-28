@@ -220,7 +220,7 @@ export function CandleLighting({
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Share a thought or memory..."
-          className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+          className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent resize-none"
           rows={2}
         />
       </div>
@@ -229,7 +229,7 @@ export function CandleLighting({
       <Button
         onClick={handleLightCandle}
         disabled={isLighting}
-        className="w-full bg-amber-500 hover:bg-amber-600"
+        className="w-full"
       >
         {isLighting ? (
           <span className="flex items-center gap-2">

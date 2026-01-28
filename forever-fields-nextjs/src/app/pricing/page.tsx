@@ -6,8 +6,8 @@ import { motion } from "framer-motion";
 import { Button, Card } from "@/components/ui";
 import { useStripe } from "@/hooks/useStripe";
 import { useAuth } from "@/hooks/useAuth";
-import { SUBSCRIPTION_TIERS, ONE_TIME_PRODUCTS } from "@/lib/stripe/config";
-import type { SubscriptionTier } from "@/lib/stripe/config";
+import { SUBSCRIPTION_TIERS, ONE_TIME_PRODUCTS } from "@/lib/stripe/client-config";
+import type { SubscriptionTier } from "@/lib/stripe/client-config";
 import {
   Check,
   Flower2,
@@ -99,7 +99,7 @@ export default function PricingPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-5xl font-serif font-bold text-gray-dark mb-4"
           >
-            Choose Your Plan
+            Find the Right Fit for Your Family
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -107,8 +107,8 @@ export default function PricingPage() {
             transition={{ delay: 0.1 }}
             className="text-xl text-gray-body max-w-2xl mx-auto"
           >
-            Honor your loved ones with beautiful memorials. Start free, upgrade
-            anytime.
+            Every family&apos;s needs are different. Choose what feels right for
+            honoring your loved one.
           </motion.p>
         </div>
 
@@ -205,6 +205,11 @@ export default function PricingPage() {
                           </>
                         )}
                       </div>
+                      {config.price > 0 && (
+                        <p className="mt-2 text-xs text-green-600 font-medium bg-green-50 rounded-full px-3 py-1 inline-block">
+                          7-day free trial included
+                        </p>
+                      )}
                     </div>
 
                     <ul className="space-y-3 mb-6 flex-grow">
@@ -295,6 +300,33 @@ export default function PricingPage() {
           </Card>
         </motion.div>
 
+        {/* Referral Incentive */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="max-w-3xl mx-auto mt-8"
+        >
+          <Card className="p-6 bg-gradient-to-r from-sage-pale/30 to-gold/10 border-sage-pale">
+            <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+              <div className="w-12 h-12 rounded-full bg-sage/10 flex items-center justify-center shrink-0">
+                <Users className="w-6 h-6 text-sage" />
+              </div>
+              <div className="flex-grow">
+                <h3 className="font-semibold text-gray-dark mb-1">
+                  Invite family, get rewarded
+                </h3>
+                <p className="text-sm text-gray-body">
+                  Invite 5 family members to collaborate on memorials and get <strong className="text-sage-dark">1 month free</strong> on any paid plan.
+                </p>
+              </div>
+              <Button variant="outline" size="sm" className="shrink-0">
+                Learn More
+              </Button>
+            </div>
+          </Card>
+        </motion.div>
+
         {/* FAQ section */}
         <div className="mt-20 max-w-3xl mx-auto">
           <h2 className="text-2xl font-serif font-bold text-center text-gray-dark mb-8">
@@ -326,7 +358,7 @@ export default function PricingPage() {
               </h3>
               <p className="text-gray-body">
                 It&apos;s blockchain-based storage that ensures your memorial
-                lives forever, even if Forever Fields ceases to exist. Your
+                endures for generations, protected even if Forever Fields changes. Your
                 memories are preserved on IPFS and Arweave.
               </p>
             </div>

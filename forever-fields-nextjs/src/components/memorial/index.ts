@@ -6,3 +6,4 @@ export { CemeteryImport } from "./CemeteryImport";
 export { GraveLocator } from "./GraveLocator";
 export { CandleLighting } from "./CandleLighting";
 export { Guestbook } from "./Guestbook";
+export { FamilyProgress } from "./FamilyProgress";
