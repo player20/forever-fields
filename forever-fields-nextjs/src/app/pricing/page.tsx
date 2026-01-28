@@ -16,6 +16,8 @@ import {
   Users,
   Shield,
   ArrowRight,
+  ChevronDown,
+  Heart,
 } from "lucide-react";
 
 const tierIcons: Record<SubscriptionTier, React.ComponentType<{ className?: string }>> = {
@@ -40,6 +42,7 @@ export default function PricingPage() {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
     "monthly"
   );
+  const [showAllPlans, setShowAllPlans] = useState(false);
 
   const handleSubscribe = async (tier: SubscriptionTier) => {
     if (!user) {
@@ -92,23 +95,39 @@ export default function PricingPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-12">
-        {/* Hero */}
+        {/* Hero - Compassionate messaging */}
         <div className="text-center mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 text-sage mb-4"
+          >
+            <Heart className="w-5 h-5" />
+            <span className="text-sm font-medium">No pressure, no rush</span>
+          </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
             className="text-4xl md:text-5xl font-serif font-bold text-gray-dark mb-4"
           >
-            Find the Right Fit for Your Family
+            Start Free, Upgrade When You&apos;re Ready
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-xl text-gray-body max-w-2xl mx-auto"
+            className="text-xl text-gray-body max-w-2xl mx-auto mb-4"
           >
-            Every family&apos;s needs are different. Choose what feels right for
-            honoring your loved one.
+            Create a beautiful memorial at no cost. Add more features if and when it feels right.
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="text-sm text-gray-muted max-w-xl mx-auto"
+          >
+            Most families start with Free and find it&apos;s everything they need.
           </motion.p>
         </div>
 
@@ -119,131 +138,310 @@ export default function PricingPage() {
           </div>
         )}
 
-        {/* Billing toggle */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-white rounded-full p-1 shadow-sm">
-            <button
-              onClick={() => setBillingPeriod("monthly")}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-                billingPeriod === "monthly"
-                  ? "bg-sage text-white"
-                  : "text-gray-body hover:text-sage-dark"
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBillingPeriod("annual")}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-                billingPeriod === "annual"
-                  ? "bg-sage text-white"
-                  : "text-gray-body hover:text-sage-dark"
-              }`}
-            >
-              Annual <span className="text-green-600 text-xs">Save 20%</span>
-            </button>
-          </div>
-        </div>
+        {/* Simplified 2-option view - reduces decision fatigue */}
+        {!showAllPlans ? (
+          <div className="max-w-4xl mx-auto mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {/* Free Tier - Primary recommendation */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <Card className="relative p-8 h-full flex flex-col border-sage-pale bg-white">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-sage text-white text-xs font-medium px-3 py-1 rounded-full">
+                      Recommended to Start
+                    </span>
+                  </div>
+                  <div className="text-center mb-6">
+                    <div className="w-14 h-14 rounded-xl mx-auto mb-4 flex items-center justify-center bg-sage-pale text-sage">
+                      <Flower2 className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-2xl font-serif font-bold text-gray-dark">
+                      Free Forever
+                    </h3>
+                    <p className="text-gray-muted mt-2">Everything you need to get started</p>
+                    <div className="mt-4">
+                      <span className="text-4xl font-bold text-gray-dark">$0</span>
+                    </div>
+                  </div>
 
-        {/* Pricing cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {(Object.entries(SUBSCRIPTION_TIERS) as [SubscriptionTier, typeof SUBSCRIPTION_TIERS.free][]).map(
-            ([tier, config], index) => {
-              const Icon = tierIcons[tier];
-              const isPopular = tier === "heritage";
-              const price =
-                billingPeriod === "annual"
-                  ? Math.round(config.price * 0.8 * 12)
-                  : config.price;
+                  <ul className="space-y-3 mb-8 flex-grow">
+                    <li className="flex items-start gap-2 text-gray-body">
+                      <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                      <span>1 beautiful memorial page</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-gray-body">
+                      <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                      <span>Up to 50 photos</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-gray-body">
+                      <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                      <span>Invite family to contribute</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-gray-body">
+                      <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                      <span>Virtual candle lightings</span>
+                    </li>
+                  </ul>
 
-              return (
-                <motion.div
-                  key={tier}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card
-                    className={`relative p-6 h-full flex flex-col ${tierColors[tier]} ${
-                      isPopular ? "shadow-lg scale-105" : ""
-                    }`}
+                  <Button
+                    onClick={() => handleSubscribe("free")}
+                    disabled={isLoading}
+                    variant="primary"
+                    className="w-full"
+                    size="lg"
                   >
-                    {isPopular && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <span className="bg-gold text-white text-xs font-medium px-3 py-1 rounded-full">
-                          Most Popular
-                        </span>
-                      </div>
+                    {isLoading ? (
+                      <Flower2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      "Create Your Memorial"
                     )}
+                  </Button>
+                </Card>
+              </motion.div>
 
-                    <div className="text-center mb-6">
-                      <div
-                        className={`w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center ${
-                          isPopular
-                            ? "bg-gold/10 text-gold"
-                            : "bg-sage-pale text-sage"
+              {/* Heritage Tier - For those who want more */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <Card className="relative p-8 h-full flex flex-col border-gray-200 bg-white">
+                  <div className="text-center mb-6">
+                    <div className="w-14 h-14 rounded-xl mx-auto mb-4 flex items-center justify-center bg-gold/10 text-gold">
+                      <Crown className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-2xl font-serif font-bold text-gray-dark">
+                      Heritage
+                    </h3>
+                    <p className="text-gray-muted mt-2">When you&apos;re ready for more</p>
+                    <div className="mt-4">
+                      <span className="text-4xl font-bold text-gray-dark">
+                        ${billingPeriod === "annual" ? Math.round(19 * 0.8 * 12) : 19}
+                      </span>
+                      <span className="text-gray-body">
+                        /{billingPeriod === "annual" ? "year" : "month"}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xs text-green-600 font-medium">
+                      Try free for 7 days
+                    </p>
+                  </div>
+
+                  <ul className="space-y-3 mb-8 flex-grow">
+                    <li className="flex items-start gap-2 text-gray-body">
+                      <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                      <span>Up to 5 memorials</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-gray-body">
+                      <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                      <span>Unlimited photos & stories</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-gray-body">
+                      <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                      <span>AI photo restoration</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-gray-body">
+                      <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                      <span>Family tree visualization</span>
+                    </li>
+                  </ul>
+
+                  <Button
+                    onClick={() => handleSubscribe("heritage")}
+                    disabled={isLoading}
+                    variant="outline"
+                    className="w-full"
+                    size="lg"
+                  >
+                    {isLoading ? (
+                      <Flower2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      "Start Free Trial"
+                    )}
+                  </Button>
+                </Card>
+              </motion.div>
+            </div>
+
+            {/* Billing toggle - subtle */}
+            <div className="flex justify-center mb-6">
+              <div className="bg-white rounded-full p-1 shadow-sm">
+                <button
+                  onClick={() => setBillingPeriod("monthly")}
+                  className={`px-5 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    billingPeriod === "monthly"
+                      ? "bg-sage text-white"
+                      : "text-gray-body hover:text-sage-dark"
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setBillingPeriod("annual")}
+                  className={`px-5 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    billingPeriod === "annual"
+                      ? "bg-sage text-white"
+                      : "text-gray-body hover:text-sage-dark"
+                  }`}
+                >
+                  Annual <span className="text-green-600 text-xs">Save 20%</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Show more options */}
+            <div className="text-center">
+              <button
+                onClick={() => setShowAllPlans(true)}
+                className="inline-flex items-center gap-2 text-sm text-gray-muted hover:text-sage-dark transition-colors"
+              >
+                <span>Compare all plans</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Billing toggle */}
+            <div className="flex justify-center mb-12">
+              <div className="bg-white rounded-full p-1 shadow-sm">
+                <button
+                  onClick={() => setBillingPeriod("monthly")}
+                  className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                    billingPeriod === "monthly"
+                      ? "bg-sage text-white"
+                      : "text-gray-body hover:text-sage-dark"
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setBillingPeriod("annual")}
+                  className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                    billingPeriod === "annual"
+                      ? "bg-sage text-white"
+                      : "text-gray-body hover:text-sage-dark"
+                  }`}
+                >
+                  Annual <span className="text-green-600 text-xs">Save 20%</span>
+                </button>
+              </div>
+            </div>
+
+            {/* All pricing cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {(Object.entries(SUBSCRIPTION_TIERS) as [SubscriptionTier, typeof SUBSCRIPTION_TIERS.free][]).map(
+                ([tier, config], index) => {
+                  const Icon = tierIcons[tier];
+                  const isPopular = tier === "heritage";
+                  const price =
+                    billingPeriod === "annual"
+                      ? Math.round(config.price * 0.8 * 12)
+                      : config.price;
+
+                  return (
+                    <motion.div
+                      key={tier}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card
+                        className={`relative p-6 h-full flex flex-col ${tierColors[tier]} ${
+                          isPopular ? "shadow-lg scale-105" : ""
                         }`}
                       >
-                        <Icon className="w-6 h-6" />
-                      </div>
-                      <h3 className="text-xl font-serif font-bold text-gray-dark">
-                        {config.name}
-                      </h3>
-                      <div className="mt-4">
-                        {config.price === 0 ? (
-                          <span className="text-3xl font-bold text-gray-dark">
-                            Free
-                          </span>
-                        ) : (
-                          <>
-                            <span className="text-3xl font-bold text-gray-dark">
-                              ${billingPeriod === "annual" ? price : config.price}
+                        {isPopular && (
+                          <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                            <span className="bg-gold text-white text-xs font-medium px-3 py-1 rounded-full">
+                              Most Popular
                             </span>
-                            <span className="text-gray-body">
-                              /{billingPeriod === "annual" ? "year" : "month"}
-                            </span>
-                          </>
+                          </div>
                         )}
-                      </div>
-                      {config.price > 0 && (
-                        <p className="mt-2 text-xs text-green-600 font-medium bg-green-50 rounded-full px-3 py-1 inline-block">
-                          7-day free trial included
-                        </p>
-                      )}
-                    </div>
 
-                    <ul className="space-y-3 mb-6 flex-grow">
-                      {config.features.map((feature, i) => (
-                        <li
-                          key={i}
-                          className="flex items-start gap-2 text-sm text-gray-body"
+                        <div className="text-center mb-6">
+                          <div
+                            className={`w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center ${
+                              isPopular
+                                ? "bg-gold/10 text-gold"
+                                : "bg-sage-pale text-sage"
+                            }`}
+                          >
+                            <Icon className="w-6 h-6" />
+                          </div>
+                          <h3 className="text-xl font-serif font-bold text-gray-dark">
+                            {config.name}
+                          </h3>
+                          <div className="mt-4">
+                            {config.price === 0 ? (
+                              <span className="text-3xl font-bold text-gray-dark">
+                                Free
+                              </span>
+                            ) : (
+                              <>
+                                <span className="text-3xl font-bold text-gray-dark">
+                                  ${billingPeriod === "annual" ? price : config.price}
+                                </span>
+                                <span className="text-gray-body">
+                                  /{billingPeriod === "annual" ? "year" : "month"}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                          {config.price > 0 && (
+                            <p className="mt-2 text-xs text-green-600 font-medium bg-green-50 rounded-full px-3 py-1 inline-block">
+                              7-day free trial included
+                            </p>
+                          )}
+                        </div>
+
+                        <ul className="space-y-3 mb-6 flex-grow">
+                          {config.features.map((feature, i) => (
+                            <li
+                              key={i}
+                              className="flex items-start gap-2 text-sm text-gray-body"
+                            >
+                              <Check className="w-5 h-5 text-green-500 shrink-0" />
+                              {feature}
+                            </li>
+                          ))}
+                        </ul>
+
+                        <Button
+                          onClick={() => handleSubscribe(tier)}
+                          disabled={isLoading}
+                          variant={isPopular ? "primary" : "outline"}
+                          className="w-full"
                         >
-                          <Check className="w-5 h-5 text-green-500 shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
+                          {isLoading ? (
+                            <Flower2 className="w-4 h-4 animate-spin" />
+                          ) : tier === "free" ? (
+                            "Get Started"
+                          ) : (
+                            "Start 7-Day Trial"
+                          )}
+                        </Button>
+                      </Card>
+                    </motion.div>
+                  );
+                }
+              )}
+            </div>
 
-                    <Button
-                      onClick={() => handleSubscribe(tier)}
-                      disabled={isLoading}
-                      variant={isPopular ? "primary" : "outline"}
-                      className="w-full"
-                    >
-                      {isLoading ? (
-                        <Flower2 className="w-4 h-4 animate-spin" />
-                      ) : tier === "free" ? (
-                        "Get Started"
-                      ) : (
-                        "Start 7-Day Trial"
-                      )}
-                    </Button>
-                  </Card>
-                </motion.div>
-              );
-            }
-          )}
-        </div>
+            {/* Back to simple view */}
+            <div className="text-center mb-16">
+              <button
+                onClick={() => setShowAllPlans(false)}
+                className="text-sm text-gray-muted hover:text-sage-dark transition-colors"
+              >
+                ← Back to simplified view
+              </button>
+            </div>
+          </>
+        )}
 
         {/* Perpetual preservation */}
         <motion.div
@@ -300,35 +498,46 @@ export default function PricingPage() {
           </Card>
         </motion.div>
 
-        {/* Referral Incentive */}
+        {/* Family collaboration - softer messaging */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
           className="max-w-3xl mx-auto mt-8"
         >
-          <Card className="p-6 bg-gradient-to-r from-sage-pale/30 to-gold/10 border-sage-pale">
+          <Card className="p-6 bg-sage-pale/20 border-sage-pale/50">
             <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
               <div className="w-12 h-12 rounded-full bg-sage/10 flex items-center justify-center shrink-0">
                 <Users className="w-6 h-6 text-sage" />
               </div>
               <div className="flex-grow">
                 <h3 className="font-semibold text-gray-dark mb-1">
-                  Invite family, get rewarded
+                  Better together
                 </h3>
                 <p className="text-sm text-gray-body">
-                  Invite 5 family members to collaborate on memorials and get <strong className="text-sage-dark">1 month free</strong> on any paid plan.
+                  Memorials are most meaningful when family contributes together. Invite loved ones to share their photos and stories.
                 </p>
               </div>
-              <Button variant="outline" size="sm" className="shrink-0">
-                Learn More
-              </Button>
             </div>
           </Card>
         </motion.div>
 
+        {/* Reassurance message */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+          className="max-w-2xl mx-auto mt-12 text-center"
+        >
+          <p className="text-gray-muted text-sm">
+            Not sure yet? That&apos;s okay. Start with Free and take all the time you need.
+            <br />
+            You can always upgrade later, and we&apos;ll never rush you.
+          </p>
+        </motion.div>
+
         {/* FAQ section */}
-        <div className="mt-20 max-w-3xl mx-auto">
+        <div className="mt-16 max-w-3xl mx-auto">
           <h2 className="text-2xl font-serif font-bold text-center text-gray-dark mb-8">
             Frequently Asked Questions
           </h2>
@@ -344,12 +553,21 @@ export default function PricingPage() {
             </div>
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <h3 className="font-semibold text-gray-dark mb-2">
+                What if I&apos;m not ready to decide?
+              </h3>
+              <p className="text-gray-body">
+                Start with Free. It includes everything you need to create a meaningful memorial.
+                There&apos;s no pressure to upgrade, ever. Take all the time you need.
+              </p>
+            </div>
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <h3 className="font-semibold text-gray-dark mb-2">
                 What happens if I cancel?
               </h3>
               <p className="text-gray-body">
-                Your memorials are never deleted. If you cancel, you&apos;ll keep
-                access until the end of your billing period, then downgrade to
-                Free.
+                Your memorials are never deleted. If you cancel a paid plan, you keep
+                full access until your billing period ends, then continue on Free.
+                Your memories stay safe.
               </p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-sm">

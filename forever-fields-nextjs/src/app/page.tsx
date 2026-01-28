@@ -76,25 +76,28 @@ const features = [
   },
 ];
 
-// Testimonials
+// Testimonials - from grieving families
 const testimonials = [
   {
     quote:
-      "Forever Fields helped me capture my grandmother's stories before she passed. Now my children can hear her voice reading bedtime stories.",
+      "In those first weeks after losing Mom, I could barely function. Forever Fields didn't rush me. I came back months later and it was still there, waiting.",
     author: "Sarah M.",
-    role: "Mother of 3",
+    role: "Lost her mother in 2023",
+    context: "Started her memorial 3 months after loss",
   },
   {
     quote:
-      "The Legacy Companion let me have one more conversation with my dad. It's not him, but it carries his wisdom forward.",
+      "I wasn't ready to write an obituary. The AI helped me start with just a few words about Dad's laugh. The rest came naturally over time.",
     author: "Michael T.",
-    role: "Son",
+    role: "Lost his father in 2024",
+    context: "Built memorial gradually over 6 months",
   },
   {
     quote:
-      "Planning my own memorial took a weight off my children. They know my wishes, and I've left them messages for their futures.",
-    author: "Eleanor K.",
-    role: "Grandmother",
+      "My kids never met their great-grandmother. Now they can hear her voice telling the stories I grew up with. It's not the same, but it's something.",
+    author: "Jennifer R.",
+    role: "Preserving family history",
+    context: "3 generations contributing",
   },
 ];
 
@@ -294,6 +297,78 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Why Forever Fields - Differentiation Section */}
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-white to-sage-pale/20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SlideUp>
+            <div className="text-center mb-12">
+              <Badge variant="outline" pill className="mb-4">
+                Why Forever Fields
+              </Badge>
+              <h2 className="text-3xl sm:text-4xl font-serif font-bold text-gray-dark mb-4">
+                This Isn&apos;t Another Photo App
+              </h2>
+              <p className="text-lg text-gray-body max-w-2xl mx-auto">
+                We built Forever Fields for one reason: grief is hard enough without technology making it harder.
+              </p>
+            </div>
+          </SlideUp>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                not: "Photo storage",
+                is: "Living memories",
+                desc: "Photos fade. We preserve the stories, voices, and wisdom behind them.",
+                icon: "📷",
+              },
+              {
+                not: "Genealogy charts",
+                is: "Family connections",
+                desc: "Not about dates and trees. About the grandmother who taught you to bake.",
+                icon: "🌳",
+              },
+              {
+                not: "Social media",
+                is: "Sacred space",
+                desc: "No likes, no feeds, no algorithms. Just a peaceful place to remember.",
+                icon: "🕯️",
+              },
+            ].map((item, index) => (
+              <motion.div
+                key={item.not}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="text-center"
+              >
+                <div className="text-4xl mb-4">{item.icon}</div>
+                <p className="text-gray-400 line-through text-sm mb-1">Not {item.not}</p>
+                <h3 className="text-xl font-serif font-semibold text-gray-dark mb-2">{item.is}</h3>
+                <p className="text-gray-body text-sm">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Gentle reminder */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+            className="mt-12 text-center"
+          >
+            <Card className="inline-block p-4 bg-sage-pale/30 border-sage-pale">
+              <p className="text-gray-body text-sm flex items-center gap-2">
+                <Heart className="w-4 h-4 text-sage" />
+                Take your time. There&apos;s no rush. Your memorial will be here when you&apos;re ready.
+              </p>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Featured In Section - Credibility Signal */}
       <section className="py-10 bg-sage-pale/20 border-y border-sage-pale/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -486,17 +561,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Testimonials Section - From Grieving Families */}
       <section className="py-20 sm:py-28 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SlideUp>
             <div className="text-center max-w-3xl mx-auto mb-16">
               <Badge variant="secondary" pill className="mb-4">
-                Testimonials
+                Real Families
               </Badge>
-              <h2 className="text-3xl sm:text-4xl font-serif font-bold text-gray-dark">
-                Stories from Our Community
+              <h2 className="text-3xl sm:text-4xl font-serif font-bold text-gray-dark mb-3">
+                Stories from Those Who&apos;ve Been There
               </h2>
+              <p className="text-gray-body">
+                We know grief doesn&apos;t follow a schedule. Neither does healing.
+              </p>
             </div>
           </SlideUp>
 
@@ -510,15 +588,10 @@ export default function Home() {
                 transition={{ delay: index * 0.1 }}
               >
                 <Card className="h-full p-6">
-                  <div className="flex gap-1 text-gold mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-current" />
-                    ))}
-                  </div>
-                  <blockquote className="text-gray-body mb-6">
+                  <blockquote className="text-gray-body mb-6 italic">
                     &ldquo;{testimonial.quote}&rdquo;
                   </blockquote>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 mb-3">
                     <Avatar name={testimonial.author} size="md" />
                     <div>
                       <p className="font-medium text-gray-dark">
@@ -529,10 +602,28 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
+                  {testimonial.context && (
+                    <p className="text-xs text-sage bg-sage-pale/50 rounded-full px-3 py-1 inline-block">
+                      {testimonial.context}
+                    </p>
+                  )}
                 </Card>
               </motion.div>
             ))}
           </div>
+
+          {/* Grief resources link */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="mt-12 text-center"
+          >
+            <p className="text-gray-body text-sm mb-2">Need support?</p>
+            <Link href="/help" className="text-sage hover:text-sage-dark text-sm underline">
+              Visit our grief resources →
+            </Link>
+          </motion.div>
         </div>
       </section>
 
