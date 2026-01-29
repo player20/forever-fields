@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button, Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
 import { MemoryAssistant, LegacyCompanion } from "@/components/ai";
 import { KidsMemorialExplorer, StoryTime, MilestoneMessages, MySpaceForGrandma } from "@/components/kids";
-import { QRMemorialCode, SimpleFamilyTree } from "@/components/memorial";
+import { QRMemorialCode, SimpleFamilyTree, LivingPortrait, TraditionsLegacy, MusicGallery, TraditionEditor, MusicEditor } from "@/components/memorial";
+import { GraveLocator } from "@/components/memorial/GraveLocator";
 import { formatDate, calculateAge } from "@/lib/utils";
 import {
   Share2,
@@ -22,7 +23,103 @@ import {
   MessageCircle,
   Linkedin,
   Mail,
+  Flame,
+  Camera,
+  Users,
+  MapPin,
+  Quote,
+  Sparkles,
+  QrCode,
+  Navigation,
+  Shield,
+  Mic,
+  Image as ImageIcon,
+  Gift,
+  Video,
+  Palette,
+  Check,
+  Leaf,
+  Scroll,
+  Waves,
+  Sun,
+  Flower2,
+  type LucideIcon,
 } from "lucide-react";
+
+// Theme definitions - personality-based options
+const MEMORIAL_THEMES: Record<string, {
+  name: string;
+  description: string;
+  icon: LucideIcon;
+  heroOverlay: string;
+  accentColor: string;
+  badgeBg: string;
+  badgeText: string;
+  cardGradient: string;
+}> = {
+  garden: {
+    name: "Garden",
+    description: "Nature-inspired with soft greens",
+    icon: Leaf,
+    heroOverlay: "from-emerald-900/80 via-emerald-800/40 to-emerald-700/20",
+    accentColor: "text-emerald-400",
+    badgeBg: "bg-emerald-100",
+    badgeText: "text-emerald-800",
+    cardGradient: "from-emerald-50 to-sage-pale",
+  },
+  classic: {
+    name: "Classic",
+    description: "Timeless sepia tones",
+    icon: Scroll,
+    heroOverlay: "from-amber-900/80 via-amber-800/40 to-amber-700/20",
+    accentColor: "text-amber-300",
+    badgeBg: "bg-amber-100",
+    badgeText: "text-amber-800",
+    cardGradient: "from-amber-50 to-orange-50",
+  },
+  ocean: {
+    name: "Ocean",
+    description: "Peaceful blue waters",
+    icon: Waves,
+    heroOverlay: "from-blue-900/80 via-blue-800/40 to-cyan-700/20",
+    accentColor: "text-cyan-300",
+    badgeBg: "bg-blue-100",
+    badgeText: "text-blue-800",
+    cardGradient: "from-blue-50 to-cyan-50",
+  },
+  sunset: {
+    name: "Sunset",
+    description: "Warm golden hour",
+    icon: Sun,
+    heroOverlay: "from-orange-900/80 via-rose-800/40 to-amber-700/20",
+    accentColor: "text-orange-300",
+    badgeBg: "bg-orange-100",
+    badgeText: "text-orange-800",
+    cardGradient: "from-orange-50 to-rose-50",
+  },
+  night: {
+    name: "Starlight",
+    description: "Peaceful night sky",
+    icon: Sparkles,
+    heroOverlay: "from-slate-900/90 via-indigo-900/50 to-purple-900/30",
+    accentColor: "text-indigo-300",
+    badgeBg: "bg-indigo-100",
+    badgeText: "text-indigo-800",
+    cardGradient: "from-slate-100 to-indigo-50",
+  },
+  rose: {
+    name: "Rose Garden",
+    description: "Romantic pink florals",
+    icon: Flower2,
+    heroOverlay: "from-rose-900/80 via-pink-800/40 to-rose-700/20",
+    accentColor: "text-rose-300",
+    badgeBg: "bg-rose-100",
+    badgeText: "text-rose-800",
+    cardGradient: "from-rose-50 to-pink-50",
+  },
+};
+
+type ThemeKey = keyof typeof MEMORIAL_THEMES;
 
 interface Memorial {
   id: string;
@@ -66,10 +163,50 @@ interface Memorial {
     description: string | null;
     eventDate: string;
   }>;
+  traditions?: Array<{
+    id: string;
+    type: "recipe" | "wisdom" | "skill" | "tradition" | "saying";
+    title: string;
+    content: string;
+    ingredients?: string[];
+    occasion?: string;
+    memory?: string;
+    addedBy: string;
+  }>;
+  favorites?: Array<{
+    id: string;
+    songTitle: string;
+    artist: string;
+    genre?: string;
+    significance?: string;
+    addedBy: string;
+  }>;
 }
 
 interface MemorialViewProps {
   memorial: Memorial;
+  userRole?: "owner" | "editor" | "viewer" | "guest";
+}
+
+// Types for editors
+interface Tradition {
+  id: string;
+  type: "recipe" | "wisdom" | "skill" | "tradition" | "saying";
+  title: string;
+  content: string;
+  ingredients?: string[];
+  occasion?: string;
+  memory?: string;
+  addedBy: string;
+}
+
+interface FavoriteMusic {
+  id: string;
+  songTitle: string;
+  artist: string;
+  genre?: string;
+  significance?: string;
+  addedBy: string;
 }
 
 type ViewMode = "default" | "kids" | "companion" | "stories" | "milestones" | "create";
@@ -89,10 +226,36 @@ const scaleIn = {
   visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
 };
 
-export function MemorialView({ memorial }: MemorialViewProps) {
-  const [activeTab, setActiveTab] = useState<"memories" | "photos" | "timeline" | "family" | "candles">("memories");
+export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps) {
+  const [activeTab, setActiveTab] = useState<"memories" | "photos" | "timeline" | "family" | "candles" | "traditions" | "music">("memories");
   const [showMemoryAssistant, setShowMemoryAssistant] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("default");
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [showGraveLocator, setShowGraveLocator] = useState(false);
+
+  // Permission check - owners and editors can edit content
+  const canEdit = userRole === "owner" || userRole === "editor";
+
+  // Editor modal states
+  const [showTraditionEditor, setShowTraditionEditor] = useState(false);
+  const [editingTradition, setEditingTradition] = useState<Tradition | null>(null);
+  const [showMusicEditor, setShowMusicEditor] = useState(false);
+  const [editingMusic, setEditingMusic] = useState<FavoriteMusic | null>(null);
+
+  // Local state for traditions and music (for demo mode - would be from API in production)
+  const [traditions, setTraditions] = useState<Tradition[]>(memorial.traditions || []);
+  const [favorites, setFavorites] = useState<FavoriteMusic[]>(memorial.favorites || []);
+
+  // Theme state - default to garden theme
+  const [currentTheme, setCurrentTheme] = useState<ThemeKey>((memorial.theme as ThemeKey) || "garden");
+  const [showThemeSelector, setShowThemeSelector] = useState(false);
+  const theme = MEMORIAL_THEMES[currentTheme];
+
+  // Living Portrait state
+  const [livingPortraitUrl, setLivingPortraitUrl] = useState<string | null>(
+    (memorial.settings?.livingPortraitUrl as string) || null
+  );
+  const [isGeneratingPortrait, setIsGeneratingPortrait] = useState(false);
 
   // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -109,6 +272,50 @@ export function MemorialView({ memorial }: MemorialViewProps) {
   const fullName = `${memorial.firstName} ${memorial.lastName}`;
   const age = memorial.birthDate && memorial.deathDate
     ? calculateAge(memorial.birthDate, memorial.deathDate)
+    : null;
+
+  // Featured quote - pull from first memory or use default
+  const featuredQuote = memorial.memories.length > 0
+    ? {
+        text: memorial.memories[0].content.length > 150
+          ? memorial.memories[0].content.slice(0, 150) + "..."
+          : memorial.memories[0].content,
+        author: memorial.memories[0].authorName,
+        relationship: memorial.memories[0].relationship,
+      }
+    : null;
+
+  // "Who They Were" personality traits - would come from memorial settings
+  const personalityTraits = [
+    { icon: "☕", label: "Morning coffee ritual" },
+    { icon: "🎹", label: "Piano every Sunday" },
+    { icon: "📚", label: "Romance novels" },
+    { icon: "🍪", label: "Famous cookies" },
+    { icon: "🌹", label: "Rose garden" },
+    { icon: "👨‍👩‍👧‍👦", label: `${memorial.memories.length || 0} memories shared` },
+  ];
+
+  // Engagement stats
+  const engagementStats = {
+    candles: memorial.candles.length,
+    memories: memorial.memories.length,
+    photos: memorial.photos.length,
+    familyMembers: 12, // Would come from collaborators count
+  };
+
+  // Recent activity for "Living Memorial" indicator
+  const recentActivity = memorial.candles.length > 0
+    ? {
+        action: "lit a candle",
+        name: memorial.candles[memorial.candles.length - 1].lighterName || "Someone",
+        timeAgo: "recently",
+      }
+    : memorial.memories.length > 0
+    ? {
+        action: "shared a memory",
+        name: memorial.memories[memorial.memories.length - 1].authorName,
+        timeAgo: "recently",
+      }
     : null;
 
   // Build ancestor profile for AI features
@@ -185,8 +392,13 @@ export function MemorialView({ memorial }: MemorialViewProps) {
     setLightboxIndex((prev) => (prev - 1 + memorial.photos.length) % memorial.photos.length);
   }, [memorial.photos.length]);
 
-  // Share functions
-  const shareUrl = typeof window !== "undefined" ? window.location.href : `/memorial/${memorial.slug}`;
+  // Share URL - use state to avoid hydration mismatch
+  const [shareUrl, setShareUrl] = useState(`/memorial/${memorial.slug}`);
+
+  useEffect(() => {
+    // Update to actual URL after mount to avoid hydration issues
+    setShareUrl(window.location.href);
+  }, []);
 
   const copyToClipboard = async () => {
     try {
@@ -248,6 +460,121 @@ export function MemorialView({ memorial }: MemorialViewProps) {
     setShowCandleModal(false);
     setCandleMessage("");
     setCandleName("");
+  };
+
+  // Tradition handlers
+  const handleAddTradition = () => {
+    setEditingTradition(null);
+    setShowTraditionEditor(true);
+  };
+
+  const handleEditTradition = (tradition: Tradition) => {
+    setEditingTradition(tradition);
+    setShowTraditionEditor(true);
+  };
+
+  const handleSaveTradition = (traditionData: Omit<Tradition, "id"> & { id?: string }) => {
+    if (traditionData.id) {
+      // Update existing
+      setTraditions((prev) =>
+        prev.map((t) => (t.id === traditionData.id ? { ...t, ...traditionData } as Tradition : t))
+      );
+      toast.success("Tradition updated!");
+    } else {
+      // Add new
+      const newTradition: Tradition = {
+        ...traditionData,
+        id: `tradition-${Date.now()}`,
+      } as Tradition;
+      setTraditions((prev) => [...prev, newTradition]);
+      toast.success("Tradition added!");
+    }
+    setShowTraditionEditor(false);
+    setEditingTradition(null);
+  };
+
+  const handleDeleteTradition = (id: string) => {
+    setTraditions((prev) => prev.filter((t) => t.id !== id));
+    toast.success("Tradition removed");
+  };
+
+  // Music handlers
+  const handleAddMusic = () => {
+    setEditingMusic(null);
+    setShowMusicEditor(true);
+  };
+
+  const handleEditMusic = (music: FavoriteMusic) => {
+    setEditingMusic(music);
+    setShowMusicEditor(true);
+  };
+
+  const handleSaveMusic = (musicData: Omit<FavoriteMusic, "id"> & { id?: string }) => {
+    if (musicData.id) {
+      // Update existing
+      setFavorites((prev) =>
+        prev.map((m) => (m.id === musicData.id ? { ...m, ...musicData } as FavoriteMusic : m))
+      );
+      toast.success("Song updated!");
+    } else {
+      // Add new
+      const newMusic: FavoriteMusic = {
+        ...musicData,
+        id: `music-${Date.now()}`,
+      } as FavoriteMusic;
+      setFavorites((prev) => [...prev, newMusic]);
+      toast.success("Song added!");
+    }
+    setShowMusicEditor(false);
+    setEditingMusic(null);
+  };
+
+  const handleDeleteMusic = (id: string) => {
+    setFavorites((prev) => prev.filter((m) => m.id !== id));
+    toast.success("Song removed");
+  };
+
+  // Generate Living Portrait
+  const handleGenerateLivingPortrait = async () => {
+    if (!memorial.profilePhotoUrl) {
+      toast.error("No profile photo to animate");
+      return;
+    }
+
+    if (isGeneratingPortrait) {
+      toast.info("Already generating, please wait...");
+      return;
+    }
+
+    setIsGeneratingPortrait(true);
+    toast.info("Creating Living Portrait... This may take 30-60 seconds.", {
+      duration: 10000,
+    });
+
+    try {
+      const response = await fetch("/api/ai/living-photo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageUrl: memorial.profilePhotoUrl,
+          motionBucketId: 40, // Subtle motion
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.videoUrl) {
+        setLivingPortraitUrl(data.videoUrl);
+        toast.success("Living Portrait created! Click play to see it.");
+      } else {
+        throw new Error(data.error || "Failed to generate");
+      }
+    } catch (error) {
+      console.error("Living portrait error:", error);
+      toast.error("Failed to create Living Portrait. Please try again.");
+    } finally {
+      setIsGeneratingPortrait(false);
+    }
   };
 
   // Kids Explorer Mode
@@ -362,148 +689,405 @@ export function MemorialView({ memorial }: MemorialViewProps) {
 
   return (
     <div className="min-h-screen bg-cream">
-      {/* Cover Photo */}
-      <div className="relative h-64 md:h-80 bg-sage-dark">
+      {/* Cinematic Hero Section */}
+      <div className="relative h-[70vh] min-h-[500px] max-h-[700px] bg-sage-dark overflow-hidden">
+        {/* Background Photo with Ken Burns effect */}
         {memorial.coverPhotoUrl ? (
-          <Image
-            src={memorial.coverPhotoUrl}
-            alt={`Cover photo for ${fullName}`}
-            fill
-            className="object-cover opacity-80"
-            priority
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-b from-sage to-sage-dark" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-
-        {/* Share Button */}
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          onClick={handleNativeShare}
-          className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2 hover:bg-white transition-colors"
-        >
-          <Share2 className="w-4 h-4" />
-          <span className="text-sm font-medium">Share</span>
-        </motion.button>
-      </div>
-
-      {/* Profile Section */}
-      <div className="max-w-4xl mx-auto px-4 -mt-20 relative z-10">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={stagger}
-          className="flex flex-col md:flex-row items-center md:items-end gap-6"
-        >
-          {/* Profile Photo */}
           <motion.div
-            variants={scaleIn}
-            className="w-40 h-40 rounded-full border-4 border-cream shadow-xl overflow-hidden bg-sage-pale"
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 20, ease: "linear" }}
+            className="absolute inset-0"
           >
-            {memorial.profilePhotoUrl ? (
-              <Image
-                src={memorial.profilePhotoUrl}
-                alt={fullName}
-                width={160}
-                height={160}
-                className="object-cover w-full h-full"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-sage-dark text-4xl font-display">
-                {memorial.firstName[0]}{memorial.lastName[0]}
-              </div>
-            )}
+            <Image
+              src={memorial.coverPhotoUrl}
+              alt={`Cover photo for ${fullName}`}
+              fill
+              className="object-cover"
+              priority
+            />
           </motion.div>
-
-          {/* Name & Dates */}
-          <motion.div variants={fadeIn} className="text-center md:text-left pb-4">
-            <h1 className="font-display text-4xl md:text-5xl text-sage-dark">
-              {fullName}
-            </h1>
-            <p className="text-gray-600 text-lg mt-2">
-              {memorial.birthDate && formatDate(memorial.birthDate)}
-              {memorial.birthDate && memorial.deathDate && " — "}
-              {memorial.deathDate && formatDate(memorial.deathDate)}
-              {age && <span className="ml-2 text-sage">({age} years)</span>}
-            </p>
-          </motion.div>
-        </motion.div>
-
-        {/* Biography */}
-        {memorial.biography && (
-          <Card className="mt-8">
-            <CardContent className="pt-6">
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                {memorial.biography}
-              </p>
-            </CardContent>
-          </Card>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-sage via-sage-dark to-gray-900" />
         )}
 
-        {/* Interactive Features */}
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3">
-          <button
-            onClick={() => setViewMode("kids")}
-            className="p-4 bg-sage-pale hover:bg-sage-light rounded-xl transition-colors text-center group"
-          >
-            <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">🧒</span>
-            <span className="text-sm font-medium text-sage-dark">For Children</span>
-            <span className="text-xs text-gray-500 block">Age-appropriate view</span>
-          </button>
+        {/* Gradient overlays for text readability - themed */}
+        <div className={`absolute inset-0 bg-gradient-to-t ${theme.heroOverlay}`} />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent" />
 
-          <button
-            onClick={() => setViewMode("companion")}
-            className="p-4 bg-sage-pale hover:bg-sage-light rounded-xl transition-colors text-center group"
+        {/* Share & Theme Buttons */}
+        <div className="absolute top-4 right-4 flex gap-2 z-20">
+          <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            onClick={() => setShowThemeSelector(true)}
+            className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2 hover:bg-white transition-colors"
           >
-            <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">💬</span>
-            <span className="text-sm font-medium text-sage-dark">Talk to {memorial.firstName}</span>
-            <span className="text-xs text-gray-500 block">AI companion</span>
-          </button>
-
-          <button
-            onClick={() => setViewMode("stories")}
-            className="p-4 bg-sage-pale hover:bg-sage-light rounded-xl transition-colors text-center group"
+            <Palette className="w-4 h-4" />
+            <span className="text-sm font-medium hidden sm:inline">Theme</span>
+          </motion.button>
+          <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            onClick={handleNativeShare}
+            className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2 hover:bg-white transition-colors"
           >
-            <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">🎧</span>
-            <span className="text-sm font-medium text-sage-dark">Story Time</span>
-            <span className="text-xs text-gray-500 block">Listen to memories</span>
-          </button>
-
-          <button
-            onClick={() => setViewMode("milestones")}
-            className="p-4 bg-gold/20 hover:bg-gold/30 rounded-xl transition-colors text-center group"
-          >
-            <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">💌</span>
-            <span className="text-sm font-medium text-sage-dark">Time Capsule</span>
-            <span className="text-xs text-gray-500 block">Milestone messages</span>
-          </button>
+            <Share2 className="w-4 h-4" />
+            <span className="text-sm font-medium">Share</span>
+          </motion.button>
         </div>
 
-        {/* Create Something Section */}
-        <Card className="mt-4 bg-gradient-to-r from-sage-pale/50 to-gold/10 border-0">
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-sage-dark">Create something for {memorial.firstName}</p>
-                <p className="text-sm text-gray-500">Draw a picture, write a letter, or record a message</p>
-              </div>
-              <Button onClick={() => setViewMode("create")} variant="secondary">
-                Create
-              </Button>
+        {/* Living Memorial Indicator */}
+        {recentActivity && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.8 }}
+            className="absolute top-4 left-4 z-20"
+          >
+            <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-sm text-gray-700">
+                {recentActivity.name} {recentActivity.action} {recentActivity.timeAgo}
+              </span>
             </div>
-          </CardContent>
-        </Card>
+          </motion.div>
+        )}
+
+        {/* Hero Content */}
+        <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 z-10">
+          <div className="max-w-4xl mx-auto w-full">
+            {/* Featured Quote */}
+            {featuredQuote && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mb-6"
+              >
+                <div className="flex items-start gap-3 max-w-2xl">
+                  <Quote className="w-8 h-8 text-gold/80 shrink-0 mt-1" />
+                  <div>
+                    <p className="text-white/90 text-lg md:text-xl italic leading-relaxed">
+                      &ldquo;{featuredQuote.text}&rdquo;
+                    </p>
+                    <p className="text-white/60 text-sm mt-2">
+                      — {featuredQuote.author}{featuredQuote.relationship && `, ${featuredQuote.relationship}`}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Profile Photo + Name */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="flex flex-col md:flex-row items-center md:items-end gap-6"
+            >
+              {/* Living Portrait - AI-animated profile photo */}
+              {memorial.profilePhotoUrl ? (
+                <LivingPortrait
+                  imageUrl={memorial.profilePhotoUrl}
+                  videoUrl={livingPortraitUrl}
+                  name={fullName}
+                  size="lg"
+                  showControls={true}
+                  isGenerating={isGeneratingPortrait}
+                  onGenerateRequest={handleGenerateLivingPortrait}
+                  betaMode={true} // Opt-in beta testing
+                />
+              ) : (
+                <div className="w-36 h-36 md:w-44 md:h-44 rounded-full border-4 border-white/90 shadow-2xl overflow-hidden bg-sage-pale flex items-center justify-center text-sage-dark text-4xl font-serif bg-gradient-to-br from-sage-pale to-sage-light">
+                  {memorial.firstName[0]}{memorial.lastName[0]}
+                </div>
+              )}
+
+              {/* Name & Life Span */}
+              <div className="text-center md:text-left">
+                <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-white font-bold tracking-tight">
+                  {fullName}
+                </h1>
+                <p className="text-white/80 text-lg md:text-xl mt-2">
+                  {memorial.birthDate && new Date(memorial.birthDate).getFullYear()}
+                  {memorial.birthDate && memorial.deathDate && " – "}
+                  {memorial.deathDate && new Date(memorial.deathDate).getFullYear()}
+                  {age && (
+                    <span className={`ml-3 ${theme.accentColor}`}>
+                      · {age} years of love
+                    </span>
+                  )}
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Engagement Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="flex flex-wrap gap-4 md:gap-6 mt-6"
+            >
+              <div className="flex items-center gap-2 text-white/80">
+                <Flame className="w-5 h-5 text-orange-400" />
+                <span className="text-sm md:text-base">{engagementStats.candles} candles lit</span>
+              </div>
+              <div className="flex items-center gap-2 text-white/80">
+                <Camera className="w-5 h-5 text-blue-400" />
+                <span className="text-sm md:text-base">{engagementStats.photos} photos</span>
+              </div>
+              <div className="flex items-center gap-2 text-white/80">
+                <MessageCircle className="w-5 h-5 text-green-400" />
+                <span className="text-sm md:text-base">{engagementStats.memories} memories</span>
+              </div>
+              <div className="flex items-center gap-2 text-white/80">
+                <Users className="w-5 h-5 text-purple-400" />
+                <span className="text-sm md:text-base">{engagementStats.familyMembers} family members</span>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* "Who They Were" Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-8"
+        >
+          <Card className="overflow-hidden">
+            <CardHeader className={`bg-gradient-to-r ${theme.cardGradient} border-b border-sage-pale/30`}>
+              <CardTitle className="flex items-center gap-2 text-sage-dark">
+                <Sparkles className="w-5 h-5 text-gold" />
+                What Made {memorial.firstName} Special
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {personalityTraits.map((trait, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.05 }}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-sage-pale/30 hover:bg-sage-pale/50 transition-colors"
+                  >
+                    <span className="text-2xl">{trait.icon}</span>
+                    <span className="text-sm text-gray-700">{trait.label}</span>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Philosophy/Quote if exists */}
+              {memorial.biography && (
+                <div className="mt-6 p-4 border-l-4 border-gold bg-gold/5 rounded-r-lg">
+                  <p className="text-gray-700 italic">
+                    {memorial.biography.length > 200
+                      ? memorial.biography.slice(0, 200) + "..."
+                      : memorial.biography}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Quick Actions - Primary CTAs */}
+        <div className="flex flex-wrap gap-3 mb-8">
+          <Button
+            onClick={() => setShowCandleModal(true)}
+            className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white"
+          >
+            <Flame className="w-4 h-4 mr-2" />
+            Light a Candle
+          </Button>
+          <Button variant="outline" onClick={() => setShowMemoryAssistant(true)}>
+            <MessageCircle className="w-4 h-4 mr-2" />
+            Share a Memory
+          </Button>
+          <Button variant="outline" onClick={handleNativeShare}>
+            <Share2 className="w-4 h-4 mr-2" />
+            Share Memorial
+          </Button>
+        </div>
+
+        {/* Interactive Experiences */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-8"
+        >
+          <h2 className="font-serif text-xl text-sage-dark mb-4 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-gold" />
+            Interactive Experiences
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <button
+              onClick={() => setViewMode("companion")}
+              className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-xl transition-all text-center group border border-purple-200"
+            >
+              <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">💬</span>
+              <span className="text-sm font-medium text-purple-900">Talk to {memorial.firstName}</span>
+              <span className="text-xs text-purple-600 block">AI companion</span>
+            </button>
+
+            <button
+              onClick={() => setViewMode("stories")}
+              className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl transition-all text-center group border border-blue-200"
+            >
+              <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">🎧</span>
+              <span className="text-sm font-medium text-blue-900">Story Time</span>
+              <span className="text-xs text-blue-600 block">Listen to memories</span>
+            </button>
+
+            <button
+              onClick={() => setViewMode("milestones")}
+              className="p-4 bg-gradient-to-br from-gold/20 to-gold/30 hover:from-gold/30 hover:to-gold/40 rounded-xl transition-all text-center group border border-gold/30"
+            >
+              <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">💌</span>
+              <span className="text-sm font-medium text-amber-900">Time Capsule</span>
+              <span className="text-xs text-amber-700 block">Future messages</span>
+            </button>
+
+            <button
+              onClick={() => setViewMode("kids")}
+              className="p-4 bg-gradient-to-br from-pink-50 to-pink-100 hover:from-pink-100 hover:to-pink-200 rounded-xl transition-all text-center group border border-pink-200"
+            >
+              <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">🧒</span>
+              <span className="text-sm font-medium text-pink-900">For Children</span>
+              <span className="text-xs text-pink-600 block">Age-appropriate</span>
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Physical Connection & Preservation */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-8"
+        >
+          <h2 className="font-serif text-xl text-sage-dark mb-4 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-sage" />
+            Physical Connection
+          </h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            {/* QR Code */}
+            <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setShowQRModal(true)}>
+              <CardContent className="p-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-sage-pale flex items-center justify-center shrink-0">
+                    <QrCode className="w-6 h-6 text-sage" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-dark">QR Code</h3>
+                    <p className="text-sm text-gray-500">Print for headstone, programs, or memorial cards</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Grave Locator */}
+            <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setShowGraveLocator(true)}>
+              <CardContent className="p-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                    <Navigation className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-dark">Find Their Resting Place</h3>
+                    <p className="text-sm text-gray-500">GPS navigation to the exact location</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Permanence */}
+            <Card className="overflow-hidden hover:shadow-lg transition-shadow bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-amber-200 flex items-center justify-center shrink-0">
+                    <Shield className="w-6 h-6 text-amber-700" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-amber-900">Preserved Forever</h3>
+                    <p className="text-sm text-amber-700">Blockchain-backed 200+ year guarantee</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </motion.div>
+
+        {/* AI Tools */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-8"
+        >
+          <h2 className="font-serif text-xl text-sage-dark mb-4 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-purple-500" />
+            AI-Powered Tools
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Card className="p-3 hover:shadow-md transition-shadow cursor-pointer group">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <Mic className="w-5 h-5 text-purple-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-dark">Voice Clone</span>
+                <span className="text-xs text-gray-500">Hear them again</span>
+              </div>
+            </Card>
+
+            <Card className="p-3 hover:shadow-md transition-shadow cursor-pointer group">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <ImageIcon className="w-5 h-5 text-blue-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-dark">Photo Restore</span>
+                <span className="text-xs text-gray-500">Enhance old photos</span>
+              </div>
+            </Card>
+
+            <Card className="p-3 hover:shadow-md transition-shadow cursor-pointer group">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <Video className="w-5 h-5 text-green-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-dark">Animate Photo</span>
+                <span className="text-xs text-gray-500">Bring photos to life</span>
+              </div>
+            </Card>
+
+            <Card className="p-3 hover:shadow-md transition-shadow cursor-pointer group" onClick={() => setViewMode("create")}>
+              <div className="flex flex-col items-center text-center">
+                <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <Gift className="w-5 h-5 text-pink-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-dark">Create Art</span>
+                <span className="text-xs text-gray-500">Draw, write, record</span>
+              </div>
+            </Card>
+          </div>
+        </motion.div>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-2 mt-8 border-b border-sage-light">
-          {(["memories", "photos", "timeline", "family", "candles"] as const).map((tab) => (
+        <div className="flex gap-2 mt-8 border-b border-sage-light overflow-x-auto">
+          {(["memories", "photos", "timeline", "family", "candles", "traditions", "music"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 font-medium capitalize transition-colors ${
+              className={`px-4 py-3 font-medium capitalize transition-colors whitespace-nowrap ${
                 activeTab === tab
                   ? "text-sage-dark border-b-2 border-sage-dark"
                   : "text-gray-500 hover:text-sage"
@@ -518,6 +1102,16 @@ export function MemorialView({ memorial }: MemorialViewProps) {
               {tab === "candles" && memorial.candles.length > 0 && (
                 <span className="ml-2 text-sm bg-gold/20 text-gold px-2 py-0.5 rounded-full">
                   {memorial.candles.length}
+                </span>
+              )}
+              {tab === "traditions" && traditions.length > 0 && (
+                <span className="ml-2 text-sm bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                  {traditions.length}
+                </span>
+              )}
+              {tab === "music" && favorites.length > 0 && (
+                <span className="ml-2 text-sm bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
+                  {favorites.length}
                 </span>
               )}
             </button>
@@ -766,13 +1360,47 @@ export function MemorialView({ memorial }: MemorialViewProps) {
               </motion.div>
             </motion.div>
           )}
+
+          {/* Traditions Tab */}
+          {activeTab === "traditions" && (
+            <motion.div initial="hidden" animate="visible" variants={fadeIn}>
+              <h2 className="font-display text-2xl text-sage-dark mb-6">
+                Traditions & Legacy
+              </h2>
+              <TraditionsLegacy
+                traditions={traditions}
+                name={memorial.firstName}
+                canEdit={canEdit}
+                onAdd={handleAddTradition}
+                onEdit={handleEditTradition}
+                onDelete={handleDeleteTradition}
+              />
+            </motion.div>
+          )}
+
+          {/* Music Tab */}
+          {activeTab === "music" && (
+            <motion.div initial="hidden" animate="visible" variants={fadeIn}>
+              <h2 className="font-display text-2xl text-sage-dark mb-6">
+                Favorite Music
+              </h2>
+              <MusicGallery
+                favorites={favorites}
+                name={memorial.firstName}
+                canEdit={canEdit}
+                onAdd={handleAddMusic}
+                onEdit={handleEditMusic}
+                onDelete={handleDeleteMusic}
+              />
+            </motion.div>
+          )}
         </div>
 
         {/* QR Code Section */}
         <div className="mt-8 mb-12">
           <QRMemorialCode
             memorialId={memorial.id}
-            memorialUrl={typeof window !== "undefined" ? window.location.href : `/memorial/${memorial.slug}`}
+            memorialUrl={shareUrl}
             deceasedName={fullName}
             profilePhotoUrl={memorial.profilePhotoUrl || undefined}
             birthYear={ancestorProfile.birthYear}
@@ -1012,6 +1640,180 @@ export function MemorialView({ memorial }: MemorialViewProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* QR Code Modal */}
+      <AnimatePresence>
+        {showQRModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto"
+            onClick={() => setShowQRModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-xl my-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-serif text-xl text-sage-dark">QR Memorial Code</h3>
+                <button onClick={() => setShowQRModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <QRMemorialCode
+                memorialId={memorial.id}
+                memorialUrl={shareUrl}
+                deceasedName={fullName}
+                profilePhotoUrl={memorial.profilePhotoUrl || undefined}
+                birthYear={ancestorProfile.birthYear}
+                deathYear={ancestorProfile.deathYear}
+                showDownloadOptions={true}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Grave Locator Modal */}
+      <AnimatePresence>
+        {showGraveLocator && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto"
+            onClick={() => setShowGraveLocator(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-xl my-8 max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-serif text-xl text-sage-dark">Find Resting Place</h3>
+                <button onClick={() => setShowGraveLocator(false)} className="text-gray-400 hover:text-gray-600">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <GraveLocator
+                location={{
+                  deceasedName: fullName,
+                  cemeteryName: "Greenwood Cemetery",
+                  cemeteryAddress: "500 25th Street",
+                  cemeteryCity: "Brooklyn",
+                  cemeteryState: "NY",
+                  section: "Section B",
+                  plot: "Row 12, Plot 45",
+                  gpsLat: 40.7589,
+                  gpsLng: -73.9851,
+                  epitaph: "Forever in our hearts",
+                }}
+                onVisitLogged={(visit) => {
+                  console.log("Visit logged:", visit);
+                }}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Theme Selector Modal */}
+      <AnimatePresence>
+        {showThemeSelector && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+            onClick={() => setShowThemeSelector(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h3 className="font-serif text-xl text-sage-dark flex items-center gap-2">
+                    <Palette className="w-5 h-5 text-sage" />
+                    Choose a Theme
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Select a style that reflects {memorial.firstName}&apos;s personality
+                  </p>
+                </div>
+                <button onClick={() => setShowThemeSelector(false)} className="text-gray-400 hover:text-gray-600">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {(Object.entries(MEMORIAL_THEMES) as [ThemeKey, typeof MEMORIAL_THEMES[ThemeKey]][]).map(([key, themeOption]) => (
+                  <button
+                    key={key}
+                    onClick={() => {
+                      setCurrentTheme(key);
+                      toast.success(`Theme changed to ${themeOption.name}`);
+                    }}
+                    className={`relative p-4 rounded-xl border-2 transition-all text-left ${
+                      currentTheme === key
+                        ? "border-sage bg-sage-pale/30 shadow-md"
+                        : "border-gray-200 hover:border-sage-light hover:bg-gray-50"
+                    }`}
+                  >
+                    {currentTheme === key && (
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-sage flex items-center justify-center">
+                        <Check className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+                    <themeOption.icon className="w-6 h-6 mb-2" />
+                    <span className="font-medium text-gray-dark block">{themeOption.name}</span>
+                    <span className="text-xs text-gray-500">{themeOption.description}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <p className="text-xs text-gray-400 text-center">
+                  Theme changes are applied instantly and saved automatically
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Tradition Editor Modal */}
+      <TraditionEditor
+        isOpen={showTraditionEditor}
+        onClose={() => {
+          setShowTraditionEditor(false);
+          setEditingTradition(null);
+        }}
+        onSave={handleSaveTradition}
+        tradition={editingTradition}
+        userName="Family Member"
+      />
+
+      {/* Music Editor Modal */}
+      <MusicEditor
+        isOpen={showMusicEditor}
+        onClose={() => {
+          setShowMusicEditor(false);
+          setEditingMusic(null);
+        }}
+        onSave={handleSaveMusic}
+        music={editingMusic}
+        userName="Family Member"
+      />
     </div>
   );
 }

@@ -22,7 +22,8 @@ import {
   MessageSquare,
   Image as ImageIcon,
   Gift,
-  Star,
+  Sparkles,
+  Search,
 } from "lucide-react";
 
 interface Memorial {
@@ -93,21 +94,21 @@ const quickActions = [
     label: "Upload Photos",
     description: "Add new memories",
     href: "/memorials",
-    color: "bg-blue-500",
+    color: "bg-gold",
   },
   {
     icon: Gift,
     label: "Send Flowers",
     description: "Shop memorial gifts",
     href: "/shop",
-    color: "bg-pink-500",
+    color: "bg-coral",
   },
   {
     icon: Users,
     label: "Invite Family",
     description: "Share access",
     href: "/family",
-    color: "bg-purple-500",
+    color: "bg-twilight",
   },
 ];
 
@@ -116,6 +117,7 @@ export default function DashboardPage() {
   const { user, isLoading: authLoading } = useRequireAuth();
 
   const [filter, setFilter] = useState<"all" | "creator" | "contributor">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [memorials, setMemorials] = useState<Memorial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -167,9 +169,13 @@ export default function DashboardPage() {
     };
   });
 
-  const filteredMemorials = transformedMemorials.filter((m) =>
-    filter === "all" ? true : m.role === filter
-  );
+  const filteredMemorials = transformedMemorials.filter((m) => {
+    const matchesFilter = filter === "all" ? true : m.role === filter;
+    const matchesSearch = searchQuery === "" ||
+      m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.location.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
 
   // Calculate stats
   const totalMemories = transformedMemorials.reduce((sum, m) => sum + m.memoriesCount, 0);
@@ -206,7 +212,7 @@ export default function DashboardPage() {
       <Header />
 
       {/* Welcome Section */}
-      <section className="bg-gradient-to-b from-sage-pale/50 to-cream py-8">
+      <section className="bg-gradient-to-r from-gold-pale/30 via-cream to-coral-pale/20 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -244,10 +250,10 @@ export default function DashboardPage() {
                 <Card className="p-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-sage-pale flex items-center justify-center">
-                      <Flower2 className="w-5 h-5 text-sage" />
+                      <Flower2 className="w-5 h-5 text-sage-dark" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-gray-dark">{transformedMemorials.length}</p>
+                      <p className="text-2xl font-bold text-sage-dark">{transformedMemorials.length}</p>
                       <p className="text-sm text-gray-body">Memorials</p>
                     </div>
                   </div>
@@ -257,11 +263,11 @@ export default function DashboardPage() {
               <StaggerItem>
                 <Card className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                      <MessageSquare className="w-5 h-5 text-blue-600" />
+                    <div className="w-10 h-10 rounded-lg bg-coral-pale flex items-center justify-center">
+                      <MessageSquare className="w-5 h-5 text-coral-dark" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-gray-dark">{totalMemories}</p>
+                      <p className="text-2xl font-bold text-coral-dark">{totalMemories}</p>
                       <p className="text-sm text-gray-body">Memories</p>
                     </div>
                   </div>
@@ -271,11 +277,11 @@ export default function DashboardPage() {
               <StaggerItem>
                 <Card className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gold/20 flex items-center justify-center">
-                      <span className="text-xl">🕯️</span>
+                    <div className="w-10 h-10 rounded-lg bg-gold-pale flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-gold-dark" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-gray-dark">{totalCandles}</p>
+                      <p className="text-2xl font-bold text-gold-dark">{totalCandles}</p>
                       <p className="text-sm text-gray-body">Candles Lit</p>
                     </div>
                   </div>
@@ -285,11 +291,11 @@ export default function DashboardPage() {
               <StaggerItem>
                 <Card className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 text-green-600" />
+                    <div className="w-10 h-10 rounded-lg bg-rose-pale flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 text-rose-dark" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-gray-dark">{totalViews}</p>
+                      <p className="text-2xl font-bold text-rose-dark">{totalViews}</p>
                       <p className="text-sm text-gray-body">Views this month</p>
                     </div>
                   </div>
@@ -331,22 +337,36 @@ export default function DashboardPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Memorials List */}
             <div className="lg:col-span-2">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                 <h2 className="text-lg font-semibold text-gray-dark">Your Memorials</h2>
-                <div className="flex gap-2">
-                  {(["all", "creator", "contributor"] as const).map((f) => (
-                    <button
-                      key={f}
-                      onClick={() => setFilter(f)}
-                      className={`px-3 py-1 rounded-full text-sm capitalize transition-colors ${
-                        filter === f
-                          ? "bg-sage text-white"
-                          : "bg-sage-pale/50 text-gray-body hover:bg-sage-pale"
-                      }`}
-                    >
-                      {f}
-                    </button>
-                  ))}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {/* Search Input */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search memorials..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9 pr-4 py-1.5 rounded-lg border border-sage-pale bg-white focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent text-sm w-full sm:w-48"
+                    />
+                  </div>
+                  {/* Filter Buttons */}
+                  <div className="flex gap-2">
+                    {(["all", "creator", "contributor"] as const).map((f) => (
+                      <button
+                        key={f}
+                        onClick={() => setFilter(f)}
+                        className={`px-3 py-1 rounded-full text-sm capitalize transition-colors ${
+                          filter === f
+                            ? "bg-sage text-white"
+                            : "bg-sage-pale/50 text-gray-body hover:bg-sage-pale"
+                        }`}
+                      >
+                        {f}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -478,24 +498,6 @@ export default function DashboardPage() {
                 </button>
               </Card>
 
-              {/* Premium Upsell */}
-              <Card className="mt-6 p-4 bg-gradient-to-br from-gold/10 to-sage-pale/30 border-gold/20">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gold/20 flex items-center justify-center">
-                    <Star className="w-5 h-5 text-gold" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-dark">Upgrade to Premium</h3>
-                    <p className="text-sm text-gray-body mt-1">
-                      Unlock unlimited photos, voice cloning, and more AI features.
-                    </p>
-                    <Button variant="outline" size="sm" className="mt-3">
-                      Learn More
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-
               {/* Help Card */}
               <Card className="mt-6 p-4">
                 <h3 className="font-medium text-gray-dark mb-2">Need Help?</h3>
@@ -508,6 +510,28 @@ export default function DashboardPage() {
                   </Button>
                 </Link>
               </Card>
+
+              {/* Premium Upsell - Only show after user has engaged with platform */}
+              {totalMemories > 0 && (
+                <Card className="mt-6 p-4 bg-gradient-to-br from-gold-pale/50 to-coral-pale/30 border-gold/20">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gold/20 flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-gold-dark" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-dark">Unlock More Features</h3>
+                      <p className="text-sm text-gray-body mt-1">
+                        Unlimited photos, AI voice cloning, and family collaboration.
+                      </p>
+                      <Link href="/pricing">
+                        <Button variant="outline" size="sm" className="mt-3">
+                          View Plans
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </Card>
+              )}
             </div>
           </div>
         </div>

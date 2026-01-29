@@ -1,20 +1,36 @@
 "use client";
 
 import { Card } from "../ui/Card";
+import {
+  BookOpen,
+  Tag,
+  FileText,
+  Frame,
+  Archive,
+  Gem,
+  Gift,
+  Flower,
+  TreeDeciduous,
+} from "lucide-react";
 import type { Product, ProductCategory } from "@/types/shop";
 import { formatCurrency } from "@/lib/shop-utils";
 
-const CATEGORY_ICONS: Record<ProductCategory, string> = {
-  photo_books: "📖",
-  qr_plaques: "🏷️",
-  memorial_cards: "📄",
-  canvas_prints: "🖼️",
-  urns: "⚱️",
-  jewelry: "💎",
-  keepsakes: "🎁",
-  flowers: "💐",
-  donations: "🌳"
+const CATEGORY_ICONS: Record<ProductCategory, React.ComponentType<{ className?: string }>> = {
+  photo_books: BookOpen,
+  qr_plaques: Tag,
+  memorial_cards: FileText,
+  canvas_prints: Frame,
+  urns: Archive,
+  jewelry: Gem,
+  keepsakes: Gift,
+  flowers: Flower,
+  donations: TreeDeciduous
 };
+
+function CategoryIcon({ category, className = "w-5 h-5" }: { category: ProductCategory; className?: string }) {
+  const Icon = CATEGORY_ICONS[category];
+  return Icon ? <Icon className={className} /> : null;
+}
 
 interface ProductCardProps {
   product: Product;
@@ -28,9 +44,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       onClick={() => onClick(product)}
     >
       <div className="aspect-square bg-gray-100 rounded-lg mb-3 flex items-center justify-center">
-        <span className="text-4xl">
-          {CATEGORY_ICONS[product.category]}
-        </span>
+        <CategoryIcon category={product.category} className="w-10 h-10 text-gray-600" />
       </div>
       <h3 className="font-semibold text-gray-900">{product.name}</h3>
       <p className="text-sm text-gray-600 line-clamp-2 mt-1">{product.description}</p>

@@ -13,11 +13,29 @@ import {
   Truck,
   Shield,
   Clock,
+  Flower,
+  Circle,
+  Flame,
+  Frame,
+  Wind,
+  ShoppingBasket,
+  TreeDeciduous,
+  BookOpen,
+  type LucideIcon,
 } from "lucide-react";
 import { useState } from "react";
 
 // Sample products
-const products = [
+const products: Array<{
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  rating: number;
+  reviews: number;
+  icon: LucideIcon;
+}> = [
   {
     id: "1",
     name: "Memorial Flower Arrangement",
@@ -26,7 +44,7 @@ const products = [
     category: "flowers",
     rating: 4.9,
     reviews: 124,
-    image: "🌸",
+    icon: Flower,
   },
   {
     id: "2",
@@ -36,7 +54,7 @@ const products = [
     category: "keepsakes",
     rating: 4.8,
     reviews: 89,
-    image: "🪨",
+    icon: Circle,
   },
   {
     id: "3",
@@ -46,7 +64,7 @@ const products = [
     category: "candles",
     rating: 4.7,
     reviews: 156,
-    image: "🕯️",
+    icon: Flame,
   },
   {
     id: "4",
@@ -56,7 +74,7 @@ const products = [
     category: "tech",
     rating: 4.9,
     reviews: 67,
-    image: "🖼️",
+    icon: Frame,
   },
   {
     id: "5",
@@ -66,7 +84,7 @@ const products = [
     category: "keepsakes",
     rating: 4.8,
     reviews: 98,
-    image: "🎐",
+    icon: Wind,
   },
   {
     id: "6",
@@ -76,7 +94,7 @@ const products = [
     category: "gifts",
     rating: 4.9,
     reviews: 112,
-    image: "🧺",
+    icon: ShoppingBasket,
   },
   {
     id: "7",
@@ -86,7 +104,7 @@ const products = [
     category: "eco",
     rating: 5.0,
     reviews: 203,
-    image: "🌳",
+    icon: TreeDeciduous,
   },
   {
     id: "8",
@@ -96,7 +114,7 @@ const products = [
     category: "keepsakes",
     rating: 4.9,
     reviews: 145,
-    image: "📖",
+    icon: BookOpen,
   },
 ];
 
@@ -120,7 +138,7 @@ export default function ShopPage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-sage-pale/50 to-cream py-16">
+      <section className="relative overflow-hidden bg-gradient-to-r from-gold-pale/40 via-cream to-rose-pale/30 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
             <div className="text-center max-w-3xl mx-auto">
@@ -148,13 +166,18 @@ export default function ShopPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { icon: Truck, text: "Free Delivery" },
-              { icon: Shield, text: "Secure Payment" },
-              { icon: Clock, text: "Same Day Shipping" },
-              { icon: Heart, text: "With Care" },
+              { icon: Truck, text: "Free Delivery", color: "sage" },
+              { icon: Shield, text: "Secure Payment", color: "gold" },
+              { icon: Clock, text: "Same Day Shipping", color: "coral" },
+              { icon: Heart, text: "With Care", color: "rose" },
             ].map((item) => (
               <div key={item.text} className="flex items-center justify-center gap-2">
-                <item.icon className="w-5 h-5 text-sage" />
+                <item.icon className={`w-5 h-5 ${
+                  item.color === "sage" ? "text-sage-dark" :
+                  item.color === "gold" ? "text-gold-dark" :
+                  item.color === "coral" ? "text-coral" :
+                  "text-rose"
+                }`} />
                 <span className="text-sm font-medium text-gray-dark">{item.text}</span>
               </div>
             ))}
@@ -195,7 +218,7 @@ export default function ShopPage() {
                   >
                     <Card className="h-full overflow-hidden hover:shadow-hover transition-shadow cursor-pointer">
                       <div className="aspect-square bg-sage-pale/30 flex items-center justify-center">
-                        <span className="text-6xl">{product.image}</span>
+                        <product.icon className="w-16 h-16 text-sage" />
                       </div>
                       <div className="p-4">
                         <h3 className="font-serif font-semibold text-gray-dark mb-1">
@@ -230,11 +253,11 @@ export default function ShopPage() {
       </section>
 
       {/* Gift Cards CTA */}
-      <section className="py-16 bg-gradient-to-r from-sage-pale/50 to-gold/10">
+      <section className="py-16 bg-gradient-to-r from-coral-pale/40 to-gold-pale/40">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <SlideUp>
             <div className="flex items-center justify-center gap-3 mb-4">
-              <Gift className="w-8 h-8 text-sage" />
+              <Gift className="w-8 h-8 text-coral-dark" />
               <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-dark">
                 Gift Cards Available
               </h2>

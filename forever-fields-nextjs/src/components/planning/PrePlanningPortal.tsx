@@ -5,6 +5,19 @@ import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import { Input } from "../ui/Input";
 import { Textarea } from "../ui/Textarea";
+import {
+  ClipboardList,
+  User,
+  Feather,
+  Church,
+  Mail,
+  FileText,
+  Laptop,
+  Users,
+  DollarSign,
+  CheckCircle,
+  type LucideIcon,
+} from "lucide-react";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -475,17 +488,17 @@ export function PrePlanningPortal({
   }, [plan, onComplete]);
 
   // Section navigation
-  const sections: Array<{ id: PlanSection; label: string; icon: string }> = [
-    { id: "overview", label: "Overview", icon: "📋" },
-    { id: "personal", label: "Personal Info", icon: "👤" },
-    { id: "final_wishes", label: "Final Wishes", icon: "🕊️" },
-    { id: "service_preferences", label: "Service Preferences", icon: "⛪" },
-    { id: "legacy_messages", label: "Legacy Messages", icon: "💌" },
-    { id: "documents", label: "Important Documents", icon: "📄" },
-    { id: "digital_assets", label: "Digital Assets", icon: "💻" },
-    { id: "authorized_contacts", label: "Authorized Contacts", icon: "👥" },
-    { id: "financial", label: "Financial Information", icon: "💰" },
-    { id: "preview", label: "Preview & Complete", icon: "✓" }
+  const sections: Array<{ id: PlanSection; label: string; icon: LucideIcon }> = [
+    { id: "overview", label: "Overview", icon: ClipboardList },
+    { id: "personal", label: "Personal Info", icon: User },
+    { id: "final_wishes", label: "Final Wishes", icon: Feather },
+    { id: "service_preferences", label: "Service Preferences", icon: Church },
+    { id: "legacy_messages", label: "Legacy Messages", icon: Mail },
+    { id: "documents", label: "Important Documents", icon: FileText },
+    { id: "digital_assets", label: "Digital Assets", icon: Laptop },
+    { id: "authorized_contacts", label: "Authorized Contacts", icon: Users },
+    { id: "financial", label: "Financial Information", icon: DollarSign },
+    { id: "preview", label: "Preview & Complete", icon: CheckCircle }
   ];
 
   // ============================================================================
@@ -536,10 +549,10 @@ export function PrePlanningPortal({
               onClick={() => setCurrentSection(section.id)}
             >
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-2xl">{section.icon}</span>
+                <section.icon className="w-6 h-6 text-gray-600" />
                 <h3 className="font-semibold text-gray-900">{section.label}</h3>
                 {isComplete && (
-                  <span className="ml-auto text-green-600">✓</span>
+                  <CheckCircle className="ml-auto w-5 h-5 text-green-600" />
                 )}
               </div>
               <p className="text-sm text-gray-600">
@@ -2007,10 +2020,10 @@ export function PrePlanningPortal({
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
-                  <span>{section.icon}</span>
+                  <section.icon className="w-5 h-5" />
                   <span className="flex-1">{section.label}</span>
                   {getSectionStatus(section.id) && section.id !== "overview" && section.id !== "preview" && (
-                    <span className="text-green-600 text-sm">✓</span>
+                    <CheckCircle className="w-4 h-4 text-green-600" />
                   )}
                 </button>
               ))}
@@ -2028,7 +2041,7 @@ export function PrePlanningPortal({
               >
                 {sections.map(section => (
                   <option key={section.id} value={section.id}>
-                    {section.icon} {section.label}
+                    {section.label}
                   </option>
                 ))}
               </select>

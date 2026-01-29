@@ -2,6 +2,27 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Input, Textarea } from "@/components/ui";
+import {
+  Landmark,
+  Flame,
+  Leaf,
+  Heart,
+  PartyPopper,
+  Medal,
+  Church,
+  RectangleVertical,
+  ClipboardList,
+  CheckCircle,
+  Store,
+  DollarSign,
+  Users,
+  FileText,
+  AlertTriangle,
+  Calendar,
+  Edit3,
+  Flower2,
+  type LucideIcon,
+} from "lucide-react";
 
 // ============================================
 // TYPES & INTERFACES
@@ -147,16 +168,16 @@ interface FuneralPlanningHubProps {
 // CONSTANTS
 // ============================================
 
-const SERVICE_TYPES: Record<ServiceType, { label: string; icon: string; description: string }> = {
-  traditional_burial: { label: "Traditional Burial", icon: "⚱️", description: "Full service with viewing, funeral, and burial" },
-  cremation: { label: "Cremation with Service", icon: "🕯️", description: "Memorial service followed by cremation" },
-  green_burial: { label: "Green/Natural Burial", icon: "🌿", description: "Eco-friendly burial without embalming" },
-  memorial_service: { label: "Memorial Service", icon: "🙏", description: "Service without the body present" },
-  celebration_of_life: { label: "Celebration of Life", icon: "🎉", description: "Uplifting tribute focusing on their life" },
-  military_honors: { label: "Military Honors", icon: "🎖️", description: "Service with military funeral honors" },
-  religious_ceremony: { label: "Religious Ceremony", icon: "⛪", description: "Traditional religious funeral rites" },
-  direct_cremation: { label: "Direct Cremation", icon: "🔥", description: "Cremation without prior viewing or service" },
-  direct_burial: { label: "Direct Burial", icon: "🪦", description: "Burial without prior viewing or service" },
+const SERVICE_TYPES: Record<ServiceType, { label: string; icon: LucideIcon; description: string }> = {
+  traditional_burial: { label: "Traditional Burial", icon: Landmark, description: "Full service with viewing, funeral, and burial" },
+  cremation: { label: "Cremation with Service", icon: Flame, description: "Memorial service followed by cremation" },
+  green_burial: { label: "Green/Natural Burial", icon: Leaf, description: "Eco-friendly burial without embalming" },
+  memorial_service: { label: "Memorial Service", icon: Heart, description: "Service without the body present" },
+  celebration_of_life: { label: "Celebration of Life", icon: PartyPopper, description: "Uplifting tribute focusing on their life" },
+  military_honors: { label: "Military Honors", icon: Medal, description: "Service with military funeral honors" },
+  religious_ceremony: { label: "Religious Ceremony", icon: Church, description: "Traditional religious funeral rites" },
+  direct_cremation: { label: "Direct Cremation", icon: Flame, description: "Cremation without prior viewing or service" },
+  direct_burial: { label: "Direct Burial", icon: RectangleVertical, description: "Burial without prior viewing or service" },
 };
 
 const RELIGIONS: Record<ReligiousAffiliation, { label: string; specialNotes?: string }> = {
@@ -461,7 +482,7 @@ export function FuneralPlanningHub({
             <div>
               <h3 className="font-medium text-sage-dark mb-3">What type of service are you planning?</h3>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {Object.entries(SERVICE_TYPES).map(([key, { label, icon, description }]) => (
+                {Object.entries(SERVICE_TYPES).map(([key, { label, icon: Icon, description }]) => (
                   <button
                     key={key}
                     onClick={() => updateServiceDetails({ type: key as ServiceType })}
@@ -471,7 +492,7 @@ export function FuneralPlanningHub({
                         : "border-gray-200 hover:border-sage-light"
                     }`}
                   >
-                    <div className="text-2xl mb-2">{icon}</div>
+                    <Icon className="w-6 h-6 text-sage-dark mb-2" />
                     <div className="font-medium text-sage-dark">{label}</div>
                     <div className="text-xs text-gray-500 mt-1">{description}</div>
                   </button>
@@ -615,12 +636,12 @@ export function FuneralPlanningHub({
       {/* Tab Navigation */}
       <div className="flex gap-1 overflow-x-auto pb-2">
         {[
-          { id: "overview", label: "Overview", icon: "📋" },
-          { id: "checklist", label: "Checklist", icon: "✓" },
-          { id: "vendors", label: "Vendors", icon: "🏪" },
-          { id: "budget", label: "Budget", icon: "💰" },
-          { id: "family", label: "Family", icon: "👨‍👩‍👧‍👦" },
-          { id: "documents", label: "Documents", icon: "📄" },
+          { id: "overview", label: "Overview", icon: ClipboardList },
+          { id: "checklist", label: "Checklist", icon: CheckCircle },
+          { id: "vendors", label: "Vendors", icon: Store },
+          { id: "budget", label: "Budget", icon: DollarSign },
+          { id: "family", label: "Family", icon: Users },
+          { id: "documents", label: "Documents", icon: FileText },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -631,7 +652,7 @@ export function FuneralPlanningHub({
                 : "bg-sage-pale/50 text-sage-dark hover:bg-sage-pale"
             }`}
           >
-            <span>{tab.icon}</span>
+            <tab.icon className="w-4 h-4" />
             <span>{tab.label}</span>
           </button>
         ))}
@@ -647,7 +668,7 @@ export function FuneralPlanningHub({
                 {/* Service Details */}
                 <div className="space-y-4">
                   <h3 className="font-medium text-sage-dark flex items-center gap-2">
-                    <span>🗓️</span> Service Details
+                    <Calendar className="w-5 h-5" /> Service Details
                   </h3>
                   <div className="bg-sage-pale/30 rounded-lg p-4 space-y-3">
                     <div className="grid grid-cols-2 gap-3 text-sm">
@@ -690,7 +711,7 @@ export function FuneralPlanningHub({
                 {/* Urgent Items */}
                 <div className="space-y-4">
                   <h3 className="font-medium text-sage-dark flex items-center gap-2">
-                    <span>⚠️</span> Urgent Tasks
+                    <AlertTriangle className="w-5 h-5" /> Urgent Tasks
                   </h3>
                   <div className="space-y-2">
                     {filteredChecklist
@@ -721,7 +742,7 @@ export function FuneralPlanningHub({
                   onClick={() => setActiveTab("checklist")}
                   className="p-4 bg-sage-pale/30 rounded-lg text-center hover:bg-sage-pale transition-colors"
                 >
-                  <div className="text-2xl mb-1">✓</div>
+                  <CheckCircle className="w-6 h-6 mx-auto mb-1 text-sage-dark" />
                   <div className="font-medium text-sage-dark">View Full Checklist</div>
                   <div className="text-xs text-gray-500">{checklistProgress.completed}/{checklistProgress.total} complete</div>
                 </button>
@@ -729,7 +750,7 @@ export function FuneralPlanningHub({
                   onClick={() => setActiveTab("vendors")}
                   className="p-4 bg-sage-pale/30 rounded-lg text-center hover:bg-sage-pale transition-colors"
                 >
-                  <div className="text-2xl mb-1">🏪</div>
+                  <Store className="w-6 h-6 mx-auto mb-1 text-sage-dark" />
                   <div className="font-medium text-sage-dark">Manage Vendors</div>
                   <div className="text-xs text-gray-500">{plan.vendors.length} vendors added</div>
                 </button>
@@ -737,7 +758,7 @@ export function FuneralPlanningHub({
                   onClick={() => setActiveTab("budget")}
                   className="p-4 bg-sage-pale/30 rounded-lg text-center hover:bg-sage-pale transition-colors"
                 >
-                  <div className="text-2xl mb-1">💰</div>
+                  <DollarSign className="w-6 h-6 mx-auto mb-1 text-sage-dark" />
                   <div className="font-medium text-sage-dark">Track Expenses</div>
                   <div className="text-xs text-gray-500">${budgetTotals.remaining.toLocaleString()} remaining</div>
                 </button>
@@ -750,21 +771,21 @@ export function FuneralPlanningHub({
             <div className="space-y-6">
               {(["immediate", "within_days", "before_service", "day_of", "after_service"] as ChecklistCategory[]).map((category) => {
                 const items = filteredChecklist.filter((item) => item.category === category);
-                const categoryLabels: Record<ChecklistCategory, { label: string; icon: string }> = {
-                  immediate: { label: "Immediate (within hours)", icon: "🚨" },
-                  within_days: { label: "Within the First Few Days", icon: "📅" },
-                  before_service: { label: "Before the Service", icon: "📝" },
-                  day_of: { label: "Day of Service", icon: "🌹" },
-                  after_service: { label: "After the Service", icon: "📋" },
+                const categoryLabels: Record<ChecklistCategory, { label: string; icon: LucideIcon }> = {
+                  immediate: { label: "Immediate (within hours)", icon: AlertTriangle },
+                  within_days: { label: "Within the First Few Days", icon: Calendar },
+                  before_service: { label: "Before the Service", icon: Edit3 },
+                  day_of: { label: "Day of Service", icon: Flower2 },
+                  after_service: { label: "After the Service", icon: ClipboardList },
                 };
-                const { label, icon } = categoryLabels[category];
+                const { label, icon: CategoryIcon } = categoryLabels[category];
                 const completed = items.filter((i) => i.completed).length;
 
                 return (
                   <div key={category}>
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-medium text-sage-dark flex items-center gap-2">
-                        <span>{icon}</span> {label}
+                        <CategoryIcon className="w-5 h-5" /> {label}
                       </h3>
                       <span className="text-sm text-gray-500">
                         {completed}/{items.length}
@@ -856,7 +877,7 @@ export function FuneralPlanningHub({
 
               {plan.vendors.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  <div className="text-4xl mb-2">🏪</div>
+                  <Store className="w-10 h-10 mx-auto mb-2 text-gray-400" />
                   <p>No vendors added yet</p>
                   <p className="text-sm">Add funeral homes, florists, caterers, etc.</p>
                 </div>
@@ -994,7 +1015,7 @@ export function FuneralPlanningHub({
 
               {plan.familyMembers.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  <div className="text-4xl mb-2">👨‍👩‍👧‍👦</div>
+                  <Users className="w-10 h-10 mx-auto mb-2 text-gray-400" />
                   <p>No family members added yet</p>
                   <p className="text-sm">Add family to assign tasks and coordinate</p>
                 </div>

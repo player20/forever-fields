@@ -7,3 +7,8 @@ export { GraveLocator } from "./GraveLocator";
 export { CandleLighting } from "./CandleLighting";
 export { Guestbook } from "./Guestbook";
 export { FamilyProgress } from "./FamilyProgress";
+export { LivingPortrait } from "./LivingPortrait";
+export { TraditionsLegacy } from "./TraditionsLegacy";
+export { MusicGallery } from "./MusicGallery";
+export { TraditionEditor } from "./TraditionEditor";
+export { MusicEditor } from "./MusicEditor";

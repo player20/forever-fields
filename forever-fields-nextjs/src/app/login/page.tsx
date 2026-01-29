@@ -27,7 +27,7 @@ export default function LoginPage() {
 
   const { login, requestMagicLink, loginWithGoogle, isLoading, error, clearError, isAuthenticated } = useAuth();
 
-  const [mode, setMode] = useState<AuthMode>("magic");
+  const [mode, setMode] = useState<AuthMode>("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -87,8 +87,8 @@ export default function LoginPage() {
           className="max-w-md w-full"
         >
           <Card className="p-8 text-center">
-            <div className="w-16 h-16 rounded-full bg-sage-pale flex items-center justify-center mx-auto mb-6">
-              <Check className="w-8 h-8 text-sage" />
+            <div className="w-16 h-16 rounded-full bg-gold-pale flex items-center justify-center mx-auto mb-6">
+              <Check className="w-8 h-8 text-gold-dark" />
             </div>
             <h1 className="text-2xl font-serif font-bold text-gray-dark mb-2">
               Check Your Email
@@ -150,17 +150,6 @@ export default function LoginPage() {
           {/* Auth Mode Toggle */}
           <div className="flex gap-2 p-1 bg-sage-pale/30 rounded-lg mb-6">
             <button
-              onClick={() => { setMode("magic"); clearError(); }}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                mode === "magic"
-                  ? "bg-white shadow text-sage-dark"
-                  : "text-gray-body hover:text-gray-dark"
-              }`}
-            >
-              <Sparkles className="w-4 h-4 inline mr-2" />
-              Magic Link
-            </button>
-            <button
               onClick={() => { setMode("password"); clearError(); }}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                 mode === "password"
@@ -170,6 +159,17 @@ export default function LoginPage() {
             >
               <Lock className="w-4 h-4 inline mr-2" />
               Password
+            </button>
+            <button
+              onClick={() => { setMode("magic"); clearError(); }}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                mode === "magic"
+                  ? "bg-white shadow text-sage-dark"
+                  : "text-gray-body hover:text-gray-dark"
+              }`}
+            >
+              <Sparkles className="w-4 h-4 inline mr-2" />
+              Passwordless
             </button>
           </div>
 

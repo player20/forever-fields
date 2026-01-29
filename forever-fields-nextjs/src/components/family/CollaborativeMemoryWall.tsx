@@ -3,6 +3,20 @@
 import { useState, useCallback } from "react";
 import Image from "next/image";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Textarea, Input } from "@/components/ui";
+import {
+  FileText,
+  Camera,
+  MessageSquareQuote,
+  Target,
+  Music,
+  Film,
+  Heart,
+  Flame,
+  Flower,
+  Pin,
+  List,
+  type LucideIcon,
+} from "lucide-react";
 
 interface MemoryPost {
   id: string;
@@ -33,19 +47,19 @@ interface CollaborativeMemoryWallProps {
   userRelationship?: string;
 }
 
-const postTypeInfo = {
-  text: { icon: "📝", label: "Memory", color: "#F5F5DC" },
-  photo: { icon: "📸", label: "Photo", color: "#E8F5E9" },
-  quote: { icon: "💬", label: "Quote", color: "#FFF8E1" },
-  milestone: { icon: "🎯", label: "Milestone", color: "#E3F2FD" },
-  song: { icon: "🎵", label: "Song", color: "#FCE4EC" },
-  video: { icon: "🎬", label: "Video", color: "#F3E5F5" },
+const postTypeInfo: Record<string, { icon: LucideIcon; label: string; color: string }> = {
+  text: { icon: FileText, label: "Memory", color: "#F5F5DC" },
+  photo: { icon: Camera, label: "Photo", color: "#E8F5E9" },
+  quote: { icon: MessageSquareQuote, label: "Quote", color: "#FFF8E1" },
+  milestone: { icon: Target, label: "Milestone", color: "#E3F2FD" },
+  song: { icon: Music, label: "Song", color: "#FCE4EC" },
+  video: { icon: Film, label: "Video", color: "#F3E5F5" },
 };
 
-const reactionInfo = {
-  hearts: { icon: "❤️", label: "Love" },
-  candles: { icon: "🕯️", label: "Light a candle" },
-  flowers: { icon: "🌸", label: "Leave flowers" },
+const reactionInfo: Record<string, { icon: LucideIcon; label: string }> = {
+  hearts: { icon: Heart, label: "Love" },
+  candles: { icon: Flame, label: "Light a candle" },
+  flowers: { icon: Flower, label: "Leave flowers" },
 };
 
 const backgroundColors = [
@@ -238,7 +252,7 @@ export function CollaborativeMemoryWall({
               aria-label="Timeline view"
               aria-pressed={viewMode === "timeline"}
             >
-              <span aria-hidden="true">☰</span>
+              <List className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -254,7 +268,7 @@ export function CollaborativeMemoryWall({
           >
             All
           </button>
-          {Object.entries(postTypeInfo).map(([key, { icon, label }]) => (
+          {Object.entries(postTypeInfo).map(([key, { icon: FilterIcon, label }]) => (
             <button
               key={key}
               onClick={() => setFilter(key)}
@@ -262,7 +276,7 @@ export function CollaborativeMemoryWall({
                 filter === key ? "bg-sage text-white" : "bg-sage-pale text-sage-dark hover:bg-sage-light"
               }`}
             >
-              <span>{icon}</span>
+              <FilterIcon className="w-4 h-4" />
               {label}
             </button>
           ))}
@@ -293,7 +307,7 @@ export function CollaborativeMemoryWall({
 
             {/* Post Type Selector */}
             <div className="flex flex-wrap gap-2 mb-4">
-              {Object.entries(postTypeInfo).map(([key, { icon, label }]) => (
+              {Object.entries(postTypeInfo).map(([key, { icon: TypeIcon, label }]) => (
                 <button
                   key={key}
                   onClick={() => setNewPost({ ...newPost, type: key as MemoryPost["type"] })}
@@ -303,7 +317,7 @@ export function CollaborativeMemoryWall({
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
-                  <span>{icon}</span>
+                  <TypeIcon className="w-4 h-4" />
                   {label}
                 </button>
               ))}
@@ -331,7 +345,7 @@ export function CollaborativeMemoryWall({
                   </div>
                 ) : (
                   <label className="block w-full p-8 border-2 border-dashed border-gray-300 rounded-lg text-center cursor-pointer hover:border-sage transition-colors">
-                    <span className="text-4xl mb-2 block">📷</span>
+                    <Camera className="w-10 h-10 mx-auto mb-2 text-gray-400" />
                     <span className="text-gray-500">Click to upload a photo</span>
                     <input
                       type="file"
@@ -443,7 +457,7 @@ export function CollaborativeMemoryWall({
                   {/* Pinned indicator */}
                   {post.pinnedBy && (
                     <div className="flex items-center gap-1 text-xs text-gold mb-2">
-                      <span>📌</span> Pinned by {post.pinnedBy}
+                      <Pin className="w-3 h-3" /> Pinned by {post.pinnedBy}
                     </div>
                   )}
 
@@ -458,7 +472,7 @@ export function CollaborativeMemoryWall({
                         <p className="text-xs text-gray-500">{post.relationship}</p>
                       )}
                     </div>
-                    <span className="text-lg">{typeInfo.icon}</span>
+                    <typeInfo.icon className="w-5 h-5 text-gray-400" />
                   </div>
 
                   {/* Content */}
@@ -490,7 +504,7 @@ export function CollaborativeMemoryWall({
                   {/* Footer */}
                   <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
                     <div className="flex gap-2">
-                      {Object.entries(reactionInfo).map(([key, { icon }]) => {
+                      {Object.entries(reactionInfo).map(([key, { icon: ReactionIcon }]) => {
                         const count = post.reactions[key as keyof typeof post.reactions];
                         return (
                           <button
@@ -499,7 +513,7 @@ export function CollaborativeMemoryWall({
                             className="flex items-center gap-1 text-sm text-gray-500 hover:text-sage transition-colors"
                             aria-label={`${reactionInfo[key as keyof typeof reactionInfo].label}${count > 0 ? ` (${count})` : ""}`}
                           >
-                            <span className="text-base" aria-hidden="true">{icon}</span>
+                            <ReactionIcon className="w-4 h-4" aria-hidden="true" />
                             {count > 0 && <span>{count}</span>}
                           </button>
                         );
@@ -523,10 +537,10 @@ export function CollaborativeMemoryWall({
               return (
                 <div key={post.id} className="relative">
                   <div
-                    className="absolute left-[-1.35rem] w-6 h-6 rounded-full flex items-center justify-center text-sm border-2 border-white"
+                    className="absolute left-[-1.35rem] w-6 h-6 rounded-full flex items-center justify-center border-2 border-white"
                     style={{ backgroundColor: typeInfo.color }}
                   >
-                    {typeInfo.icon}
+                    <typeInfo.icon className="w-3 h-3 text-gray-700" />
                   </div>
 
                   <div
@@ -570,7 +584,7 @@ export function CollaborativeMemoryWall({
 
                     {/* Reactions */}
                     <div className="flex gap-3 mt-3 pt-3 border-t border-gray-100">
-                      {Object.entries(reactionInfo).map(([key, { icon }]) => {
+                      {Object.entries(reactionInfo).map(([key, { icon: ReactionIcon }]) => {
                         const count = post.reactions[key as keyof typeof post.reactions];
                         return (
                           <button
@@ -579,7 +593,7 @@ export function CollaborativeMemoryWall({
                             className="flex items-center gap-1 text-sm text-gray-500 hover:text-sage transition-colors"
                             aria-label={`${reactionInfo[key as keyof typeof reactionInfo].label}${count > 0 ? ` (${count})` : ""}`}
                           >
-                            <span aria-hidden="true">{icon}</span>
+                            <ReactionIcon className="w-4 h-4" aria-hidden="true" />
                             {count > 0 && <span>{count}</span>}
                           </button>
                         );

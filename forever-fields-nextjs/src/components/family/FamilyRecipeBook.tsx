@@ -2,6 +2,27 @@
 
 import { useState, useCallback } from "react";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Input, Textarea } from "@/components/ui";
+import {
+  Salad,
+  Beef,
+  ChefHat,
+  Cake,
+  GlassWater,
+  Croissant,
+  Soup,
+  Leaf,
+  FileText,
+  Clock,
+  Users,
+  Flame,
+  ClipboardList,
+  ListOrdered,
+  BookOpen,
+  MessageCircle,
+  Printer,
+  Camera,
+  type LucideIcon,
+} from "lucide-react";
 
 interface Recipe {
   id: string;
@@ -28,16 +49,16 @@ interface FamilyRecipeBookProps {
   currentUser?: string;
 }
 
-const categoryInfo = {
-  appetizer: { icon: "🥗", label: "Appetizers" },
-  main: { icon: "🍖", label: "Main Dishes" },
-  side: { icon: "🥔", label: "Side Dishes" },
-  dessert: { icon: "🍰", label: "Desserts" },
-  drink: { icon: "🍹", label: "Drinks" },
-  bread: { icon: "🍞", label: "Breads" },
-  soup: { icon: "🍲", label: "Soups" },
-  salad: { icon: "🥬", label: "Salads" },
-  other: { icon: "📝", label: "Other" },
+const categoryInfo: Record<string, { icon: LucideIcon; label: string }> = {
+  appetizer: { icon: Salad, label: "Appetizers" },
+  main: { icon: Beef, label: "Main Dishes" },
+  side: { icon: ChefHat, label: "Side Dishes" },
+  dessert: { icon: Cake, label: "Desserts" },
+  drink: { icon: GlassWater, label: "Drinks" },
+  bread: { icon: Croissant, label: "Breads" },
+  soup: { icon: Soup, label: "Soups" },
+  salad: { icon: Leaf, label: "Salads" },
+  other: { icon: FileText, label: "Other" },
 };
 
 // Sample recipes for demo
@@ -321,7 +342,7 @@ export function FamilyRecipeBook({
               {familyName} family recipes passed down through generations
             </CardDescription>
           </div>
-          <div className="text-3xl">📖</div>
+          <BookOpen className="w-8 h-8 text-sage" />
         </div>
       </CardHeader>
       <CardContent>
@@ -346,7 +367,7 @@ export function FamilyRecipeBook({
             >
               All
             </button>
-            {Object.entries(categoryInfo).map(([key, { icon, label }]) => {
+            {Object.entries(categoryInfo).map(([key, { icon: CatIcon, label }]) => {
               const count = recipesByCategory[key]?.length || 0;
               if (count === 0) return null;
               return (
@@ -359,7 +380,7 @@ export function FamilyRecipeBook({
                       : "bg-sage-pale text-sage-dark hover:bg-sage-light"
                   }`}
                 >
-                  <span>{icon}</span>
+                  <CatIcon className="w-4 h-4" />
                   <span className="hidden sm:inline">{label}</span>
                   <span className="text-xs opacity-70">({count})</span>
                 </button>
@@ -380,7 +401,7 @@ export function FamilyRecipeBook({
                   className="text-left p-4 bg-warm-cream rounded-lg hover:shadow-md transition-all border border-transparent hover:border-sage-light"
                 >
                   <div className="flex items-start gap-3">
-                    <span className="text-3xl">{cat.icon}</span>
+                    <cat.icon className="w-8 h-8 text-sage" />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-display text-sage-dark font-medium truncate">
                         {recipe.title}
@@ -396,8 +417,8 @@ export function FamilyRecipeBook({
                     </div>
                   </div>
                   <div className="flex items-center gap-3 mt-3 text-xs text-gray-400">
-                    {recipe.prepTime && <span>⏱️ {recipe.prepTime}</span>}
-                    {recipe.servings && <span>👥 {recipe.servings}</span>}
+                    {recipe.prepTime && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {recipe.prepTime}</span>}
+                    {recipe.servings && <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {recipe.servings}</span>}
                     <span className="ml-auto">by {recipe.addedBy}</span>
                   </div>
                 </button>
@@ -428,7 +449,10 @@ export function FamilyRecipeBook({
 
             <div className="bg-warm-cream rounded-lg p-6">
               <div className="flex items-start gap-4 mb-4">
-                <span className="text-5xl">{categoryInfo[selectedRecipe.category].icon}</span>
+                {(() => {
+                  const IconComponent = categoryInfo[selectedRecipe.category].icon;
+                  return <IconComponent className="w-12 h-12 text-sage" />;
+                })()}
                 <div>
                   <h2 className="font-display text-2xl text-sage-dark">
                     {selectedRecipe.title}
@@ -443,17 +467,17 @@ export function FamilyRecipeBook({
               <div className="flex flex-wrap gap-4 mb-6 text-sm">
                 {selectedRecipe.prepTime && (
                   <div className="flex items-center gap-1 text-gray-600">
-                    <span>⏱️</span> Prep: {selectedRecipe.prepTime}
+                    <Clock className="w-4 h-4" /> Prep: {selectedRecipe.prepTime}
                   </div>
                 )}
                 {selectedRecipe.cookTime && (
                   <div className="flex items-center gap-1 text-gray-600">
-                    <span>🔥</span> Cook: {selectedRecipe.cookTime}
+                    <Flame className="w-4 h-4" /> Cook: {selectedRecipe.cookTime}
                   </div>
                 )}
                 {selectedRecipe.servings && (
                   <div className="flex items-center gap-1 text-gray-600">
-                    <span>👥</span> {selectedRecipe.servings}
+                    <Users className="w-4 h-4" /> {selectedRecipe.servings}
                   </div>
                 )}
               </div>
@@ -462,7 +486,7 @@ export function FamilyRecipeBook({
                 {/* Ingredients */}
                 <div>
                   <h3 className="font-display text-lg text-sage-dark mb-3 flex items-center gap-2">
-                    <span>🧾</span> Ingredients
+                    <ClipboardList className="w-5 h-5" /> Ingredients
                   </h3>
                   <ul className="space-y-2">
                     {selectedRecipe.ingredients.map((ing, i) => (
@@ -477,7 +501,7 @@ export function FamilyRecipeBook({
                 {/* Instructions */}
                 <div>
                   <h3 className="font-display text-lg text-sage-dark mb-3 flex items-center gap-2">
-                    <span>👩‍🍳</span> Instructions
+                    <ListOrdered className="w-5 h-5" /> Instructions
                   </h3>
                   <ol className="space-y-3">
                     {selectedRecipe.instructions.map((step, i) => (
@@ -496,7 +520,7 @@ export function FamilyRecipeBook({
               {selectedRecipe.memories && (
                 <div className="mt-6 p-4 bg-gold/10 rounded-lg">
                   <h3 className="font-display text-sage-dark mb-2 flex items-center gap-2">
-                    <span>💭</span> The Story Behind This Recipe
+                    <MessageCircle className="w-5 h-5" /> The Story Behind This Recipe
                   </h3>
                   <p className="text-gray-600 italic">{selectedRecipe.memories}</p>
                   <p className="text-xs text-gray-400 mt-2">
@@ -509,7 +533,7 @@ export function FamilyRecipeBook({
             {/* Print Button */}
             <div className="flex justify-end">
               <Button variant="outline" onClick={() => window.print()}>
-                🖨️ Print Recipe
+                <Printer className="w-4 h-4 mr-2" /> Print Recipe
               </Button>
             </div>
           </div>
@@ -569,14 +593,14 @@ export function FamilyRecipeBook({
 
             {/* Scan Option */}
             <div className="bg-sage-pale/30 rounded-lg p-4">
-              <h3 className="font-medium text-sage-dark mb-2">
-                📸 Have a handwritten recipe card?
+              <h3 className="font-medium text-sage-dark mb-2 flex items-center gap-2">
+                <Camera className="w-5 h-5" /> Have a handwritten recipe card?
               </h3>
               <p className="text-sm text-gray-500 mb-3">
                 Upload a photo and we'll extract the recipe for you
               </p>
               <label className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-sage rounded-lg cursor-pointer hover:bg-sage-pale transition-colors">
-                <span>📷</span>
+                <Camera className="w-4 h-4 text-sage" />
                 <span className="text-sage-dark">
                   {isScanningRecipe ? "Scanning..." : "Upload Recipe Photo"}
                 </span>
@@ -616,9 +640,9 @@ export function FamilyRecipeBook({
                       onChange={(e) => setNewRecipe({ ...newRecipe, category: e.target.value as Recipe["category"] })}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-sage focus:border-sage"
                     >
-                      {Object.entries(categoryInfo).map(([key, { icon, label }]) => (
+                      {Object.entries(categoryInfo).map(([key, { label }]) => (
                         <option key={key} value={key}>
-                          {icon} {label}
+                          {label}
                         </option>
                       ))}
                     </select>

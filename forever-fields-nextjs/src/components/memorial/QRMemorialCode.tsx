@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { QRCodeSVG, QRCodeCanvas } from "qrcode.react";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui";
+import { Loader2 } from "lucide-react";
 
 interface QRMemorialCodeProps {
   memorialId: string;
@@ -37,9 +38,15 @@ export function QRMemorialCode({
   const [size, setSize] = useState<QRSize>("medium");
   const [style, setStyle] = useState<QRStyle>("framed");
   const [isDownloading, setIsDownloading] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // Generate the memorial URL
-  const url = memorialUrl || `${typeof window !== "undefined" ? window.location.origin : ""}/memorial/${memorialId}`;
+  // Only render QR on client to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Generate the memorial URL (only on client)
+  const url = memorialUrl || (mounted ? `${window.location.origin}/memorial/${memorialId}` : `/memorial/${memorialId}`);
 
   const lifespan = birthYear && deathYear ? `${birthYear} - ${deathYear}` : "";
 
@@ -158,39 +165,50 @@ export function QRMemorialCode({
                 </div>
               )}
 
-              {/* Visible QR (SVG for display) */}
-              <QRCodeSVG
-                id={`qr-svg-${memorialId}`}
-                value={url}
-                size={QR_SIZES[size]}
-                level="H"
-                includeMargin={false}
-                fgColor="#4a6741"
-                bgColor="#ffffff"
-                imageSettings={
-                  profilePhotoUrl
-                    ? {
-                        src: profilePhotoUrl,
-                        height: QR_SIZES[size] * 0.2,
-                        width: QR_SIZES[size] * 0.2,
-                        excavate: true,
-                      }
-                    : undefined
-                }
-              />
-
-              {/* Hidden canvas for download */}
-              <div className="hidden">
-                <QRCodeCanvas
-                  id={`qr-download-canvas-${memorialId}`}
+              {/* Visible QR (SVG for display) - only render on client */}
+              {mounted ? (
+                <QRCodeSVG
+                  id={`qr-svg-${memorialId}`}
                   value={url}
-                  size={QR_SIZES.print}
+                  size={QR_SIZES[size]}
                   level="H"
                   includeMargin={false}
                   fgColor="#4a6741"
                   bgColor="#ffffff"
+                  imageSettings={
+                    profilePhotoUrl
+                      ? {
+                          src: profilePhotoUrl,
+                          height: QR_SIZES[size] * 0.2,
+                          width: QR_SIZES[size] * 0.2,
+                          excavate: true,
+                        }
+                      : undefined
+                  }
                 />
-              </div>
+              ) : (
+                <div
+                  className="flex items-center justify-center bg-sage-pale/30"
+                  style={{ width: QR_SIZES[size], height: QR_SIZES[size] }}
+                >
+                  <Loader2 className="w-8 h-8 text-sage animate-spin" />
+                </div>
+              )}
+
+              {/* Hidden canvas for download */}
+              {mounted && (
+                <div className="hidden">
+                  <QRCodeCanvas
+                    id={`qr-download-canvas-${memorialId}`}
+                    value={url}
+                    size={QR_SIZES.print}
+                    level="H"
+                    includeMargin={false}
+                    fgColor="#4a6741"
+                    bgColor="#ffffff"
+                  />
+                </div>
+              )}
 
               {style !== "simple" && (
                 <p className="text-center text-xs text-gray-400 mt-3">

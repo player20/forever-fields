@@ -27,36 +27,42 @@ const helpCategories = [
     title: "Getting Started",
     description: "Learn the basics of creating and managing memorials",
     articles: 12,
+    color: "sage",
   },
   {
     icon: Heart,
     title: "Memorial Features",
     description: "Explore all the ways to honor your loved ones",
     articles: 24,
+    color: "rose",
   },
   {
     icon: Users,
     title: "Family & Sharing",
     description: "Invite family members and collaborate together",
     articles: 8,
+    color: "coral",
   },
   {
     icon: Shield,
     title: "Privacy & Security",
     description: "Control who can see and contribute to memorials",
     articles: 6,
+    color: "twilight",
   },
   {
     icon: CreditCard,
     title: "Billing & Plans",
     description: "Manage subscriptions and payment methods",
     articles: 10,
+    color: "gold",
   },
   {
     icon: FileText,
     title: "Pre-Planning",
     description: "Plan your own legacy and preserve your wishes",
     articles: 15,
+    color: "sage",
   },
 ];
 
@@ -92,6 +98,25 @@ const faqs = [
   },
 ];
 
+// Quick answers for immediate help
+const quickAnswers = [
+  {
+    question: "How do I start?",
+    answer: "Click 'Create Memorial' and follow the simple steps. You only need a name to begin.",
+    icon: "✨",
+  },
+  {
+    question: "Can I take my time?",
+    answer: "Absolutely. Your progress saves automatically. Come back whenever you're ready.",
+    icon: "🕐",
+  },
+  {
+    question: "Is it private?",
+    answer: "Yes. Memorials are private by default. You control exactly who can see and contribute.",
+    icon: "🔒",
+  },
+];
+
 export default function HelpPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
@@ -101,7 +126,7 @@ export default function HelpPage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-sage-pale/50 to-cream py-16">
+      <section className="relative overflow-hidden bg-gradient-to-r from-gold-pale/40 via-cream to-coral-pale/30 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
             <div className="text-center max-w-3xl mx-auto">
@@ -131,6 +156,22 @@ export default function HelpPage() {
                   className="w-full pl-12 pr-4 py-4 rounded-xl border border-sage-pale bg-white focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent text-lg shadow-soft"
                 />
               </div>
+
+              {/* Quick Answers - Most Common Questions */}
+              <div className="mt-8 grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                {quickAnswers.map((item) => (
+                  <div
+                    key={item.question}
+                    className="bg-white rounded-xl p-4 shadow-soft text-left"
+                  >
+                    <div className="text-2xl mb-2">{item.icon}</div>
+                    <h3 className="font-medium text-gray-dark text-sm mb-1">
+                      {item.question}
+                    </h3>
+                    <p className="text-xs text-gray-body">{item.answer}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </FadeIn>
         </div>
@@ -155,8 +196,20 @@ export default function HelpPage() {
                   >
                     <Card className="h-full p-6 hover:shadow-hover transition-shadow cursor-pointer">
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-sage-pale flex items-center justify-center shrink-0">
-                          <category.icon className="w-6 h-6 text-sage" />
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                          category.color === "sage" ? "bg-sage-pale" :
+                          category.color === "rose" ? "bg-rose-pale" :
+                          category.color === "coral" ? "bg-coral-pale" :
+                          category.color === "gold" ? "bg-gold-pale" :
+                          "bg-twilight/10"
+                        }`}>
+                          <category.icon className={`w-6 h-6 ${
+                            category.color === "sage" ? "text-sage-dark" :
+                            category.color === "rose" ? "text-rose-dark" :
+                            category.color === "coral" ? "text-coral-dark" :
+                            category.color === "gold" ? "text-gold-dark" :
+                            "text-twilight"
+                          }`} />
                         </div>
                         <div>
                           <h3 className="font-serif font-semibold text-gray-dark mb-1">
@@ -165,7 +218,13 @@ export default function HelpPage() {
                           <p className="text-sm text-gray-body mb-2">
                             {category.description}
                           </p>
-                          <p className="text-xs text-sage">
+                          <p className={`text-xs ${
+                            category.color === "sage" ? "text-sage" :
+                            category.color === "rose" ? "text-rose" :
+                            category.color === "coral" ? "text-coral" :
+                            category.color === "gold" ? "text-gold" :
+                            "text-twilight"
+                          }`}>
                             {category.articles} articles
                           </p>
                         </div>
@@ -394,18 +453,21 @@ export default function HelpPage() {
                 title: "Live Chat",
                 desc: "Chat with our team",
                 action: "Start Chat",
+                color: "sage",
               },
               {
                 icon: Mail,
                 title: "Email Support",
                 desc: "support@foreverfields.com",
                 action: "Send Email",
+                color: "gold",
               },
               {
                 icon: Phone,
                 title: "Phone Support",
                 desc: "1-800-FOREVER",
                 action: "Call Now",
+                color: "coral",
               },
             ].map((option, index) => (
               <motion.div
@@ -416,8 +478,16 @@ export default function HelpPage() {
                 transition={{ delay: index * 0.1 }}
               >
                 <Card className="p-6 text-center hover:shadow-hover transition-shadow">
-                  <div className="w-12 h-12 rounded-xl bg-sage-pale flex items-center justify-center mx-auto mb-4">
-                    <option.icon className="w-6 h-6 text-sage" />
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 ${
+                    option.color === "sage" ? "bg-sage-pale" :
+                    option.color === "gold" ? "bg-gold-pale" :
+                    "bg-coral-pale"
+                  }`}>
+                    <option.icon className={`w-6 h-6 ${
+                      option.color === "sage" ? "text-sage-dark" :
+                      option.color === "gold" ? "text-gold-dark" :
+                      "text-coral-dark"
+                    }`} />
                   </div>
                   <h3 className="font-semibold text-gray-dark mb-1">
                     {option.title}
@@ -434,10 +504,10 @@ export default function HelpPage() {
       </section>
 
       {/* Video Tutorials CTA */}
-      <section className="py-16 bg-gradient-to-r from-sage-pale/50 to-gold/10">
+      <section className="py-16 bg-gradient-to-r from-coral-pale/40 to-gold-pale/40">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <SlideUp>
-            <Video className="w-12 h-12 text-sage mx-auto mb-4" />
+            <Video className="w-12 h-12 text-coral-dark mx-auto mb-4" />
             <h2 className="text-2xl font-serif font-bold text-gray-dark mb-4">
               Video Tutorials
             </h2>

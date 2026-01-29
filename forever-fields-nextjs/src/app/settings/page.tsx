@@ -22,6 +22,7 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  LogOut,
 } from "lucide-react";
 
 type SettingsTab = "profile" | "password" | "notifications" | "privacy" | "danger";
@@ -74,11 +75,11 @@ export default function SettingsPage() {
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   const tabs = [
-    { id: "profile" as const, label: "Profile", icon: User },
-    { id: "password" as const, label: "Password", icon: Lock },
-    { id: "notifications" as const, label: "Notifications", icon: Bell },
-    { id: "privacy" as const, label: "Privacy", icon: Shield },
-    { id: "danger" as const, label: "Danger Zone", icon: AlertTriangle },
+    { id: "profile" as const, label: "Profile", icon: User, color: "sage" },
+    { id: "password" as const, label: "Password", icon: Lock, color: "gold" },
+    { id: "notifications" as const, label: "Notifications", icon: Bell, color: "coral" },
+    { id: "privacy" as const, label: "Privacy", icon: Shield, color: "twilight" },
+    { id: "danger" as const, label: "Danger Zone", icon: AlertTriangle, color: "red" },
   ];
 
   const passwordRequirements = [
@@ -217,15 +218,21 @@ export default function SettingsPage() {
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
+                const activeStyles = tab.color === "red"
+                  ? "bg-red-50 text-red-700 font-medium"
+                  : tab.color === "sage" ? "bg-sage-pale text-sage-dark font-medium"
+                  : tab.color === "gold" ? "bg-gold-pale text-gold-dark font-medium"
+                  : tab.color === "coral" ? "bg-coral-pale text-coral-dark font-medium"
+                  : "bg-twilight/10 text-twilight font-medium";
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
                       isActive
-                        ? "bg-sage-pale text-sage-dark font-medium"
+                        ? activeStyles
                         : "text-gray-body hover:bg-sage-pale/30"
-                    } ${tab.id === "danger" ? "text-red-600 hover:bg-red-50" : ""}`}
+                    } ${tab.id === "danger" && !isActive ? "text-red-600 hover:bg-red-50" : ""}`}
                   >
                     <Icon className={`w-5 h-5 ${tab.id === "danger" && !isActive ? "text-red-500" : ""}`} />
                     {tab.label}
@@ -233,6 +240,21 @@ export default function SettingsPage() {
                 );
               })}
             </nav>
+
+            {/* Sign Out Button */}
+            <div className="mt-6 pt-6 border-t border-sage-pale/50">
+              <button
+                onClick={async () => {
+                  await logout();
+                  router.push("/");
+                  toast.success("Signed out successfully");
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-gray-body hover:bg-sage-pale/30 transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                Sign Out
+              </button>
+            </div>
           </aside>
 
           {/* Main Content */}

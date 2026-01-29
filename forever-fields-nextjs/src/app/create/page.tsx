@@ -26,9 +26,15 @@ import {
   HelpCircle,
   Zap,
   Info,
+  PawPrint,
+  Dog,
+  Cat,
+  Bird,
+  type LucideIcon,
 } from "lucide-react";
 import { ObituaryWriter } from "@/components/ai/ObituaryWriter";
 import { DuplicateWarning } from "@/components/memorial/DuplicateWarning";
+import { useAuth } from "@/hooks/useAuth";
 import {
   ClaimRequestModal,
   ClaimRequestData,
@@ -39,31 +45,31 @@ import { DuplicateMatch } from "@/lib/duplicates/detection";
 // CONSTANTS
 // =============================================================================
 
-// Step definitions - streamlined flow
+// Step definitions - streamlined flow with color variety
 const steps = [
-  { id: 1, title: "Basics", icon: User, description: "Name & photo" },
-  { id: 2, title: "Dates", icon: Calendar, description: "Life timeline" },
-  { id: 3, title: "Story", icon: FileText, description: "Their memory" },
-  { id: 4, title: "Review", icon: Check, description: "Final check" },
+  { id: 1, title: "Basics", icon: User, description: "Name & photo", color: "sage" },
+  { id: 2, title: "Dates", icon: Calendar, description: "Life timeline", color: "gold" },
+  { id: 3, title: "Story", icon: FileText, description: "Their memory", color: "coral" },
+  { id: 4, title: "Review", icon: Check, description: "Final check", color: "sage" },
 ];
 
 // Memorial types
-const memorialTypes = [
-  { id: "human", label: "Person", icon: "👤", description: "Honor a loved one" },
+const memorialTypes: Array<{ id: string; label: string; icon: LucideIcon; description: string }> = [
+  { id: "human", label: "Person", icon: User, description: "Honor a loved one" },
   {
     id: "pet",
     label: "Pet",
-    icon: "🐾",
+    icon: PawPrint,
     description: "Remember a beloved companion",
   },
 ];
 
 // Pet types - simplified, removed breed/color
-const petTypes = [
-  { id: "dog", label: "Dog", icon: "🐕" },
-  { id: "cat", label: "Cat", icon: "🐈" },
-  { id: "bird", label: "Bird", icon: "🦜" },
-  { id: "other", label: "Other", icon: "🐾" },
+const petTypes: Array<{ id: string; label: string; icon: LucideIcon }> = [
+  { id: "dog", label: "Dog", icon: Dog },
+  { id: "cat", label: "Cat", icon: Cat },
+  { id: "bird", label: "Bird", icon: Bird },
+  { id: "other", label: "Other", icon: PawPrint },
 ];
 
 // Date precision options for fuzzy dates
@@ -120,11 +126,14 @@ interface DraftData {
 
 export default function CreateMemorialPage() {
   const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [currentStep, setCurrentStep] = useState(0); // 0 = intro, 1-4 = steps
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showQuickCreate, setShowQuickCreate] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
+  const [showSignupPrompt, setShowSignupPrompt] = useState(false);
+  const [createdMemorialName, setCreatedMemorialName] = useState("");
 
   // Collapsible section state
   const [showOptionalName, setShowOptionalName] = useState(false);
@@ -398,35 +407,25 @@ export default function CreateMemorialPage() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
+    const memorialName = formData.memorialType === "pet"
+      ? formData.firstName
+      : `${formData.firstName} ${formData.lastName}`;
+
     if (DEMO_MODE) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // If user is not authenticated, prompt them to sign up
+      if (!isAuthenticated) {
+        setCreatedMemorialName(memorialName);
+        setShowSignupPrompt(true);
+        setIsSubmitting(false);
+        return;
+      }
+
       toast.success("Memorial created successfully! (Demo Mode)");
-      toast.info(
-        "In production, this would save to the database and redirect to the memorial page."
-      );
       clearDraft();
       setIsSubmitting(false);
-      setCurrentStep(0);
-      setFormData({
-        memorialType: "human",
-        petType: "",
-        firstName: "",
-        middleName: "",
-        lastName: "",
-        nickname: "",
-        photoFile: null,
-        photoPreview: null,
-        birthDate: "",
-        birthDatePrecision: "exact",
-        birthDateApproximate: "",
-        deathDate: "",
-        deathDatePrecision: "exact",
-        deathDateApproximate: "",
-        birthPlace: "",
-        restingPlace: "",
-        obituary: "",
-        isPublic: false,
-      });
+      router.push("/dashboard");
       return;
     }
 
@@ -466,13 +465,28 @@ export default function CreateMemorialPage() {
   const handleQuickCreate = async () => {
     setIsSubmitting(true);
 
+    const memorialName = formData.memorialType === "pet"
+      ? formData.firstName
+      : `${formData.firstName} ${formData.lastName}`;
+
     if (DEMO_MODE) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // If user is not authenticated, prompt them to sign up
+      if (!isAuthenticated) {
+        setCreatedMemorialName(memorialName);
+        setShowQuickCreate(false);
+        setShowSignupPrompt(true);
+        setIsSubmitting(false);
+        return;
+      }
+
       toast.success("Memorial created! (Demo Mode)");
       toast.info("You can add photos, stories, and more anytime.");
       clearDraft();
       setIsSubmitting(false);
       setShowQuickCreate(false);
+      router.push("/dashboard");
       return;
     }
 
@@ -707,24 +721,24 @@ export default function CreateMemorialPage() {
                     <button
                       type="button"
                       onClick={() => updateFormData("memorialType", "human")}
-                      className={`flex-1 py-2 px-4 rounded-lg border text-sm transition-colors ${
+                      className={`flex-1 py-2 px-4 rounded-lg border text-sm transition-colors flex items-center justify-center gap-2 ${
                         formData.memorialType === "human"
                           ? "border-sage bg-sage-pale text-sage-dark"
                           : "border-gray-200 hover:border-sage"
                       }`}
                     >
-                      👤 Person
+                      <User className="w-4 h-4" /> Person
                     </button>
                     <button
                       type="button"
                       onClick={() => updateFormData("memorialType", "pet")}
-                      className={`flex-1 py-2 px-4 rounded-lg border text-sm transition-colors ${
+                      className={`flex-1 py-2 px-4 rounded-lg border text-sm transition-colors flex items-center justify-center gap-2 ${
                         formData.memorialType === "pet"
                           ? "border-sage bg-sage-pale text-sage-dark"
                           : "border-gray-200 hover:border-sage"
                       }`}
                     >
-                      🐾 Pet
+                      <PawPrint className="w-4 h-4" /> Pet
                     </button>
                   </div>
 
@@ -774,7 +788,7 @@ export default function CreateMemorialPage() {
                               : "border-gray-200 hover:border-sage"
                           }`}
                         >
-                          <span className="text-lg">{pet.icon}</span>
+                          <pet.icon className="w-5 h-5 mx-auto" />
                         </button>
                       ))}
                     </div>
@@ -866,20 +880,27 @@ export default function CreateMemorialPage() {
 
             {/* Supportive Progress Steps */}
             <div className="flex items-center justify-between">
-              {steps.map((step, index) => (
+              {steps.map((step, index) => {
+                const colorClasses = {
+                  completed: step.color === "gold" ? "bg-gold border-gold" : step.color === "coral" ? "bg-coral border-coral" : "bg-sage border-sage",
+                  active: step.color === "gold" ? "border-gold text-gold-dark bg-gold-pale" : step.color === "coral" ? "border-coral text-coral-dark bg-coral-pale" : "border-sage text-sage-dark bg-sage-pale",
+                  hover: step.color === "gold" ? "hover:border-gold" : step.color === "coral" ? "hover:border-coral" : "hover:border-sage",
+                  line: step.color === "gold" ? "bg-gold" : step.color === "coral" ? "bg-coral" : "bg-sage",
+                };
+                return (
                 <div key={step.id} className="flex items-center">
                   <button
                     onClick={() => goToStep(step.id)}
                     disabled={step.id > currentStep && !canProceed()}
                     className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
                       currentStep > step.id
-                        ? "bg-sage border-sage text-white cursor-pointer"
+                        ? `${colorClasses.completed} text-white cursor-pointer`
                         : currentStep === step.id
-                        ? "border-sage text-sage bg-sage-pale"
+                        ? colorClasses.active
                         : "border-gray-200 text-gray-400 bg-white"
                     } ${
                       step.id <= currentStep || canProceed()
-                        ? "hover:border-sage"
+                        ? colorClasses.hover
                         : ""
                     }`}
                   >
@@ -904,12 +925,12 @@ export default function CreateMemorialPage() {
                   {index < steps.length - 1 && (
                     <div
                       className={`w-8 sm:w-12 h-0.5 mx-2 sm:mx-4 ${
-                        currentStep > step.id ? "bg-sage" : "bg-gray-200"
+                        currentStep > step.id ? colorClasses.line : "bg-gray-200"
                       }`}
                     />
                   )}
                 </div>
-              ))}
+              )})}
             </div>
           </FadeIn>
         </div>
@@ -971,7 +992,7 @@ export default function CreateMemorialPage() {
                                 : "border-sage-pale hover:border-sage hover:bg-sage-pale/30"
                             }`}
                           >
-                            <span className="text-2xl mb-2 block">{type.icon}</span>
+                            <type.icon className="w-6 h-6 mb-2" />
                             <span className="font-medium text-gray-dark block">
                               {type.label}
                             </span>
@@ -1001,7 +1022,7 @@ export default function CreateMemorialPage() {
                                   : "border-sage-pale hover:border-sage hover:bg-sage-pale/50"
                               }`}
                             >
-                              <span className="text-xl block mb-1">{pet.icon}</span>
+                              <pet.icon className="w-5 h-5 mx-auto mb-1" />
                               <span className="text-xs">{pet.label}</span>
                             </button>
                           ))}
@@ -1464,10 +1485,10 @@ export default function CreateMemorialPage() {
                       ) : (
                         <div className="w-full h-full bg-sage-pale flex items-center justify-center">
                           {formData.memorialType === "pet" ? (
-                            <span className="text-3xl">
-                              {petTypes.find((p) => p.id === formData.petType)
-                                ?.icon || "🐾"}
-                            </span>
+                            (() => {
+                              const PetIcon = petTypes.find((p) => p.id === formData.petType)?.icon || PawPrint;
+                              return <PetIcon className="w-10 h-10 text-sage" />;
+                            })()
                           ) : (
                             <Flower2 className="w-10 h-10 text-sage" />
                           )}
@@ -1778,6 +1799,111 @@ export default function CreateMemorialPage() {
             }}
             isSubmitting={isSubmitting}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Signup Prompt Modal - shown after creating memorial as guest */}
+      <AnimatePresence>
+        {showSignupPrompt && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-xl max-w-md w-full p-6"
+            >
+              {/* Success icon */}
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 rounded-full bg-sage-pale flex items-center justify-center mx-auto mb-4">
+                  <Check className="w-8 h-8 text-sage" />
+                </div>
+                <h2 className="text-2xl font-serif font-bold text-gray-dark mb-2">
+                  Memorial Created!
+                </h2>
+                <p className="text-gray-body">
+                  You&apos;ve created a beautiful memorial for{" "}
+                  <strong>{createdMemorialName}</strong>
+                </p>
+              </div>
+
+              {/* Sign up prompt */}
+              <div className="bg-sage-pale/30 rounded-lg p-4 mb-6">
+                <p className="text-gray-dark text-center">
+                  <strong>Create a free account</strong> to save your memorial,
+                  invite family to contribute, and access all features.
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="space-y-3">
+                <Button
+                  onClick={() => {
+                    // Save draft to localStorage before redirecting
+                    clearDraft();
+                    router.push("/signup?redirect=/dashboard&memorial=new");
+                  }}
+                  className="w-full"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Create Free Account
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    clearDraft();
+                    router.push("/login?redirect=/dashboard&memorial=new");
+                  }}
+                  className="w-full"
+                >
+                  I already have an account
+                </Button>
+
+                <button
+                  onClick={() => {
+                    setShowSignupPrompt(false);
+                    clearDraft();
+                    toast.info(
+                      "Your memorial was created but not saved. Create an account to save it!"
+                    );
+                    setCurrentStep(0);
+                    setFormData({
+                      memorialType: "human",
+                      petType: "",
+                      firstName: "",
+                      middleName: "",
+                      lastName: "",
+                      nickname: "",
+                      photoFile: null,
+                      photoPreview: null,
+                      birthDate: "",
+                      birthDatePrecision: "exact",
+                      birthDateApproximate: "",
+                      deathDate: "",
+                      deathDatePrecision: "exact",
+                      deathDateApproximate: "",
+                      birthPlace: "",
+                      restingPlace: "",
+                      obituary: "",
+                      isPublic: false,
+                    });
+                  }}
+                  className="w-full text-sm text-gray-500 hover:text-gray-700 py-2"
+                >
+                  Continue without saving
+                </button>
+              </div>
+
+              <p className="text-xs text-gray-400 text-center mt-4">
+                Your memorial draft is saved locally for 30 days
+              </p>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

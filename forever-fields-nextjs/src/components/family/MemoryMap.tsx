@@ -2,6 +2,17 @@
 
 import { useState, useCallback } from "react";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Input, Textarea } from "@/components/ui";
+import {
+  Baby,
+  Home,
+  GraduationCap,
+  Briefcase,
+  Heart,
+  Plane,
+  Star,
+  MapPin,
+  type LucideIcon,
+} from "lucide-react";
 
 interface MemoryLocation {
   id: string;
@@ -23,15 +34,15 @@ interface MemoryMapProps {
   currentUser?: string;
 }
 
-const locationTypes = {
-  birth: { icon: "👶", label: "Birthplace", color: "#FFD700" },
-  home: { icon: "🏠", label: "Home", color: "#4CAF50" },
-  school: { icon: "🎓", label: "School", color: "#2196F3" },
-  work: { icon: "💼", label: "Work", color: "#9C27B0" },
-  wedding: { icon: "💒", label: "Wedding", color: "#E91E63" },
-  travel: { icon: "✈️", label: "Travel", color: "#00BCD4" },
-  special: { icon: "⭐", label: "Special Place", color: "#FF9800" },
-  other: { icon: "📍", label: "Other", color: "#607D8B" },
+const locationTypes: Record<string, { icon: LucideIcon; label: string; color: string }> = {
+  birth: { icon: Baby, label: "Birthplace", color: "#FFD700" },
+  home: { icon: Home, label: "Home", color: "#4CAF50" },
+  school: { icon: GraduationCap, label: "School", color: "#2196F3" },
+  work: { icon: Briefcase, label: "Work", color: "#9C27B0" },
+  wedding: { icon: Heart, label: "Wedding", color: "#E91E63" },
+  travel: { icon: Plane, label: "Travel", color: "#00BCD4" },
+  special: { icon: Star, label: "Special Place", color: "#FF9800" },
+  other: { icon: MapPin, label: "Other", color: "#607D8B" },
 };
 
 // Sample locations for demo
@@ -177,10 +188,10 @@ export function MemoryMap({
                     title={loc.title}
                   >
                     <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-lg border-2 border-white"
+                      className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
                       style={{ backgroundColor: type.color }}
                     >
-                      {type.icon}
+                      <type.icon className="w-5 h-5 text-white" />
                     </div>
                   </button>
                 );
@@ -197,10 +208,10 @@ export function MemoryMap({
               {Object.entries(locationTypes).map(([key, value]) => (
                 <div key={key} className="flex items-center gap-1 text-xs text-gray-600">
                   <span
-                    className="w-4 h-4 rounded-full flex items-center justify-center text-xs"
+                    className="w-4 h-4 rounded-full flex items-center justify-center"
                     style={{ backgroundColor: value.color }}
                   >
-                    {value.icon}
+                    <value.icon className="w-2.5 h-2.5 text-white" />
                   </span>
                   {value.label}
                 </div>
@@ -211,12 +222,17 @@ export function MemoryMap({
             {selectedLocation && (
               <div className="bg-white border border-sage-light rounded-lg p-4 shadow-sm">
                 <div className="flex items-start gap-3">
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
-                    style={{ backgroundColor: locationTypes[selectedLocation.type].color }}
-                  >
-                    {locationTypes[selectedLocation.type].icon}
-                  </div>
+                  {(() => {
+                    const TypeIcon = locationTypes[selectedLocation.type].icon;
+                    return (
+                      <div
+                        className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: locationTypes[selectedLocation.type].color }}
+                      >
+                        <TypeIcon className="w-6 h-6 text-white" />
+                      </div>
+                    );
+                  })()}
                   <div className="flex-1">
                     <h3 className="font-display text-lg text-sage-dark">
                       {selectedLocation.title}
@@ -254,10 +270,10 @@ export function MemoryMap({
                 >
                   <div className="flex items-center gap-3">
                     <span
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-lg"
+                      className="w-10 h-10 rounded-full flex items-center justify-center"
                       style={{ backgroundColor: type.color }}
                     >
-                      {type.icon}
+                      <type.icon className="w-5 h-5 text-white" />
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sage-dark truncate">{loc.title}</p>
@@ -285,10 +301,10 @@ export function MemoryMap({
               return (
                 <div key={loc.id} className="relative">
                   <div
-                    className="absolute left-[-1.35rem] w-6 h-6 rounded-full flex items-center justify-center text-sm border-2 border-white"
+                    className="absolute left-[-1.35rem] w-6 h-6 rounded-full flex items-center justify-center border-2 border-white"
                     style={{ backgroundColor: type.color }}
                   >
-                    {type.icon}
+                    <type.icon className="w-3 h-3 text-white" />
                   </div>
                   <div className="bg-white border border-gray-100 rounded-lg p-3 shadow-sm">
                     <div className="flex items-center gap-2 mb-1">
@@ -345,7 +361,7 @@ export function MemoryMap({
                         : "bg-white text-gray-600 hover:bg-gray-100"
                     }`}
                   >
-                    <span>{value.icon}</span>
+                    <value.icon className="w-4 h-4" />
                     {value.label}
                   </button>
                 ))}

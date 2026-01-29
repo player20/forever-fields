@@ -28,10 +28,17 @@ const tierIcons: Record<SubscriptionTier, React.ComponentType<{ className?: stri
 };
 
 const tierColors: Record<SubscriptionTier, string> = {
-  free: "border-gray-200",
-  remember: "border-sage",
+  free: "border-sage-pale",
+  remember: "border-coral-light",
   heritage: "border-gold ring-2 ring-gold/20",
-  legacy: "border-sage-dark",
+  legacy: "border-twilight",
+};
+
+const tierBgColors: Record<SubscriptionTier, string> = {
+  free: "bg-sage-pale text-sage",
+  remember: "bg-coral-pale text-coral-dark",
+  heritage: "bg-gold/10 text-gold",
+  legacy: "bg-twilight/10 text-twilight",
 };
 
 export default function PricingPage() {
@@ -365,9 +372,7 @@ export default function PricingPage() {
                         <div className="text-center mb-6">
                           <div
                             className={`w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center ${
-                              isPopular
-                                ? "bg-gold/10 text-gold"
-                                : "bg-sage-pale text-sage"
+                              tierBgColors[tier]
                             }`}
                           >
                             <Icon className="w-6 h-6" />
@@ -542,7 +547,7 @@ export default function PricingPage() {
             Frequently Asked Questions
           </h2>
           <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm">
+            <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-sage">
               <h3 className="font-semibold text-gray-dark mb-2">
                 Can I change my plan later?
               </h3>
@@ -551,7 +556,7 @@ export default function PricingPage() {
                 take effect immediately with prorated billing.
               </p>
             </div>
-            <div className="bg-white rounded-lg p-6 shadow-sm">
+            <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-gold">
               <h3 className="font-semibold text-gray-dark mb-2">
                 What if I&apos;m not ready to decide?
               </h3>
@@ -560,7 +565,7 @@ export default function PricingPage() {
                 There&apos;s no pressure to upgrade, ever. Take all the time you need.
               </p>
             </div>
-            <div className="bg-white rounded-lg p-6 shadow-sm">
+            <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-coral">
               <h3 className="font-semibold text-gray-dark mb-2">
                 What happens if I cancel?
               </h3>
@@ -570,7 +575,7 @@ export default function PricingPage() {
                 Your memories stay safe.
               </p>
             </div>
-            <div className="bg-white rounded-lg p-6 shadow-sm">
+            <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-twilight">
               <h3 className="font-semibold text-gray-dark mb-2">
                 What is Perpetual Preservation?
               </h3>
@@ -580,7 +585,7 @@ export default function PricingPage() {
                 ensuring your memories are protected for generations.
               </p>
             </div>
-            <div className="bg-white rounded-lg p-6 shadow-sm">
+            <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-rose">
               <h3 className="font-semibold text-gray-dark mb-2">
                 Is there a refund policy?
               </h3>

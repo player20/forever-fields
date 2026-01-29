@@ -189,3 +189,16 @@ export const CATEGORY_LABELS: Record<ProductCategory | "all", string> = {
   flowers: "Flowers",
   donations: "Memorial Donations"
 };
+
+// Icon names for categories (to be used with Lucide icons)
+export const CATEGORY_ICON_NAMES: Record<ProductCategory, string> = {
+  photo_books: "BookOpen",
+  qr_plaques: "Tag",
+  memorial_cards: "FileText",
+  canvas_prints: "Frame",
+  urns: "Archive",
+  jewelry: "Gem",
+  keepsakes: "Gift",
+  flowers: "Flower",
+  donations: "TreeDeciduous"
+};

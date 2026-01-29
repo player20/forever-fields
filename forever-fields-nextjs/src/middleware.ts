@@ -5,9 +5,10 @@ import type { NextRequest } from "next/server";
 const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 // Routes that require authentication
+// Note: /create is NOT protected - anyone can create a memorial
+// They'll be prompted to sign up after creation to save their work
 const protectedRoutes = [
   "/dashboard",
-  "/create",
   "/settings",
   "/memorial/*/edit",
   "/memorial/*/settings",

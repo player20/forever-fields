@@ -5,6 +5,17 @@ import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import { Input } from "../ui/Input";
 import { Textarea } from "../ui/Textarea";
+import {
+  BookOpen,
+  Tag,
+  FileText,
+  Frame,
+  Archive,
+  Gem,
+  Gift,
+  Flower,
+  TreeDeciduous,
+} from "lucide-react";
 
 // Extracted types, data, and utilities
 import type {
@@ -21,6 +32,24 @@ import { CATEGORY_LABELS } from "@/types/shop";
 import { PRODUCT_CATALOG } from "@/data/products";
 import { calculateItemPrice, calculateShipping, calculateTax, formatCurrency, generateOrderId } from "@/lib/shop-utils";
 // ShoppingCart component available at ../shop/ShoppingCart if needed
+
+// Category icon component
+const CATEGORY_ICONS: Record<ProductCategory, React.ComponentType<{ className?: string }>> = {
+  photo_books: BookOpen,
+  qr_plaques: Tag,
+  memorial_cards: FileText,
+  canvas_prints: Frame,
+  urns: Archive,
+  jewelry: Gem,
+  keepsakes: Gift,
+  flowers: Flower,
+  donations: TreeDeciduous,
+};
+
+function CategoryIcon({ category, className = "w-5 h-5" }: { category: ProductCategory; className?: string }) {
+  const Icon = CATEGORY_ICONS[category];
+  return Icon ? <Icon className={className} /> : null;
+}
 
 // ============================================================================
 // COMPONENTS
@@ -278,17 +307,7 @@ export function MemorialShop({
       }}
     >
       <div className="aspect-square bg-gray-100 rounded-lg mb-3 flex items-center justify-center">
-        <span className="text-4xl">
-          {product.category === "photo_books" && "📖"}
-          {product.category === "qr_plaques" && "🏷️"}
-          {product.category === "memorial_cards" && "📄"}
-          {product.category === "canvas_prints" && "🖼️"}
-          {product.category === "urns" && "⚱️"}
-          {product.category === "jewelry" && "💎"}
-          {product.category === "keepsakes" && "🎁"}
-          {product.category === "flowers" && "💐"}
-          {product.category === "donations" && "🌳"}
-        </span>
+        <CategoryIcon category={product.category} className="w-10 h-10 text-gray-600" />
       </div>
       <h3 className="font-semibold text-gray-900">{product.name}</h3>
       <p className="text-sm text-gray-600 line-clamp-2 mt-1">{product.description}</p>
@@ -367,17 +386,7 @@ export function MemorialShop({
         <div className="grid md:grid-cols-2 gap-8">
           {/* Product image */}
           <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-            <span className="text-8xl">
-              {selectedProduct.category === "photo_books" && "📖"}
-              {selectedProduct.category === "qr_plaques" && "🏷️"}
-              {selectedProduct.category === "memorial_cards" && "📄"}
-              {selectedProduct.category === "canvas_prints" && "🖼️"}
-              {selectedProduct.category === "urns" && "⚱️"}
-              {selectedProduct.category === "jewelry" && "💎"}
-              {selectedProduct.category === "keepsakes" && "🎁"}
-              {selectedProduct.category === "flowers" && "💐"}
-              {selectedProduct.category === "donations" && "🌳"}
-            </span>
+            <CategoryIcon category={selectedProduct.category} className="w-24 h-24 text-gray-600" />
           </div>
 
           {/* Product details */}
@@ -707,17 +716,7 @@ export function MemorialShop({
               <Card key={item.id} className="p-4">
                 <div className="flex gap-4">
                   <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
-                    <span className="text-3xl">
-                      {item.product.category === "photo_books" && "📖"}
-                      {item.product.category === "qr_plaques" && "🏷️"}
-                      {item.product.category === "memorial_cards" && "📄"}
-                      {item.product.category === "canvas_prints" && "🖼️"}
-                      {item.product.category === "urns" && "⚱️"}
-                      {item.product.category === "jewelry" && "💎"}
-                      {item.product.category === "keepsakes" && "🎁"}
-                      {item.product.category === "flowers" && "💐"}
-                      {item.product.category === "donations" && "🌳"}
-                    </span>
+                    <CategoryIcon category={item.product.category} className="w-8 h-8 text-gray-600" />
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between">
@@ -1327,16 +1326,7 @@ export function MemorialShop({
               {cart.map(item => (
                 <div key={item.id} className="flex gap-4 pb-4 border-b last:border-0 last:pb-0">
                   <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
-                    <span className="text-2xl">
-                      {item.product.category === "photo_books" && "📖"}
-                      {item.product.category === "qr_plaques" && "🏷️"}
-                      {item.product.category === "memorial_cards" && "📄"}
-                      {item.product.category === "canvas_prints" && "🖼️"}
-                      {item.product.category === "jewelry" && "💎"}
-                      {item.product.category === "keepsakes" && "🎁"}
-                      {item.product.category === "flowers" && "💐"}
-                      {item.product.category === "donations" && "🌳"}
-                    </span>
+                    <CategoryIcon category={item.product.category} className="w-6 h-6 text-gray-600" />
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">{item.product.name}</p>

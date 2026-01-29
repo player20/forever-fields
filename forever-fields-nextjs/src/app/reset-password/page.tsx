@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -15,6 +15,7 @@ import {
   Check,
   Eye,
   EyeOff,
+  RefreshCw,
 } from "lucide-react";
 
 type ResetStep = "request" | "sent" | "reset" | "success";
@@ -31,6 +32,15 @@ export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  // Countdown timer for resend button
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   const passwordRequirements = [
     { met: password.length >= 8, text: "At least 8 characters" },
@@ -54,6 +64,7 @@ export default function ResetPasswordPage() {
     try {
       await requestPasswordReset(email);
       setStep("sent");
+      setResendCooldown(60); // 60 second cooldown
       toast.success("Reset link sent! Check your email.");
     } catch {
       // Error handled by useAuth
@@ -163,25 +174,58 @@ export default function ResetPasswordPage() {
           {/* Step: Email Sent */}
           {step === "sent" && (
             <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-sage-pale flex items-center justify-center mx-auto mb-6">
-                <Check className="w-8 h-8 text-sage" />
+              <div className="w-16 h-16 rounded-full bg-gold-pale flex items-center justify-center mx-auto mb-6">
+                <Check className="w-8 h-8 text-gold-dark" />
               </div>
               <h1 className="text-2xl font-serif font-bold text-gray-dark mb-2">
                 Check Your Email
               </h1>
-              <p className="text-gray-body mb-6">
+              <p className="text-gray-body mb-4">
                 We sent a password reset link to <strong>{email}</strong>
               </p>
               <p className="text-sm text-gray-body mb-6">
                 The link will expire in 1 hour for security.
               </p>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => setStep("request")}
-              >
-                Try a different email
-              </Button>
+
+              {/* Resend Button */}
+              <div className="space-y-3">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  disabled={resendCooldown > 0 || isLoading}
+                  onClick={async () => {
+                    try {
+                      await requestPasswordReset(email);
+                      setResendCooldown(60);
+                      toast.success("Reset link sent again!");
+                    } catch {
+                      // Error handled by useAuth
+                    }
+                  }}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <Flower2 className="w-4 h-4 animate-spin" />
+                      Sending...
+                    </span>
+                  ) : resendCooldown > 0 ? (
+                    `Resend in ${resendCooldown}s`
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4" />
+                      Resend Email
+                    </span>
+                  )}
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => setStep("request")}
+                >
+                  Try a different email
+                </Button>
+              </div>
             </div>
           )}
 

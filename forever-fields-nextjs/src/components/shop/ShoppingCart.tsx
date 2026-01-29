@@ -3,20 +3,36 @@
 import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
+import {
+  BookOpen,
+  Tag,
+  FileText,
+  Frame,
+  Archive,
+  Gem,
+  Gift,
+  Flower,
+  TreeDeciduous,
+} from "lucide-react";
 import type { CartItem, PromoCode, ProductCategory } from "@/types/shop";
 import { formatCurrency } from "@/lib/shop-utils";
 
-const CATEGORY_ICONS: Record<ProductCategory, string> = {
-  photo_books: "📖",
-  qr_plaques: "🏷️",
-  memorial_cards: "📄",
-  canvas_prints: "🖼️",
-  urns: "⚱️",
-  jewelry: "💎",
-  keepsakes: "🎁",
-  flowers: "💐",
-  donations: "🌳"
+const CATEGORY_ICONS: Record<ProductCategory, React.ComponentType<{ className?: string }>> = {
+  photo_books: BookOpen,
+  qr_plaques: Tag,
+  memorial_cards: FileText,
+  canvas_prints: Frame,
+  urns: Archive,
+  jewelry: Gem,
+  keepsakes: Gift,
+  flowers: Flower,
+  donations: TreeDeciduous
 };
+
+function CategoryIcon({ category, className = "w-5 h-5" }: { category: ProductCategory; className?: string }) {
+  const Icon = CATEGORY_ICONS[category];
+  return Icon ? <Icon className={className} /> : null;
+}
 
 interface ShoppingCartProps {
   cart: CartItem[];
@@ -73,9 +89,7 @@ export function ShoppingCart({
               <Card key={item.id} className="p-4">
                 <div className="flex gap-4">
                   <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
-                    <span className="text-3xl">
-                      {CATEGORY_ICONS[item.product.category]}
-                    </span>
+                    <CategoryIcon category={item.product.category} className="w-8 h-8 text-gray-600" />
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between">
