@@ -148,19 +148,19 @@ export default function Home() {
 
             <SlideUp delay={0.1}>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-gray-dark leading-tight mb-6">
-                Honor Their{" "}
+                AI-Powered{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-sage to-sage-dark">
-                  Memory
-                </span>
-                , Always
+                  Living
+                </span>{" "}
+                Memorials
               </h1>
             </SlideUp>
 
             <SlideUp delay={0.2}>
               <p className="text-lg sm:text-xl text-gray-body max-w-2xl mx-auto mb-8">
-                Create beautiful digital memorials that grow with your family.
-                Preserve stories, photos, and even their voice for generations
-                to come.
+                Preserve voices, restore old photos, and create lasting tributes
+                with AI that understands grief. Hear grandma tell stories to future
+                generations.
               </p>
             </SlideUp>
 
@@ -261,6 +261,102 @@ export default function Home() {
               </motion.div>
             </div>
           </SlideUp>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-16 bg-white border-b border-sage-pale/30">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SlideUp>
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-dark text-center mb-12">
+              How It Works
+            </h2>
+          </SlideUp>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                step: "1",
+                title: "Create",
+                desc: "Start with a name and a memory. That's all you need.",
+                icon: "✨",
+              },
+              {
+                step: "2",
+                title: "Enhance",
+                desc: "AI restores old photos, clones voices, and helps write tributes.",
+                icon: "🎨",
+              },
+              {
+                step: "3",
+                title: "Connect",
+                desc: "Family contributes from anywhere. Memories grow together.",
+                icon: "👨‍👩‍👧‍👦",
+              },
+            ].map((item, index) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 }}
+                className="text-center"
+              >
+                <div className="w-16 h-16 rounded-full bg-sage-pale flex items-center justify-center mx-auto mb-4 text-3xl">
+                  {item.icon}
+                </div>
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <span className="w-6 h-6 rounded-full bg-sage text-white text-sm flex items-center justify-center font-medium">
+                    {item.step}
+                  </span>
+                  <h3 className="text-xl font-serif font-semibold text-gray-dark">
+                    {item.title}
+                  </h3>
+                </div>
+                <p className="text-gray-body">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* AI Features Preview */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="mt-12 grid sm:grid-cols-3 gap-4"
+          >
+            {[
+              {
+                icon: Mic,
+                label: "Voice Preservation",
+                desc: "Hear their voice again",
+              },
+              {
+                icon: Sparkles,
+                label: "Photo Restoration",
+                desc: "AI-enhanced old photos",
+              },
+              {
+                icon: MessageSquare,
+                label: "AI Obituary Writer",
+                desc: "Start with a few words",
+              },
+            ].map((feature) => (
+              <Card
+                key={feature.label}
+                className="p-4 flex items-center gap-3 hover:shadow-soft transition-shadow"
+              >
+                <div className="w-10 h-10 rounded-lg bg-sage-pale flex items-center justify-center shrink-0">
+                  <feature.icon className="w-5 h-5 text-sage" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-dark text-sm">{feature.label}</p>
+                  <p className="text-xs text-gray-body">{feature.desc}</p>
+                </div>
+              </Card>
+            ))}
+          </motion.div>
         </div>
       </section>
 
@@ -708,7 +804,7 @@ export default function Home() {
               {
                 icon: Shield,
                 title: "Multi-Gen Data Lock",
-                desc: "100-year storage guarantee with blockchain-verified authenticity.",
+                desc: "25-year storage guarantee with redundant cloud backups across multiple data centers.",
                 badge: "Enterprise Grade",
               },
             ].map((item, index) => (
@@ -772,7 +868,7 @@ export default function Home() {
                     <p className="text-sm text-gray-body mb-4">{plan.desc}</p>
                     <Link href="/pricing">
                       <Button
-                        variant={plan.popular ? "default" : "outline"}
+                        variant={plan.popular ? "primary" : "outline"}
                         size="sm"
                         className="w-full"
                       >

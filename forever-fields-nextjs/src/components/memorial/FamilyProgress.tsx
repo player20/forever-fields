@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Users, UserPlus, Check, Mail, Share2 } from "lucide-react";
-import { Button, Card, Avatar, AvatarGroup, Badge } from "@/components/ui";
+import { Button, Card, Avatar, Badge } from "@/components/ui";
 
 interface FamilyMember {
   id: string;

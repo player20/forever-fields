@@ -97,12 +97,12 @@ export const ONE_TIME_PRODUCTS = {
     name: "Perpetual Preservation",
     price: 299,
     priceId: process.env.STRIPE_PRICE_PERPETUAL || "price_perpetual",
-    description: "Blockchain preservation for permanent memorial storage",
+    description: "Permanent memorial storage with guaranteed preservation",
     features: [
-      "IPFS storage",
-      "Arweave permanent archive",
+      "Redundant cloud backups",
+      "25-year storage guarantee",
       "Memorial never deleted",
-      "Verification certificate",
+      "Priority support",
     ],
   },
 } as const;

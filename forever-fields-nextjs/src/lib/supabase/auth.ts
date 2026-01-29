@@ -1,5 +1,5 @@
 import { getSupabaseClient } from './client';
-import type { User as SupabaseUser, Session, AuthError } from '@supabase/supabase-js';
+import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import type { User } from './types';
 
 export interface AuthResult {
@@ -244,7 +244,7 @@ export async function syncUserProfile(authUser: SupabaseUser): Promise<User | nu
   const supabase = getSupabaseClient();
 
   // Check if user profile exists
-  const { data: existingUser, error: fetchError } = await supabase
+  const { data: existingUser, error: _fetchError } = await supabase
     .from('users')
     .select('*')
     .eq('id', authUser.id)

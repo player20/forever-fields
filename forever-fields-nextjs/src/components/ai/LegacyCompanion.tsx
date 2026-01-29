@@ -54,7 +54,7 @@ const DEMO_RESPONSES: Record<string, string[]> = {
   ],
 };
 
-function getDemoResponse(message: string, name: string): string {
+function getDemoResponse(message: string, _name: string): string {
   const lowerMessage = message.toLowerCase();
   let responses: string[];
 

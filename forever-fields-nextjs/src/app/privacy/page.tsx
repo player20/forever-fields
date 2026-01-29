@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Flower2, ArrowLeft, Shield, Heart, Lock, Eye, Users, Download, Mail } from "lucide-react";
+import { Flower2, ArrowLeft, Shield, Heart, Lock, Users, Mail } from "lucide-react";
 
 export const metadata = {
   title: "Privacy Policy",

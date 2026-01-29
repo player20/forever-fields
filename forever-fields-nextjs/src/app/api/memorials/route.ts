@@ -70,7 +70,7 @@ const DEMO_MEMORIALS = [
 ];
 
 // GET /api/memorials - List user's memorials
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // In demo mode, return mock memorials
     if (DEMO_MODE) {

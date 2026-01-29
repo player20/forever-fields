@@ -116,7 +116,11 @@ export async function processWebhookEvent(
       }
 
       case "customer.subscription.created": {
-        const subscription = event.data.object as Stripe.Subscription;
+        // Cast to extended type to access period properties
+        const subscription = event.data.object as Stripe.Subscription & {
+          current_period_start: number;
+          current_period_end: number;
+        };
         const priceId = subscription.items.data[0]?.price.id;
         const tier = getTierByPriceId(priceId || "") || "free";
 
@@ -139,7 +143,11 @@ export async function processWebhookEvent(
       }
 
       case "customer.subscription.updated": {
-        const subscription = event.data.object as Stripe.Subscription;
+        // Cast to extended type to access period properties
+        const subscription = event.data.object as Stripe.Subscription & {
+          current_period_start: number;
+          current_period_end: number;
+        };
         const priceId = subscription.items.data[0]?.price.id;
         const tier = getTierByPriceId(priceId || "") || "free";
 
@@ -162,7 +170,11 @@ export async function processWebhookEvent(
       }
 
       case "customer.subscription.deleted": {
-        const subscription = event.data.object as Stripe.Subscription;
+        // Cast to extended type to access period properties
+        const subscription = event.data.object as Stripe.Subscription & {
+          current_period_start: number;
+          current_period_end: number;
+        };
         const priceId = subscription.items.data[0]?.price.id;
         const tier = getTierByPriceId(priceId || "") || "free";
 
@@ -185,13 +197,17 @@ export async function processWebhookEvent(
       }
 
       case "invoice.payment_succeeded": {
-        const invoice = event.data.object as Stripe.Invoice;
+        // Cast to extended type to access subscription and amount properties
+        const invoice = event.data.object as Stripe.Invoice & {
+          subscription: string | null;
+          amount_paid: number;
+        };
 
         if (handlers.onPaymentSucceeded) {
           await handlers.onPaymentSucceeded({
             invoiceId: invoice.id,
             customerId: invoice.customer as string,
-            subscriptionId: invoice.subscription as string | null,
+            subscriptionId: invoice.subscription,
             amount: invoice.amount_paid,
             currency: invoice.currency,
             status: invoice.status || "unknown",
@@ -201,7 +217,10 @@ export async function processWebhookEvent(
       }
 
       case "invoice.payment_failed": {
-        const invoice = event.data.object as Stripe.Invoice;
+        // Cast to extended type to access subscription property
+        const invoice = event.data.object as Stripe.Invoice & {
+          subscription: string | null;
+        };
 
         if (handlers.onPaymentFailed) {
           await handlers.onPaymentFailed({
@@ -223,7 +242,7 @@ export async function processWebhookEvent(
           await handlers.onCustomerCreated({
             customerId: customer.id,
             email: customer.email,
-            name: customer.name,
+            name: customer.name ?? null,
             metadata: (customer.metadata || {}) as Record<string, string>,
           });
         }

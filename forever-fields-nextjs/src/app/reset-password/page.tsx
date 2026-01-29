@@ -80,7 +80,8 @@ export default function ResetPasswordPage() {
     }
 
     try {
-      await resetPassword(token, password);
+      // Token is handled by Supabase session when user clicks reset link
+      await resetPassword(password);
       setStep("success");
       toast.success("Password reset successfully!");
       setTimeout(() => {

@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
-import { InstallPrompt } from "@/components/pwa";
+import { InstallPrompt, ServiceWorkerProvider } from "@/components/pwa";
 import { Providers } from "@/components/providers";
 
 const playfair = Playfair_Display({
@@ -87,6 +87,7 @@ export default function RootLayout({
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <body className="min-h-screen font-sans antialiased">
         <Providers>
+          <ServiceWorkerProvider />
           {children}
           <ToastProvider />
           <InstallPrompt />

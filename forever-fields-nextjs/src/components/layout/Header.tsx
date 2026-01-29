@@ -23,7 +23,6 @@ import {
   Home,
   Heart,
   ShoppingBag,
-  FileText,
   Settings,
   LogOut,
   HelpCircle,

@@ -2,11 +2,26 @@
 
 import Stripe from "stripe";
 
-// Server-side Stripe instance
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-12-15.clover",
-  typescript: true,
-});
+// Check if we're in demo mode or have valid Stripe credentials
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+const hasStripeKey = !!process.env.STRIPE_SECRET_KEY;
+
+// Server-side Stripe instance - only create if we have a valid key
+// In demo mode without Stripe key, we use a placeholder that will throw if accessed
+export const stripe = hasStripeKey
+  ? new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: "2025-12-15.clover" as Stripe.LatestApiVersion,
+      typescript: true,
+    })
+  : (new Proxy({} as Stripe, {
+      get: (_, prop) => {
+        if (DEMO_MODE) {
+          console.warn(`Stripe.${String(prop)} called in demo mode without API key`);
+          return () => Promise.resolve(null);
+        }
+        throw new Error("Stripe API key not configured");
+      },
+    }) as Stripe);
 
 // Stripe public key for client-side
 export const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || "";
@@ -104,12 +119,12 @@ export const ONE_TIME_PRODUCTS = {
     name: "Perpetual Preservation",
     price: 299,
     priceId: process.env.STRIPE_PRICE_PERPETUAL || "price_perpetual",
-    description: "Blockchain preservation for permanent memorial storage",
+    description: "Permanent memorial storage with guaranteed preservation",
     features: [
-      "IPFS storage",
-      "Arweave permanent archive",
+      "Redundant cloud backups",
+      "25-year storage guarantee",
       "Memorial never deleted",
-      "Verification certificate",
+      "Priority support",
     ],
   },
 } as const;

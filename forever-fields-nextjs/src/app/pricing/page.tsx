@@ -575,9 +575,9 @@ export default function PricingPage() {
                 What is Perpetual Preservation?
               </h3>
               <p className="text-gray-body">
-                It&apos;s blockchain-based storage that ensures your memorial
-                endures for generations, protected even if Forever Fields changes. Your
-                memories are preserved on IPFS and Arweave.
+                It&apos;s our commitment to preserving your memorial permanently. We maintain
+                redundant backups across multiple data centers with a 25-year storage guarantee,
+                ensuring your memories are protected for generations.
               </p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-sm">

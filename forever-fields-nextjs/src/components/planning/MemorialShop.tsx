@@ -20,7 +20,7 @@ import type {
 import { CATEGORY_LABELS } from "@/types/shop";
 import { PRODUCT_CATALOG } from "@/data/products";
 import { calculateItemPrice, calculateShipping, calculateTax, formatCurrency, generateOrderId } from "@/lib/shop-utils";
-import { ShoppingCart } from "../shop/ShoppingCart";
+// ShoppingCart component available at ../shop/ShoppingCart if needed
 
 // ============================================================================
 // COMPONENTS

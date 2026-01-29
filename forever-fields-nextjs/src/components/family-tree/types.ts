@@ -49,61 +49,10 @@ export interface Connection {
   type: "parent-child" | "spouse" | "pet-owner";
 }
 
-// Demo data for development
+// Demo data for development - Simple 3-generation family
 export function generateDemoFamilyTree(): FamilyTreeData {
   const members: FamilyMember[] = [
-    // Generation 0 - Great Grandparents
-    {
-      id: "gg1",
-      firstName: "William",
-      lastName: "Anderson",
-      birthYear: 1920,
-      deathYear: 1995,
-      hasMemorial: true,
-      memorialId: "mem-gg1",
-      generation: 0,
-      spouseId: "gg2",
-      childIds: ["g1"],
-    },
-    {
-      id: "gg2",
-      firstName: "Margaret",
-      lastName: "Anderson",
-      nickname: "Maggie",
-      birthYear: 1924,
-      deathYear: 2001,
-      hasMemorial: true,
-      memorialId: "mem-gg2",
-      generation: 0,
-      spouseId: "gg1",
-      childIds: ["g1"],
-    },
-    {
-      id: "gg3",
-      firstName: "Robert",
-      lastName: "Thompson",
-      birthYear: 1918,
-      deathYear: 1988,
-      hasMemorial: true,
-      memorialId: "mem-gg3",
-      generation: 0,
-      spouseId: "gg4",
-      childIds: ["g2"],
-    },
-    {
-      id: "gg4",
-      firstName: "Eleanor",
-      lastName: "Thompson",
-      birthYear: 1922,
-      deathYear: 2010,
-      hasMemorial: true,
-      memorialId: "mem-gg4",
-      generation: 0,
-      spouseId: "gg3",
-      childIds: ["g2"],
-    },
-
-    // Generation 1 - Grandparents
+    // Generation 0 - Grandparents
     {
       id: "g1",
       firstName: "James",
@@ -112,8 +61,7 @@ export function generateDemoFamilyTree(): FamilyTreeData {
       deathYear: 2020,
       hasMemorial: true,
       memorialId: "mem-g1",
-      generation: 1,
-      parentIds: ["gg1", "gg2"],
+      generation: 0,
       spouseId: "g2",
       childIds: ["p1", "p2"],
       petIds: ["pet1"],
@@ -127,24 +75,22 @@ export function generateDemoFamilyTree(): FamilyTreeData {
       deathYear: 2022,
       hasMemorial: true,
       memorialId: "mem-g2",
-      generation: 1,
-      parentIds: ["gg3", "gg4"],
+      generation: 0,
       spouseId: "g1",
       childIds: ["p1", "p2"],
     },
 
-    // Generation 2 - Parents
+    // Generation 1 - Parents
     {
       id: "p1",
       firstName: "Michael",
       lastName: "Anderson",
       birthYear: 1970,
       hasMemorial: false,
-      generation: 2,
+      generation: 1,
       parentIds: ["g1", "g2"],
       spouseId: "p1s",
       childIds: ["c1", "c2"],
-      petIds: ["pet2", "pet3"],
     },
     {
       id: "p1s",
@@ -152,7 +98,7 @@ export function generateDemoFamilyTree(): FamilyTreeData {
       lastName: "Anderson",
       birthYear: 1972,
       hasMemorial: false,
-      generation: 2,
+      generation: 1,
       spouseId: "p1",
       childIds: ["c1", "c2"],
     },
@@ -163,7 +109,7 @@ export function generateDemoFamilyTree(): FamilyTreeData {
       nickname: "Beth",
       birthYear: 1973,
       hasMemorial: false,
-      generation: 2,
+      generation: 1,
       parentIds: ["g1", "g2"],
       spouseId: "p2s",
       childIds: ["c3"],
@@ -174,19 +120,19 @@ export function generateDemoFamilyTree(): FamilyTreeData {
       lastName: "Martinez",
       birthYear: 1971,
       hasMemorial: false,
-      generation: 2,
+      generation: 1,
       spouseId: "p2",
       childIds: ["c3"],
     },
 
-    // Generation 3 - Children
+    // Generation 2 - Grandchildren
     {
       id: "c1",
       firstName: "Emma",
       lastName: "Anderson",
       birthYear: 1998,
       hasMemorial: false,
-      generation: 3,
+      generation: 2,
       parentIds: ["p1", "p1s"],
     },
     {
@@ -195,7 +141,7 @@ export function generateDemoFamilyTree(): FamilyTreeData {
       lastName: "Anderson",
       birthYear: 2001,
       hasMemorial: false,
-      generation: 3,
+      generation: 2,
       parentIds: ["p1", "p1s"],
     },
     {
@@ -204,9 +150,8 @@ export function generateDemoFamilyTree(): FamilyTreeData {
       lastName: "Martinez",
       birthYear: 2000,
       hasMemorial: false,
-      generation: 3,
+      generation: 2,
       parentIds: ["p2", "p2s"],
-      petIds: ["pet4"],
     },
   ];
 
@@ -221,37 +166,11 @@ export function generateDemoFamilyTree(): FamilyTreeData {
       memorialId: "mem-pet1",
       ownerId: "g1",
     },
-    {
-      id: "pet2",
-      name: "Whiskers",
-      species: "cat",
-      birthYear: 2015,
-      deathYear: 2023,
-      hasMemorial: true,
-      memorialId: "mem-pet2",
-      ownerId: "p1",
-    },
-    {
-      id: "pet3",
-      name: "Buddy",
-      species: "dog",
-      birthYear: 2018,
-      hasMemorial: false,
-      ownerId: "p1",
-    },
-    {
-      id: "pet4",
-      name: "Luna",
-      species: "cat",
-      birthYear: 2020,
-      hasMemorial: false,
-      ownerId: "c3",
-    },
   ];
 
   return {
     members,
     pets,
-    rootMemberIds: ["gg1", "gg2", "gg3", "gg4"],
+    rootMemberIds: ["g1", "g2"],
   };
 }

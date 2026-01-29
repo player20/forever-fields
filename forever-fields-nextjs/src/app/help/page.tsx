@@ -251,6 +251,128 @@ export default function HelpPage() {
         </div>
       </section>
 
+      {/* Grief Support Resources */}
+      <section className="py-16 bg-rose-50/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SlideUp>
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-serif font-bold text-gray-dark mb-4">
+                If You&apos;re Struggling
+              </h2>
+              <p className="text-gray-body max-w-2xl mx-auto">
+                Grief is hard. You don&apos;t have to face it alone. These resources
+                are available 24/7.
+              </p>
+            </div>
+          </SlideUp>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <Card className="p-6 h-full border-rose-200 bg-white">
+                <div className="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center mb-4">
+                  <Phone className="w-6 h-6 text-rose-500" />
+                </div>
+                <h3 className="font-semibold text-gray-dark mb-2">
+                  988 Suicide &amp; Crisis Lifeline
+                </h3>
+                <p className="text-sm text-gray-body mb-4">
+                  Free, confidential support 24/7
+                </p>
+                <a
+                  href="tel:988"
+                  className="inline-flex items-center text-rose-600 font-medium text-sm hover:underline"
+                >
+                  Call or Text 988
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </a>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              <Card className="p-6 h-full">
+                <div className="w-12 h-12 rounded-xl bg-sage-pale flex items-center justify-center mb-4">
+                  <Heart className="w-6 h-6 text-sage" />
+                </div>
+                <h3 className="font-semibold text-gray-dark mb-2">
+                  Grief Support Resources
+                </h3>
+                <p className="text-sm text-gray-body mb-4">
+                  Articles, support groups, and professional help
+                </p>
+                <a
+                  href="https://grief.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-sage font-medium text-sm hover:underline"
+                >
+                  Visit grief.com
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </a>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card className="p-6 h-full">
+                <div className="w-12 h-12 rounded-xl bg-sage-pale flex items-center justify-center mb-4">
+                  <Users className="w-6 h-6 text-sage" />
+                </div>
+                <h3 className="font-semibold text-gray-dark mb-2">
+                  GriefShare Groups
+                </h3>
+                <p className="text-sm text-gray-body mb-4">
+                  Find a support group near you
+                </p>
+                <a
+                  href="https://griefshare.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-sage font-medium text-sm hover:underline"
+                >
+                  Find a group
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </a>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="p-6 h-full">
+                <div className="w-12 h-12 rounded-xl bg-sage-pale flex items-center justify-center mb-4">
+                  <MessageCircle className="w-6 h-6 text-sage" />
+                </div>
+                <h3 className="font-semibold text-gray-dark mb-2">
+                  Crisis Text Line
+                </h3>
+                <p className="text-sm text-gray-body mb-4">
+                  Free crisis support via text message
+                </p>
+                <p className="text-sage font-medium text-sm">
+                  Text HOME to 741741
+                </p>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* Contact Options */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

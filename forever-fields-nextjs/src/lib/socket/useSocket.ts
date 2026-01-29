@@ -45,7 +45,7 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
   const { autoConnect = true, memorialId } = options;
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<TypedSocket | null>(null);
-  const listenersRef = useRef<Map<string, Set<Function>>>(new Map());
+  const listenersRef = useRef<Map<string, Set<(...args: unknown[]) => void>>>(new Map());
 
   // Initialize socket connection
   useEffect(() => {
@@ -114,15 +114,17 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
       if (!listenersRef.current.has(event as string)) {
         listenersRef.current.set(event as string, new Set());
       }
-      listenersRef.current.get(event as string)!.add(callback);
+      listenersRef.current.get(event as string)!.add(callback as (...args: unknown[]) => void);
 
       // Register with socket
-      socket.on(event, callback as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      socket.on(event, callback as (...args: any[]) => void);
 
       // Return cleanup function
       return () => {
-        socket.off(event, callback as any);
-        listenersRef.current.get(event as string)?.delete(callback);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        socket.off(event, callback as (...args: any[]) => void);
+        listenersRef.current.get(event as string)?.delete(callback as (...args: unknown[]) => void);
       };
     },
     []

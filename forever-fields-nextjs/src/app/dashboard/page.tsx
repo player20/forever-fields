@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Button, Card, Badge, Avatar, Skeleton } from "@/components/ui";
 import { Header } from "@/components/layout";
 import { FadeIn, SlideUp, Stagger, StaggerItem } from "@/components/motion";
-import { useAuth, useRequireAuth } from "@/hooks/useAuth";
+import { useRequireAuth } from "@/hooks/useAuth";
 import {
   Plus,
   Heart,

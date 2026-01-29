@@ -59,6 +59,13 @@ model User {
   photos            Photo[]          @relation("PhotoUploader")
   stories           Story[]          @relation("StoryAuthor")
   candleLightings   CandleLighting[] @relation("CandleLighter")
+  timeCapsules      TimeCapsule[]    @relation("TimeCapsuleCreator")
+  claimRequestsMade MemorialClaimRequest[] @relation("ClaimRequester")
+  claimRequestsReviewed MemorialClaimRequest[] @relation("ClaimReviewer")
+  consentRecords    ConsentRecord[]
+  voiceProfilesCreated VoiceProfile[] @relation("VoiceProfileCreator")
+  voiceGenerations  VoiceGeneration[] @relation("VoiceGenerationCreator")
+  permanenceRecords PermanenceRecord[] @relation("PermanenceInitiator")
 
   @@map("users")
 }
@@ -87,6 +94,11 @@ model Memorial {
   createdAt            DateTime       @default(now()) @map("created_at")
   updatedAt            DateTime       @updatedAt @map("updated_at")
 
+  // Duplicate prevention
+  canonicalHash        String?        @map("canonical_hash") // Hash of name+birth+death for quick lookup
+  mergedIntoId         String?        @map("merged_into_id") @db.Uuid
+  verifiedByUsers      String[]       @default([]) @map("verified_by_users") @db.Uuid
+
   // Relations
   owner                User           @relation("MemorialOwner", fields: [userId], references: [id], onDelete: Cascade)
   collaborators        Collaborator[]
@@ -95,10 +107,19 @@ model Memorial {
   stories              Story[]
   guestbookEntries     GuestbookEntry[]
   candleLightings      CandleLighting[]
+  timeCapsules         TimeCapsule[]
+  mergedInto           Memorial?      @relation("MergedMemorials", fields: [mergedIntoId], references: [id])
+  mergedFrom           Memorial[]     @relation("MergedMemorials")
+  claimRequests        MemorialClaimRequest[]
+  consentRecords       ConsentRecord[]
+  voiceProfile         VoiceProfile?
+  permanenceRecord     PermanenceRecord?
 
   @@index([userId])
   @@index([slug])
   @@index([isPublic])
+  @@index([canonicalHash])
+  @@index([mergedIntoId])
   @@map("memorials")
 }
 
@@ -224,4 +245,320 @@ model CandleLighting {
   @@index([memorialId])
   @@index([expiresAt])
   @@map("candle_lightings")
+}
+
+// ============================================
+// TIME CAPSULE
+// ============================================
+
+enum TimeCapsuleStatus {
+  scheduled
+  delivered
+  opened
+}
+
+enum ClaimRequestStatus {
+  pending
+  approved
+  rejected
+}
+
+model TimeCapsule {
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memorialId       String?           @map("memorial_id") @db.Uuid
+  createdByUserId  String            @map("created_by_user_id") @db.Uuid
+  title            String
+  message          String            @db.Text
+  mediaUrls        String[]          @map("media_urls")
+  recipientName    String            @map("recipient_name")
+  recipientEmail   String?           @map("recipient_email")
+  unlockDate       DateTime          @map("unlock_date")
+  status           TimeCapsuleStatus @default(scheduled)
+  deliveredAt      DateTime?         @map("delivered_at")
+  openedAt         DateTime?         @map("opened_at")
+  notifyOnOpen     Boolean           @default(true) @map("notify_on_open")
+  isPrivate        Boolean           @default(true) @map("is_private")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  memorial         Memorial?         @relation(fields: [memorialId], references: [id], onDelete: SetNull)
+  createdByUser    User              @relation("TimeCapsuleCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+
+  @@index([memorialId])
+  @@index([createdByUserId])
+  @@index([unlockDate])
+  @@index([status])
+  @@map("time_capsules")
+}
+
+// ============================================
+// AUDIT & COMPLIANCE
+// ============================================
+
+enum AuditEventType {
+  // Consent events
+  VOICE_CONSENT_GIVEN
+  VOICE_CONSENT_REVOKED
+  AI_COMPANION_CONSENT_GIVEN
+  AI_COMPANION_CONSENT_REVOKED
+  EVENT_RECORDING_CONSENT_GIVEN
+  EVENT_RECORDING_CONSENT_REVOKED
+
+  // Voice events
+  VOICE_SAMPLE_UPLOADED
+  VOICE_SAMPLE_DELETED
+  VOICE_MESSAGE_GENERATED
+  VOICE_MESSAGE_PLAYED
+
+  // AI Companion events
+  AI_SESSION_STARTED
+  AI_SESSION_ENDED
+  AI_MESSAGE_SENT
+  AI_CRISIS_DETECTED
+  AI_BREAK_SUGGESTED
+
+  // Event hosting
+  EVENT_CREATED
+  EVENT_STARTED
+  EVENT_RECORDING_STARTED
+  EVENT_ENDED
+
+  // Data access
+  MEMORIAL_VIEWED
+  MEMORIAL_CREATED
+  MEMORIAL_UPDATED
+  MEMORIAL_DELETED
+  MEMORIAL_EXPORTED
+  DATA_DELETION_REQUESTED
+  DATA_EXPORTED
+
+  // Authentication
+  USER_LOGIN
+  USER_LOGOUT
+  USER_REGISTERED
+
+  // Claim system
+  CLAIM_REQUEST_SUBMITTED
+  CLAIM_REQUEST_APPROVED
+  CLAIM_REQUEST_REJECTED
+}
+
+model AuditLog {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventType     AuditEventType @map("event_type")
+  userId        String?        @map("user_id") @db.Uuid
+  memorialId    String?        @map("memorial_id") @db.Uuid
+  sessionId     String?        @map("session_id") // For grouping related events
+  ipAddress     String?        @map("ip_address")
+  userAgent     String?        @map("user_agent")
+  metadata      Json?          // Event-specific data
+  createdAt     DateTime       @default(now()) @map("created_at")
+
+  // Immutable - no updatedAt, no delete
+  @@index([eventType])
+  @@index([userId])
+  @@index([memorialId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+enum ConsentType {
+  VOICE_SELF          // Recording own voice for pre-planning
+  VOICE_FAMILY        // Family authorizing voice of deceased
+  AI_COMPANION        // Using AI companion feature
+  EVENT_RECORDING     // Being recorded in virtual events
+  LOCATION_TRACKING   // GPS tracking for AR grave visits
+  DATA_PROCESSING     // General data processing consent
+}
+
+model ConsentRecord {
+  id                     String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                 String      @map("user_id") @db.Uuid
+  memorialId             String?     @map("memorial_id") @db.Uuid
+  consentType            ConsentType @map("consent_type")
+  consentVersion         String      @map("consent_version") // Terms version agreed to
+  consentText            String      @db.Text // Exact text user agreed to
+  givenAt                DateTime    @default(now()) @map("given_at")
+  revokedAt              DateTime?   @map("revoked_at")
+  ipAddress              String?     @map("ip_address")
+
+  // For family authorization (voice consent)
+  authorizationType      String?     @map("authorization_type") // "legal_executor" | "next_of_kin" | "written_permission"
+  proofDocumentUrl       String?     @map("proof_document_url")
+  relationshipToDeceased String?     @map("relationship_to_deceased")
+
+  // Verification status
+  verifiedAt             DateTime?   @map("verified_at")
+  verifiedBy             String?     @map("verified_by") @db.Uuid // Admin user ID or "auto"
+  verificationNotes      String?     @map("verification_notes") @db.Text
+
+  // Relations
+  user                   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  memorial               Memorial?   @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, memorialId, consentType])
+  @@index([memorialId])
+  @@index([consentType])
+  @@index([userId])
+  @@map("consent_records")
+}
+
+// ============================================
+// DUPLICATE PREVENTION / CLAIM SYSTEM
+// ============================================
+
+model MemorialClaimRequest {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memorialId       String             @map("memorial_id") @db.Uuid
+  requestedBy      String             @map("requested_by") @db.Uuid
+  relationship     String             // How they're related to the deceased
+  message          String?            @db.Text // Why they're claiming
+  proofDescription String?            @map("proof_description") @db.Text // What proof they can provide
+  status           ClaimRequestStatus @default(pending)
+  reviewedBy       String?            @map("reviewed_by") @db.Uuid
+  reviewedAt       DateTime?          @map("reviewed_at")
+  reviewNotes      String?            @map("review_notes") @db.Text
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+
+  // Relations
+  memorial         Memorial           @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+  requester        User               @relation("ClaimRequester", fields: [requestedBy], references: [id], onDelete: Cascade)
+  reviewer         User?              @relation("ClaimReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@unique([memorialId, requestedBy])
+  @@index([memorialId])
+  @@index([requestedBy])
+  @@index([status])
+  @@map("memorial_claim_requests")
+}
+
+// ============================================
+// VOICE CLONING
+// ============================================
+
+enum VoiceVerificationStatus {
+  pending
+  verified
+  rejected
+}
+
+model VoiceProfile {
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memorialId             String                   @unique @map("memorial_id") @db.Uuid
+  createdByUserId        String                   @map("created_by_user_id") @db.Uuid
+
+  // Voice samples
+  sampleUrls             String[]                 @map("sample_urls")
+  totalDuration          Int                      @default(0) @map("total_duration") // seconds
+  qualityScore           Float?                   @map("quality_score") // 0-1 AI quality assessment
+
+  // Consent tracking (references ConsentRecord)
+  consentRecordId        String                   @map("consent_record_id") @db.Uuid
+  authorizationType      String                   @map("authorization_type") // "self_recorded" | "family_authorized" | "pre_mortem_consent"
+
+  // For family authorization
+  authorizerRelationship String?                  @map("authorizer_relationship")
+  proofDocumentUrl       String?                  @map("proof_document_url")
+  proofDocumentType      String?                  @map("proof_document_type") // "death_certificate" | "will" | "power_of_attorney" | "written_permission"
+
+  // Verification
+  verificationStatus     VoiceVerificationStatus  @default(pending) @map("verification_status")
+  verifiedAt             DateTime?                @map("verified_at")
+  verifiedBy             String?                  @map("verified_by") @db.Uuid
+  rejectionReason        String?                  @map("rejection_reason")
+
+  // Usage tracking
+  generationCount        Int                      @default(0) @map("generation_count")
+  lastGeneratedAt        DateTime?                @map("last_generated_at")
+
+  // Soft delete for revocation
+  revokedAt              DateTime?                @map("revoked_at")
+  revokedReason          String?                  @map("revoked_reason")
+
+  createdAt              DateTime                 @default(now()) @map("created_at")
+  updatedAt              DateTime                 @updatedAt @map("updated_at")
+
+  // Relations
+  memorial               Memorial                 @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+  createdByUser          User                     @relation("VoiceProfileCreator", fields: [createdByUserId], references: [id])
+  generations            VoiceGeneration[]
+
+  @@index([memorialId])
+  @@index([verificationStatus])
+  @@map("voice_profiles")
+}
+
+model VoiceGeneration {
+  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  voiceProfileId    String       @map("voice_profile_id") @db.Uuid
+  generatedByUserId String       @map("generated_by_user_id") @db.Uuid
+  messageText       String       @db.Text
+  audioUrl          String       @map("audio_url")
+  duration          Int          // seconds
+  occasion          String?      // "birthday" | "graduation" | "anniversary" | "custom"
+  createdAt         DateTime     @default(now()) @map("created_at")
+
+  // Audit fields
+  ipAddress         String?      @map("ip_address")
+  userAgent         String?      @map("user_agent")
+
+  // Relations
+  voiceProfile      VoiceProfile @relation(fields: [voiceProfileId], references: [id], onDelete: Cascade)
+  generatedByUser   User         @relation("VoiceGenerationCreator", fields: [generatedByUserId], references: [id])
+
+  @@index([voiceProfileId])
+  @@index([generatedByUserId])
+  @@map("voice_generations")
+}
+
+// ============================================
+// BLOCKCHAIN PERMANENCE
+// ============================================
+
+enum PermanenceVerificationStatus {
+  pending
+  verified
+  failed
+}
+
+model PermanenceRecord {
+  id                  String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memorialId          String                      @unique @map("memorial_id") @db.Uuid
+  userId              String                      @map("user_id") @db.Uuid // Who initiated
+
+  // Arweave transaction
+  arweaveTxId         String                      @unique @map("arweave_tx_id")
+  arweaveUrl          String                      @map("arweave_url") // https://arweave.net/{txId}
+  bundlrId            String?                     @map("bundlr_id")
+
+  // Content hashes for verification
+  contentHash         String                      @map("content_hash") // SHA-256 of archived data
+  profilePhotoHash    String?                     @map("profile_photo_hash")
+
+  // Metadata
+  archiveVersion      String                      @map("archive_version") // "1.0", "1.1", etc.
+  archivedAt          DateTime                    @default(now()) @map("archived_at")
+  bytesStored         Int                         @map("bytes_stored")
+  costUsd             Float                       @map("cost_usd") // For billing/tracking
+
+  // Update tracking
+  lastVerifiedAt      DateTime?                   @map("last_verified_at")
+  verificationStatus  PermanenceVerificationStatus @default(pending) @map("verification_status")
+  verificationError   String?                     @map("verification_error")
+
+  // Previous versions (for updates)
+  previousVersionId   String?                     @map("previous_version_id") @db.Uuid
+
+  createdAt           DateTime                    @default(now()) @map("created_at")
+
+  // Relations
+  memorial            Memorial                    @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+  user                User                        @relation("PermanenceInitiator", fields: [userId], references: [id])
+
+  @@index([arweaveTxId])
+  @@index([memorialId])
+  @@index([verificationStatus])
+  @@map("permanence_records")
 }

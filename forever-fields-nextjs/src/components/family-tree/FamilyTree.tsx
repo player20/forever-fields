@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef, useCallback, useMemo } from "react";
-import { motion } from "framer-motion";
-import { ZoomIn, ZoomOut, Home, Move } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ZoomIn, ZoomOut, Home } from "lucide-react";
 import { Button, Badge } from "@/components/ui";
 import { PersonNode } from "./PersonNode";
 import { PetNode } from "./PetNode";
@@ -22,15 +22,41 @@ interface FamilyTreeProps {
   className?: string;
 }
 
-// Layout constants
-const NODE_WIDTH = 120;
-const NODE_HEIGHT = 100;
-const VERTICAL_GAP = 100; // Space between generations
-const SIBLING_GAP = 40; // Space between siblings
-const COUPLE_GAP = 20; // Space between spouses
-const BRANCH_GAP = 80; // Space between family branches
-const PET_SIZE = 60;
-const PET_OFFSET_Y = 85;
+// Layout constants - improved spacing for less crowded look
+const NODE_WIDTH = 140;
+const NODE_HEIGHT = 110;
+const VERTICAL_GAP = 120; // More space between generations
+const SIBLING_GAP = 60; // More space between siblings
+const COUPLE_GAP = 24; // Space between spouses
+const BRANCH_GAP = 100; // Space between family branches
+const PET_SIZE = 65;
+const PET_OFFSET_Y = 95;
+
+// Stagger animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const nodeVariants = {
+  hidden: { opacity: 0, scale: 0.8, y: 20 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 300,
+      damping: 25,
+    },
+  },
+};
 
 export function FamilyTree({
   data,
@@ -40,8 +66,8 @@ export function FamilyTree({
   className = "",
 }: FamilyTreeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState(0.75);
-  const [pan, setPan] = useState({ x: 100, y: 30 });
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 50, y: 20 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
@@ -397,12 +423,18 @@ export function FamilyTree({
     setZoom((prev) => Math.max(0.3, Math.min(2, prev + delta)));
   };
 
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    setZoom((prev) => Math.max(0.3, Math.min(2, prev + delta)));
+  }, []);
+
   const handleReset = () => {
-    setZoom(0.75);
-    setPan({ x: 100, y: 30 });
+    setZoom(1);
+    setPan({ x: 50, y: 20 });
   };
 
-  // Generate SVG path for connections
+  // Generate SVG path for connections with highlighting
   const renderConnections = () => {
     // Group parent-child connections by parent to draw proper tree structure
     const parentChildGroups = new Map<string, Connection[]>();
@@ -418,10 +450,12 @@ export function FamilyTree({
     const paths: JSX.Element[] = [];
 
     // Draw spouse connections
-    connections.filter(c => c.type === "spouse").forEach((connection, index) => {
+    connections.filter(c => c.type === "spouse").forEach((connection) => {
       const from = positions.get(connection.fromId);
       const to = positions.get(connection.toId);
       if (!from || !to) return;
+
+      const isHighlighted = !selectedId || (connectedNodeIds.has(connection.fromId) && connectedNodeIds.has(connection.toId));
 
       // Horizontal line connecting spouses at their midpoint
       const y = from.y + NODE_HEIGHT / 2;
@@ -433,10 +467,12 @@ export function FamilyTree({
           key={`spouse-${connection.fromId}-${connection.toId}`}
           d={`M ${fromX} ${y} L ${toX} ${y}`}
           fill="none"
-          stroke="#6b8e6b"
-          strokeWidth={3}
+          stroke={isHighlighted ? "#5a7d5a" : "#6b8e6b"}
+          strokeWidth={isHighlighted ? 4 : 3}
           strokeLinecap="round"
-          opacity={0.7}
+          opacity={isHighlighted ? 0.9 : 0.3}
+          filter={isHighlighted && selectedId ? "url(#glow)" : undefined}
+          style={{ transition: "all 0.3s ease" }}
         />
       );
     });
@@ -457,7 +493,12 @@ export function FamilyTree({
       const startY = parentPos.y + NODE_HEIGHT / 2 + 10;
 
       // Vertical drop distance
-      const dropY = startY + VERTICAL_GAP / 2 - 15;
+      const dropY = startY + VERTICAL_GAP / 2 - 20;
+
+      // Check if this parent group involves selected node
+      const parentMemberId = parentId.replace('-center', '').split('-')[0];
+      const hasSelectedChild = children.some(c => connectedNodeIds.has(c.conn.toId));
+      const isGroupHighlighted = !selectedId || (connectedNodeIds.has(parentMemberId) && hasSelectedChild);
 
       // Draw vertical line from parent
       paths.push(
@@ -465,10 +506,12 @@ export function FamilyTree({
           key={`parent-drop-${parentId}`}
           d={`M ${startX} ${startY} L ${startX} ${dropY}`}
           fill="none"
-          stroke="#6b8e6b"
-          strokeWidth={2}
+          stroke={isGroupHighlighted ? "#5a7d5a" : "#6b8e6b"}
+          strokeWidth={isGroupHighlighted ? 3 : 2}
           strokeLinecap="round"
-          opacity={0.6}
+          opacity={isGroupHighlighted ? 0.8 : 0.25}
+          filter={isGroupHighlighted && selectedId ? "url(#glow)" : undefined}
+          style={{ transition: "all 0.3s ease" }}
         />
       );
 
@@ -483,10 +526,11 @@ export function FamilyTree({
             key={`sibling-bar-${parentId}`}
             d={`M ${leftX} ${dropY} L ${rightX} ${dropY}`}
             fill="none"
-            stroke="#6b8e6b"
-            strokeWidth={2}
+            stroke={isGroupHighlighted ? "#5a7d5a" : "#6b8e6b"}
+            strokeWidth={isGroupHighlighted ? 3 : 2}
             strokeLinecap="round"
-            opacity={0.6}
+            opacity={isGroupHighlighted ? 0.8 : 0.25}
+            style={{ transition: "all 0.3s ease" }}
           />
         );
       }
@@ -495,26 +539,31 @@ export function FamilyTree({
       children.forEach(({ conn, pos }) => {
         if (!pos) return;
         const childTopY = pos.y - 10;
+        const isChildHighlighted = !selectedId || connectedNodeIds.has(conn.toId);
 
         paths.push(
           <path
             key={`child-line-${conn.toId}`}
             d={`M ${pos.x} ${dropY} L ${pos.x} ${childTopY}`}
             fill="none"
-            stroke="#6b8e6b"
-            strokeWidth={2}
+            stroke={isChildHighlighted ? "#5a7d5a" : "#6b8e6b"}
+            strokeWidth={isChildHighlighted ? 3 : 2}
             strokeLinecap="round"
-            opacity={0.6}
+            opacity={isChildHighlighted ? 0.8 : 0.25}
+            filter={isChildHighlighted && selectedId ? "url(#glow)" : undefined}
+            style={{ transition: "all 0.3s ease" }}
           />
         );
       });
     });
 
     // Draw pet connections
-    connections.filter(c => c.type === "pet-owner").forEach((connection, index) => {
+    connections.filter(c => c.type === "pet-owner").forEach((connection) => {
       const from = positions.get(connection.fromId);
       const to = positions.get(connection.toId);
       if (!from || !to) return;
+
+      const isHighlighted = !selectedId || (connectedNodeIds.has(connection.fromId) && connectedNodeIds.has(connection.toId));
 
       const startY = from.y + NODE_HEIGHT / 2 + 20;
       const endY = to.y - 5;
@@ -524,11 +573,13 @@ export function FamilyTree({
           key={`pet-${connection.fromId}-${connection.toId}`}
           d={`M ${from.x} ${startY} L ${to.x} ${endY}`}
           fill="none"
-          stroke="#b38f1f"
-          strokeWidth={1.5}
-          strokeDasharray="4 4"
+          stroke={isHighlighted ? "#d4af37" : "#b38f1f"}
+          strokeWidth={isHighlighted ? 2.5 : 1.5}
+          strokeDasharray="6 4"
           strokeLinecap="round"
-          opacity={0.5}
+          opacity={isHighlighted ? 0.8 : 0.25}
+          filter={isHighlighted && selectedId ? "url(#glow)" : undefined}
+          style={{ transition: "all 0.3s ease" }}
         />
       );
     });
@@ -536,18 +587,58 @@ export function FamilyTree({
     return paths;
   };
 
+  // Get connected node IDs for highlighting
+  const connectedNodeIds = useMemo(() => {
+    if (!selectedId) return new Set<string>();
+
+    const connected = new Set<string>();
+    connected.add(selectedId);
+
+    // Find the selected member
+    const selectedMember = data.members.find(m => m.id === selectedId);
+    if (selectedMember) {
+      // Add parents
+      selectedMember.parentIds?.forEach(id => connected.add(id));
+      // Add spouse
+      if (selectedMember.spouseId) connected.add(selectedMember.spouseId);
+      // Add children
+      selectedMember.childIds?.forEach(id => connected.add(id));
+      // Add pets
+      selectedMember.petIds?.forEach(id => connected.add(id));
+    }
+
+    // Check if it's a pet
+    const selectedPet = data.pets.find(p => p.id === selectedId);
+    if (selectedPet) {
+      connected.add(selectedPet.ownerId);
+    }
+
+    return connected;
+  }, [selectedId, data.members, data.pets]);
+
+  // Calculate dynamic container height
+  const containerHeight = Math.min(Math.max(dimensions.height + 100, 500), 800);
+
   return (
     <div className={`relative ${className}`}>
-      {/* Tree container */}
+      {/* Tree container with atmospheric background */}
       <div
         ref={containerRef}
-        className="overflow-hidden rounded-xl border border-sage-pale bg-gradient-to-b from-cream to-white shadow-soft cursor-grab active:cursor-grabbing"
-        style={{ height: 550 }}
+        className="overflow-hidden rounded-2xl border border-sage-pale/50 shadow-lg cursor-grab active:cursor-grabbing relative"
+        style={{ height: containerHeight }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onWheel={handleWheel}
       >
+        {/* Atmospheric gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-sage-pale/20 via-cream to-white" />
+
+        {/* Decorative blur circles for atmosphere */}
+        <div className="absolute top-10 left-1/4 w-64 h-64 bg-sage/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 right-1/4 w-48 h-48 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
+
         <motion.div
           className="relative"
           style={{
@@ -556,6 +647,9 @@ export function FamilyTree({
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
             transformOrigin: "top left",
           }}
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
         >
           {/* Connection lines SVG */}
           <svg
@@ -564,56 +658,84 @@ export function FamilyTree({
             height={dimensions.height}
             style={{ overflow: "visible" }}
           >
+            <defs>
+              {/* Glow filter for highlighted connections */}
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
             {renderConnections()}
           </svg>
 
-          {/* Person nodes */}
-          {data.members.map((member) => {
-            const pos = positions.get(member.id);
-            if (!pos) return null;
+          {/* Person nodes with stagger animation */}
+          <AnimatePresence>
+            {data.members.map((member) => {
+              const pos = positions.get(member.id);
+              if (!pos) return null;
 
-            return (
-              <div
-                key={member.id}
-                className="absolute"
-                style={{
-                  left: pos.x - NODE_WIDTH / 2,
-                  top: pos.y,
-                  width: NODE_WIDTH,
-                }}
-              >
-                <PersonNode
-                  member={member}
-                  isSelected={selectedId === member.id}
-                  onClick={onSelectPerson}
-                />
-              </div>
-            );
-          })}
+              const isConnected = connectedNodeIds.has(member.id);
+              const isHighlighted = selectedId ? isConnected : true;
 
-          {/* Pet nodes */}
-          {data.pets.map((pet) => {
-            const pos = positions.get(pet.id);
-            if (!pos) return null;
+              return (
+                <motion.div
+                  key={member.id}
+                  className="absolute"
+                  style={{
+                    left: pos.x - NODE_WIDTH / 2,
+                    top: pos.y,
+                    width: NODE_WIDTH,
+                    opacity: isHighlighted ? 1 : 0.4,
+                    transition: "opacity 0.3s ease",
+                  }}
+                  variants={nodeVariants}
+                  custom={member.generation}
+                >
+                  <PersonNode
+                    member={member}
+                    isSelected={selectedId === member.id}
+                    isHighlighted={isConnected}
+                    onClick={onSelectPerson}
+                  />
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
 
-            return (
-              <div
-                key={pet.id}
-                className="absolute"
-                style={{
-                  left: pos.x - 35,
-                  top: pos.y,
-                  width: 70,
-                }}
-              >
-                <PetNode
-                  pet={pet}
-                  isSelected={selectedId === pet.id}
-                  onClick={onSelectPet}
-                />
-              </div>
-            );
-          })}
+          {/* Pet nodes with stagger animation */}
+          <AnimatePresence>
+            {data.pets.map((pet) => {
+              const pos = positions.get(pet.id);
+              if (!pos) return null;
+
+              const isConnected = connectedNodeIds.has(pet.id);
+              const isHighlighted = selectedId ? isConnected : true;
+
+              return (
+                <motion.div
+                  key={pet.id}
+                  className="absolute"
+                  style={{
+                    left: pos.x - 35,
+                    top: pos.y,
+                    width: 75,
+                    opacity: isHighlighted ? 1 : 0.4,
+                    transition: "opacity 0.3s ease",
+                  }}
+                  variants={nodeVariants}
+                >
+                  <PetNode
+                    pet={pet}
+                    isSelected={selectedId === pet.id}
+                    onClick={onSelectPet}
+                  />
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         </motion.div>
       </div>
 
@@ -653,12 +775,6 @@ export function FamilyTree({
         <Badge variant="secondary" className="bg-white/90 shadow-sm">
           {Math.round(zoom * 100)}%
         </Badge>
-      </div>
-
-      {/* Drag hint */}
-      <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs text-gray-400 bg-white/80 px-2 py-1 rounded">
-        <Move className="w-4 h-4" />
-        <span>Drag to pan</span>
       </div>
     </div>
   );

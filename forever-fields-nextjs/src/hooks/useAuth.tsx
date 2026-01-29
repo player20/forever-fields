@@ -2,13 +2,11 @@
 
 import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from "react";
 import {
-  getSupabaseClient,
   signInWithMagicLink,
   signInWithPassword,
   signUp as supabaseSignUp,
   signInWithGoogle,
   signOut as supabaseSignOut,
-  getSession,
   getCurrentUser,
   resetPassword as supabaseResetPassword,
   updatePassword,
@@ -16,7 +14,7 @@ import {
   onAuthStateChange,
 } from "@/lib/supabase";
 import type { User, SubscriptionTier } from "@/lib/supabase/types";
-import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 // Demo mode for local development without real Supabase credentials
 const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
@@ -28,7 +26,7 @@ const DEMO_USER: AppUser = {
   firstName: "Demo",
   lastName: "User",
   avatarUrl: undefined,
-  subscriptionTier: "premium",
+  subscriptionTier: "heritage",
 };
 
 // User type that matches what the rest of the app expects
@@ -54,6 +52,7 @@ interface AuthContextValue extends AuthState {
   register: (email: string, password: string, name?: string) => Promise<void>;
   logout: () => Promise<void>;
   requestMagicLink: (email: string) => Promise<void>;
+  verifyMagicLink: (token: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   requestPasswordReset: (email: string) => Promise<void>;
   resetPassword: (newPassword: string) => Promise<void>;
@@ -335,6 +334,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Verify magic link token
+  const verifyMagicLink = async (_token: string) => {
+    // In demo mode, simulate successful verification and login
+    if (DEMO_MODE) {
+      setState((prev) => ({
+        ...prev,
+        user: DEMO_USER,
+        isAuthenticated: true,
+        isLoading: false,
+      }));
+      return;
+    }
+
+    // With Supabase, the magic link verification happens automatically
+    // when the user clicks the link - they get redirected to the callback
+    // URL and the session is established. This function is called after
+    // that redirect to confirm the user is authenticated.
+    try {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+      const supabaseUser = await getCurrentUser();
+      if (supabaseUser) {
+        const profile = await syncUserProfile(supabaseUser);
+        const appUser = toAppUser(supabaseUser, profile);
+        setState((prev) => ({
+          ...prev,
+          user: appUser,
+          isAuthenticated: true,
+          isLoading: false,
+        }));
+      } else {
+        throw new Error("Magic link verification failed");
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Verification failed";
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: message,
+      }));
+      throw err;
+    }
+  };
+
   // Login with Google
   const loginWithGoogle = async () => {
     // In demo mode, just set the demo user
@@ -422,6 +465,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     register,
     logout,
     requestMagicLink,
+    verifyMagicLink,
     loginWithGoogle,
     requestPasswordReset,
     resetPassword: resetPasswordHandler,
