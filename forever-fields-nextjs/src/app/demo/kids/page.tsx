@@ -14,6 +14,24 @@ import { FuneralPlanningHub, MemorialShop, PrePlanningPortal } from "@/component
 
 type DemoMode = "menu" | "explorer" | "stories" | "milestones" | "create" | "companion" | "qr" | "family" | "gedcom" | "photos" | "voice" | "animate" | "capture" | "memorymap" | "recipes" | "wall" | "slideshow" | "cemetery" | "gravelocator" | "funeral" | "shop" | "preplanning";
 
+// Types for voice components
+interface VoiceSample {
+  id: string;
+  name: string;
+  type: "audio" | "video";
+  url: string;
+  duration?: number;
+  uploadedAt: Date;
+}
+
+interface GeneratedMessage {
+  id: string;
+  text: string;
+  audioUrl: string | null;
+  createdAt: Date;
+  occasion?: string;
+}
+
 // Sample data for demo
 const sampleAncestor = {
   id: "demo-grandma",
@@ -362,7 +380,7 @@ export default function KidsDemoPage() {
         <div className="max-w-2xl mx-auto space-y-6">
           <VoiceSampleUploader
             ancestorName="Grandma Margaret"
-            onComplete={(samples) => {
+            onComplete={(samples: VoiceSample[]) => {
               console.log("Voice samples:", samples);
               toast.success(`${samples.length} voice samples ready for cloning!`);
             }}
@@ -374,7 +392,7 @@ export default function KidsDemoPage() {
               sampleUrls: [], // Would be populated from uploaded samples
               createdAt: new Date(),
             }}
-            onMessageGenerated={(message) => {
+            onMessageGenerated={(message: GeneratedMessage) => {
               console.log("Generated message:", message);
               toast.success("Voice message generated! (Demo mode - requires Replicate API key)");
             }}

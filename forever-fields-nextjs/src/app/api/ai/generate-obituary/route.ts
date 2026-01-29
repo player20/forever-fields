@@ -32,6 +32,45 @@ TONE OPTIONS:
 - religious: Includes faith-based comfort
 - celebration: Focuses on joy and life well-lived`;
 
+// Helper function for demo mode
+function generateMockObituary(
+  name: string,
+  relationship: string,
+  tone: string,
+  length: string,
+  birthYear?: string,
+  deathYear?: string,
+  birthPlace?: string,
+  prompts?: { personality?: string; bestMemory?: string; legacy?: string }
+): string {
+  const dateStr = birthYear && deathYear ? `(${birthYear} - ${deathYear})` : "";
+  const placeStr = birthPlace ? ` of ${birthPlace}` : "";
+
+  const obituaries: Record<string, string> = {
+    short: `${name}${placeStr} ${dateStr} passed away peacefully, leaving behind a legacy of love and cherished memories. As a beloved ${relationship}, they touched countless lives with their warmth and kindness. Their spirit will live on in the hearts of all who knew them.`,
+
+    medium: `${name}${placeStr} ${dateStr} lived a life filled with purpose, love, and unwavering dedication to family. As a cherished ${relationship}, they created countless moments of joy that will be treasured forever.
+
+${prompts?.personality ? `Known for being ${prompts.personality}, ` : ""}${name} had a remarkable ability to make everyone feel special and valued. ${prompts?.bestMemory ? `Family members fondly remember ${prompts.bestMemory}. ` : ""}
+
+Their legacy extends far beyond what words can capture. ${prompts?.legacy ? prompts.legacy : "They will be remembered for their kindness, wisdom, and the love they shared with everyone they met."} Though they are no longer with us physically, their memory will continue to guide and inspire us all.`,
+
+    long: `${name}${placeStr} ${dateStr} graced this world with a life that exemplified love, dedication, and the true meaning of family. As a beloved ${relationship}, they created a lasting impact that will resonate through generations to come.
+
+${prompts?.personality ? `Those who knew ${name} best would describe them as ${prompts.personality}. ` : ""}Their presence had a way of lighting up any room, and their wisdom was sought by many. ${name} believed in the power of family bonds and worked tirelessly to strengthen those connections.
+
+${prompts?.bestMemory ? `Among the countless cherished memories, ${prompts.bestMemory} stands out as a testament to the joy they brought to every gathering. ` : ""}These moments of togetherness became the foundation of a family legacy built on love and mutual respect.
+
+${name} faced life's challenges with remarkable grace and resilience, always maintaining their characteristic optimism. They taught those around them the importance of perseverance, kindness, and finding joy in simple moments.
+
+${prompts?.legacy ? prompts.legacy + " " : ""}As we bid farewell, we take comfort in knowing that ${name}'s spirit lives on in every life they touched. Their memory will forever be a blessing, guiding us with the same love and wisdom they shared so generously throughout their life.
+
+Rest in peace, dear ${name}. You are deeply loved and will never be forgotten.`,
+  };
+
+  return obituaries[length] || obituaries.medium;
+}
+
 interface RequestBody {
   deceasedName: string;
   relationship: string;
@@ -81,6 +120,44 @@ export async function POST(request: NextRequest) {
         JSON.stringify({ error: "Deceased name is required" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
+    }
+
+    // Demo mode - return mock obituary without calling Claude
+    if (!process.env.ANTHROPIC_API_KEY) {
+      const mockObituary = generateMockObituary(
+        deceasedName,
+        relationship,
+        tone,
+        length,
+        birthYear,
+        deathYear,
+        birthPlace,
+        prompts
+      );
+
+      const encoder = new TextEncoder();
+      const readable = new ReadableStream({
+        async start(controller) {
+          // Simulate streaming by sending chunks
+          const words = mockObituary.split(" ");
+          for (const word of words) {
+            await new Promise((resolve) => setTimeout(resolve, 30));
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ text: word + " " })}\n\n`)
+            );
+          }
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+        },
+      });
+
+      return new Response(readable, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+      });
     }
 
     let userMessage = "";

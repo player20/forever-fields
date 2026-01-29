@@ -36,11 +36,31 @@ export async function createServerSupabaseClient() {
   );
 }
 
+// Demo user for local testing without Supabase
+const DEMO_USER = {
+  id: "demo-user-123",
+  email: "demo@foreverfields.com",
+  app_metadata: {},
+  user_metadata: {
+    first_name: "Demo",
+    last_name: "User",
+    full_name: "Demo User",
+  },
+  aud: "authenticated",
+  created_at: new Date().toISOString(),
+} as const;
+
 /**
  * Require authentication for API routes
  * Returns authenticated user or error response
  */
 export async function requireAuth() {
+  // Demo mode - return mock user without calling Supabase
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+  if (isDemoMode) {
+    return { user: DEMO_USER, error: null };
+  }
+
   const supabase = await createServerSupabaseClient();
   const { data: { user }, error } = await supabase.auth.getUser();
 
@@ -49,6 +69,23 @@ export async function requireAuth() {
   }
 
   return { user, error: null };
+}
+
+/**
+ * Optional authentication for API routes
+ * Returns authenticated user if available, but doesn't require it
+ */
+export async function optionalAuth() {
+  // Demo mode - return mock user without calling Supabase
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+  if (isDemoMode) {
+    return { user: DEMO_USER, error: null };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  return { user: user || null, error: null };
 }
 
 // Service role client for admin operations (server-side only)
