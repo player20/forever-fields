@@ -134,6 +134,7 @@ export default function CreateMemorialPage() {
   const [hasDraft, setHasDraft] = useState(false);
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const [createdMemorialName, setCreatedMemorialName] = useState("");
+  const [testAsGuest, setTestAsGuest] = useState(false); // For testing guest flow
 
   // Collapsible section state
   const [showOptionalName, setShowOptionalName] = useState(false);
@@ -414,8 +415,8 @@ export default function CreateMemorialPage() {
     if (DEMO_MODE) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // If user is not authenticated, prompt them to sign up
-      if (!isAuthenticated) {
+      // If user is not authenticated OR testing as guest, prompt them to sign up
+      if (!isAuthenticated || testAsGuest) {
         setCreatedMemorialName(memorialName);
         setShowSignupPrompt(true);
         setIsSubmitting(false);
@@ -472,8 +473,8 @@ export default function CreateMemorialPage() {
     if (DEMO_MODE) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // If user is not authenticated, prompt them to sign up
-      if (!isAuthenticated) {
+      // If user is not authenticated OR testing as guest, prompt them to sign up
+      if (!isAuthenticated || testAsGuest) {
         setCreatedMemorialName(memorialName);
         setShowQuickCreate(false);
         setShowSignupPrompt(true);
@@ -681,6 +682,24 @@ export default function CreateMemorialPage() {
                     </p>
                   </div>
                 </div>
+              </div>
+
+              {/* Test Mode Toggle - for local testing */}
+              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={testAsGuest}
+                    onChange={(e) => setTestAsGuest(e.target.checked)}
+                    className="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                  />
+                  <div className="text-sm">
+                    <span className="font-medium text-amber-800">Test as Guest</span>
+                    <span className="text-amber-600 ml-2">
+                      (Shows signup prompt after creating memorial)
+                    </span>
+                  </div>
+                </label>
               </div>
             </FadeIn>
           </div>
