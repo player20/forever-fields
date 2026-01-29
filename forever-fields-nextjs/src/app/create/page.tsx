@@ -126,7 +126,7 @@ interface DraftData {
 
 export default function CreateMemorialPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [currentStep, setCurrentStep] = useState(0); // 0 = intro, 1-4 = steps
   const [isSubmitting, setIsSubmitting] = useState(false);
