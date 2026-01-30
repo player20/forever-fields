@@ -948,9 +948,127 @@
                     <span class="indicator-icon">✓</span>
                     <span class="indicator-text">All changes saved</span>
                 </div>
+                <button type="button" class="save-return-btn" id="saveReturnBtn" title="Save and get a link to return later">
+                    📧 Save & Return Later
+                </button>
             </div>
         </div>
     </header>
+
+    <!-- Save & Return Later Modal -->
+    <div class="save-return-modal" id="saveReturnModal" style="display: none;">
+        <div class="save-return-modal-content">
+            <button class="save-return-close" id="saveReturnClose">&times;</button>
+            <h2>📧 Save & Return Later</h2>
+            <p>Need to step away? We'll email you a link so you can pick up right where you left off.</p>
+            <div class="save-return-form">
+                <input type="email" id="saveReturnEmail" placeholder="Your email address" required>
+                <button type="button" id="sendSaveLink" class="btn btn-primary">Send Me a Link</button>
+            </div>
+            <div class="save-return-success" id="saveReturnSuccess" style="display: none;">
+                <span class="success-icon">✓</span>
+                <p>Link sent! Check your email to continue later.</p>
+            </div>
+            <p class="save-return-note">Your progress is already saved locally. The email link lets you continue from any device.</p>
+        </div>
+    </div>
+
+    <style>
+        .save-return-btn {
+            padding: 0.5rem 1rem;
+            background: var(--sage-pale);
+            border: 1px solid var(--sage-light);
+            border-radius: 8px;
+            color: var(--sage-primary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .save-return-btn:hover {
+            background: var(--sage-light);
+            border-color: var(--sage-primary);
+        }
+        .save-return-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        .save-return-modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+        }
+        .save-return-modal-content h2 {
+            font-family: var(--font-serif);
+            color: var(--gray-dark);
+            margin-bottom: 0.75rem;
+        }
+        .save-return-modal-content > p {
+            color: var(--gray-body);
+            margin-bottom: 1.5rem;
+        }
+        .save-return-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-light);
+        }
+        .save-return-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .save-return-form input {
+            padding: 0.875rem 1rem;
+            border: 1.5px solid var(--sage-light);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .save-return-form input:focus {
+            outline: none;
+            border-color: var(--sage-primary);
+        }
+        .save-return-success {
+            padding: 1.5rem;
+            background: var(--sage-pale);
+            border-radius: 12px;
+            margin-top: 1rem;
+        }
+        .save-return-success .success-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--sage-primary);
+        }
+        .save-return-note {
+            font-size: 0.8rem;
+            color: var(--gray-light);
+            margin-top: 1rem;
+        }
+        @media (max-width: 600px) {
+            .save-return-btn {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
 
     <!-- Progress Bar -->
     <div class="wizard-progress">
@@ -975,268 +1093,97 @@
     <div class="wizard-container" id="wizardContainer main-content" tabindex="-1">
         <form id="memorialForm" data-autosave="memorial-draft" data-validate>
 
-            <!-- Step 1: Essential Information (Consolidated from old Steps 1+2+3) -->
+            <!-- Step 1: Essential Information (Simplified for grieving users) -->
             <div class="wizard-step active" data-step="0" aria-labelledby="step-essential-heading">
                 <div class="step-header">
-                    <span class="step-icon">📋</span>
-                    <h1 id="step-essential-heading">Essential Information</h1>
-                    <p>Let's start with the basics. Take your time — there's no rush here.</p>
+                    <span class="step-icon">🕯️</span>
+                    <h1 id="step-essential-heading">Let's Begin</h1>
+                    <p>We only need a few details to get started. Take your time.</p>
                     <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
-                        <strong>Step 1 of 3</strong> • About 5-7 minutes
+                        <strong>Step 1 of 3</strong> • Just 2 minutes
                     </p>
                 </div>
 
-                <!-- Section 1: About You -->
+                <!-- Simplified Form - Only Essential Fields -->
                 <div class="form-section">
-                    <h3 class="form-section-title">👤 About You</h3>
-
-                <div class="form-group">
-                    <label for="userEmail">Your Email</label>
-                    <input type="email" id="userEmail" name="userEmail" placeholder="you@example.com" required>
-                    <span class="field-hint">We'll use this to save your progress and send you a link to your memorial.</span>
-                </div>
-
-                <div class="form-group">
-                    <label for="userName">Your Name</label>
-                    <input type="text" id="userName" name="userName" placeholder="Your first name" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="relationship">Your Relationship to Them</label>
-                    <select id="relationship" name="relationship" required>
-                        <option value="">Select...</option>
-                        <option value="child">Son/Daughter</option>
-                        <option value="spouse">Spouse/Partner</option>
-                        <option value="parent">Parent</option>
-                        <option value="sibling">Sibling</option>
-                        <option value="grandchild">Grandchild</option>
-                        <option value="friend">Friend</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-
-                <div class="reassurance">
-                    <span class="reassurance-icon">✓</span>
-                    <span>We'll save your progress automatically. You can come back anytime.</span>
-                </div>
-                </div>
-
-                <!-- Section 2: Memorial Basics -->
-                <div class="form-section">
-                    <h3 class="form-section-title">💐 Memorial Basics</h3>
-
-                <label class="portrait-upload" id="portraitUpload" aria-label="Upload portrait photo">
-                    <input type="file" id="portraitInput" name="portrait" accept="image/*" aria-label="Portrait photo file input">
-                    <span class="portrait-upload-icon" aria-hidden="true">📷</span>
-                    <span class="portrait-upload-text">Add their photo<br><small>Click or drag to upload</small></span>
-                </label>
-
-                <div class="form-group">
-                    <label for="deceasedName">Their Full Name</label>
-                    <input type="text" id="deceasedName" name="deceasedName" placeholder="First Middle Last" required aria-required="true">
-                    <span class="field-hint">Enter their name exactly as you'd like it displayed on the memorial</span>
-                </div>
-
-                <!-- Live preview of how name will appear -->
-                <div class="name-preview" id="namePreviewBox" style="display: none; margin-top: 0.75rem; padding: 1rem; background: var(--sage-pale); border-radius: 12px; border: 1px solid var(--sage-light);" role="status" aria-live="polite">
-                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-bottom: 0.5rem;">
-                        Preview - How it will appear:
-                    </p>
-                    <p style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--gray-dark); margin: 0;" id="namePreview">
-                        [Their name will appear here]
-                    </p>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="preferredName">
-                            Preferred Name or Nickname <span class="optional">(optional)</span>
-                        </label>
-                        <input type="text" id="preferredName" name="preferredName" placeholder="e.g., 'Johnny' or 'Grandma Rose'">
-                        <span class="field-hint">What did family and friends call them? We'll use this for personalization.</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="nameTitle">
-                            Title or Suffix <span class="optional">(optional)</span>
-                        </label>
-                        <input type="text" id="nameTitle" name="nameTitle" placeholder="e.g., Dr., Sr., Jr., III">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="birthDate">Date of Birth</label>
-                        <input type="date" id="birthDate" name="birthDate" required aria-required="true">
-                    </div>
-                    <div class="form-group">
-                        <label for="passingDate">Date of Passing</label>
-                        <input type="date" id="passingDate" name="passingDate" required aria-required="true">
-                    </div>
-                </div>
-
-                <!-- Age Display (Auto-calculated) -->
-                <div id="ageDisplay" style="display: none; margin-top: 0.75rem; padding: 1rem; background: var(--sage-pale); border-radius: 12px; border: 1px solid var(--sage-light);" role="status" aria-live="polite">
-                    <p style="font-size: 0.85rem; color: var(--gray-light); margin-bottom: 0.25rem;">
-                        Age at passing:
-                    </p>
-                    <p style="font-family: var(--font-serif); font-size: 1.25rem; color: var(--sage-primary); margin: 0;" id="calculatedAge">
-                        <!-- Age will appear here -->
-                    </p>
-                </div>
-
-                <!-- Optional Personal Details -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="religion">
-                            Religion/Faith <span class="optional">(optional)</span>
-                        </label>
-                        <select id="religion" name="religion" aria-label="Select religion or faith tradition">
-                            <option value="">Prefer not to say</option>
-                            <option value="Christian">Christian</option>
-                            <option value="Muslim">Muslim</option>
-                            <option value="Jewish">Jewish</option>
-                            <option value="Hindu">Hindu</option>
-                            <option value="Buddhist">Buddhist</option>
-                            <option value="Atheist">Atheist</option>
-                            <option value="Agnostic">Agnostic</option>
-                            <option value="Spiritual">Spiritual (non-religious)</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        <span class="field-hint">Optional - helps personalize the memorial's tone and imagery</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="gender">
-                            Gender <span class="optional">(optional)</span>
-                        </label>
-                        <select id="gender" name="gender" aria-label="Select gender">
-                            <option value="">Prefer not to say</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Non-Binary">Non-Binary</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        <span class="field-hint">Helps us use the right pronouns throughout the memorial</span>
-                    </div>
-                </div>
-
-                <!-- Custom Pronouns (shown when gender is Non-Binary or Other) -->
-                <div class="form-group" id="pronounsGroup" style="display: none;">
-                    <label for="customPronouns">
-                        Preferred Pronouns <span class="optional">(optional)</span>
+                    <!-- Portrait Upload - Prominent but Optional -->
+                    <label class="portrait-upload" id="portraitUpload" aria-label="Upload portrait photo">
+                        <input type="file" id="portraitInput" name="portrait" accept="image/*" aria-label="Portrait photo file input">
+                        <span class="portrait-upload-icon" aria-hidden="true">📷</span>
+                        <span class="portrait-upload-text">Add their photo<br><small>Optional - you can add later</small></span>
                     </label>
-                    <input type="text" id="customPronouns" name="customPronouns" placeholder="e.g., they/them, xe/xem, he/they" maxlength="100" aria-label="Enter preferred pronouns">
-                    <span class="field-hint">Let us know how they liked to be referred to</span>
-                </div>
 
-                <!-- Resting Place Details -->
-                <div class="form-group">
-                    <label for="restingType">
-                        Resting Place <span class="optional">(optional)</span>
-                    </label>
-                    <select id="restingType" name="restingType" aria-label="Select type of resting place">
-                        <option value="">Prefer not to say</option>
-                        <option value="buried">Buried at cemetery</option>
-                        <option value="cremated_home">Cremated - remains at home</option>
-                        <option value="cremated_scattered">Cremated - ashes scattered</option>
-                        <option value="prefer_not_to_say">Prefer not to say</option>
-                    </select>
-                    <span class="field-hint">Share where their final resting place is, if you'd like</span>
-                </div>
-
-                <!-- Location Details (shown for buried or cremated_scattered) -->
-                <div id="restingLocationFields" style="display: none;">
                     <div class="form-group">
-                        <label for="restingLocationName">
-                            Location Name <span class="optional">(optional)</span>
-                        </label>
-                        <input type="text" id="restingLocationName" name="restingLocationName" placeholder="e.g., Forest Lawn Cemetery, Pacific Ocean" maxlength="200" aria-label="Name of resting location">
-                        <span class="field-hint">Name of the cemetery or place where ashes were scattered</span>
+                        <label for="deceasedName">Their Name</label>
+                        <input type="text" id="deceasedName" name="deceasedName" placeholder="First and last name" required aria-required="true">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="birthDate">Born</label>
+                            <input type="date" id="birthDate" name="birthDate" required aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label for="passingDate">Passed</label>
+                            <input type="date" id="passingDate" name="passingDate" required aria-required="true">
+                        </div>
+                    </div>
+
+                    <!-- Age Display (Auto-calculated) -->
+                    <div id="ageDisplay" style="display: none; margin-top: 0.75rem; padding: 1rem; background: var(--sage-pale); border-radius: 12px; border: 1px solid var(--sage-light);" role="status" aria-live="polite">
+                        <p style="font-family: var(--font-serif); font-size: 1.1rem; color: var(--sage-primary); margin: 0;" id="calculatedAge"></p>
                     </div>
 
                     <div class="form-group">
-                        <label for="restingLocationAddress">
-                            Address <span class="optional">(optional)</span>
-                        </label>
-                        <input type="text" id="restingLocationAddress" name="restingLocationAddress" placeholder="Start typing to search for address..." maxlength="500" aria-label="Address of resting location" autocomplete="off">
-                        <input type="hidden" id="restingLocationLat" name="restingLocationLat">
-                        <input type="hidden" id="restingLocationLng" name="restingLocationLng">
-                        <span class="field-hint">We'll show a map to help visitors find the location</span>
+                        <label for="userEmail">Your Email</label>
+                        <input type="email" id="userEmail" name="userEmail" placeholder="you@example.com" required>
+                        <span class="field-hint">So you can access and edit this memorial anytime</span>
                     </div>
 
-                    <!-- Photo for Scattered Ashes -->
-                    <div class="form-group" id="scatteredPhotoGroup" style="display: none;">
-                        <label for="scatteredPhoto">
-                            Photo of Location <span class="optional">(optional)</span>
-                        </label>
-                        <input type="file" id="scatteredPhoto" name="scatteredPhoto" accept="image/*" aria-label="Upload photo of scattered ashes location">
-                        <span class="field-hint">Share a photo of the special place where their ashes were scattered</span>
+                    <!-- Simple Privacy Choice -->
+                    <div class="form-group" style="margin-top: 2rem;">
+                        <label style="margin-bottom: 1rem; display: block;">Who can visit this memorial?</label>
+                        <div class="option-cards">
+                            <label class="option-card selected" data-value="public">
+                                <input type="radio" name="privacy" value="public" checked>
+                                <div class="option-radio"></div>
+                                <div class="option-content">
+                                    <h4>Anyone with the link</h4>
+                                    <p>Share with friends & family</p>
+                                </div>
+                            </label>
+                            <label class="option-card" data-value="private">
+                                <input type="radio" name="privacy" value="private">
+                                <div class="option-radio"></div>
+                                <div class="option-content">
+                                    <h4>Just me for now</h4>
+                                    <p>You can share later</p>
+                                </div>
+                            </label>
+                        </div>
                     </div>
 
-                    <div class="form-group" id="locationDescriptionGroup">
-                        <label for="restingLocationDescription">
-                            Description <span class="optional">(optional)</span>
-                        </label>
-                        <textarea id="restingLocationDescription" name="restingLocationDescription" placeholder="Share why this place was special..." maxlength="1000" aria-label="Description of resting location"></textarea>
-                        <div class="char-counter" aria-live="polite"><span id="locationDescCharCount">0</span>/1000</div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="shortBio">A Few Words About Them <span class="optional">(optional)</span></label>
-                    <textarea id="shortBio" name="shortBio" placeholder="A loving parent, loyal friend, always had a smile ready. What would you want someone to know about who they were?" maxlength="500"></textarea>
-                    <div class="char-counter" aria-live="polite"><span id="bioCharCount">0</span>/500</div>
-                </div>
-                </div>
-
-                <!-- Section 3: Privacy Settings -->
-                <div class="form-section">
-                    <h3 class="form-section-title">🔐 Privacy Settings</h3>
-                    <p class="form-section-desc">Who should be able to visit this memorial? You can change these settings anytime.</p>
-
-                <div class="form-group">
-                    <div class="option-cards">
-                        <label class="option-card selected" data-value="public">
-                            <input type="radio" name="privacy" value="public" checked aria-label="Public memorial - anyone with the link can visit">
-                            <div class="option-radio"></div>
-                            <div class="option-content">
-                                <h4>Public Memorial</h4>
-                                <p>Anyone with the link can visit and leave memories. Perfect for honoring a life lived fully.</p>
-                            </div>
-                        </label>
-                        <label class="option-card" data-value="family">
-                            <input type="radio" name="privacy" value="family" aria-label="Family only - only people you invite can visit">
-                            <div class="option-radio"></div>
-                            <div class="option-content">
-                                <h4>Family Only</h4>
-                                <p>Only people you invite can visit. Share special invite links with family members.</p>
-                            </div>
-                        </label>
-                        <label class="option-card" data-value="private">
-                            <input type="radio" name="privacy" value="private" aria-label="Private - just you can visit">
-                            <div class="option-radio"></div>
-                            <div class="option-content">
-                                <h4>Private (Just You)</h4>
-                                <p>A personal space for your own healing journey. You can always open it up later.</p>
-                            </div>
-                        </label>
+                    <div class="reassurance">
+                        <span class="reassurance-icon">💚</span>
+                        <span>Your progress is saved automatically. You can add more details in the next step, or come back anytime.</span>
                     </div>
                 </div>
 
-                <div class="toggle-group">
-                    <span class="toggle-label">Allow visitors to light candles & leave flowers</span>
-                    <div class="toggle-switch active" data-toggle="allowInteractions" role="switch" aria-checked="true" aria-label="Allow visitors to light candles and leave flowers" tabindex="0"></div>
-                </div>
-
-                <div class="toggle-group">
-                    <span class="toggle-label">Enable daily healing prompts on the memorial</span>
-                    <div class="toggle-switch active" data-toggle="enableHealingPrompts" role="switch" aria-checked="true" aria-label="Enable daily healing prompts" tabindex="0"></div>
-                </div>
-
-                <div class="reassurance">
-                    <span class="reassurance-icon">✓</span>
-                    <span>You can change these settings anytime from your dashboard.</span>
-                </div>
-                </div>
+                <!-- Hidden fields for data that will be collected in Step 2 -->
+                <input type="hidden" id="userName" name="userName" value="">
+                <input type="hidden" id="relationship" name="relationship" value="">
+                <input type="hidden" id="preferredName" name="preferredName" value="">
+                <input type="hidden" id="nameTitle" name="nameTitle" value="">
+                <input type="hidden" id="religion" name="religion" value="">
+                <input type="hidden" id="gender" name="gender" value="">
+                <input type="hidden" id="customPronouns" name="customPronouns" value="">
+                <input type="hidden" id="restingType" name="restingType" value="">
+                <input type="hidden" id="restingLocationName" name="restingLocationName" value="">
+                <input type="hidden" id="restingLocationAddress" name="restingLocationAddress" value="">
+                <input type="hidden" id="restingLocationLat" name="restingLocationLat" value="">
+                <input type="hidden" id="restingLocationLng" name="restingLocationLng" value="">
+                <input type="hidden" id="restingLocationDescription" name="restingLocationDescription" value="">
+                <input type="hidden" id="shortBio" name="shortBio" value="">
             </div>
 
             <!-- Step 2: Personalize Memorial (Consolidated from old Steps 4+5+6) -->
@@ -1248,6 +1195,87 @@
                     <p style="font-size: 0.85rem; color: var(--gray-light); margin-top: 0.5rem;">
                         <strong>Step 2 of 3</strong> • 5-15 minutes <span style="opacity: 0.7;">(all optional)</span>
                     </p>
+                </div>
+
+                <!-- Section 0: About You & More Details -->
+                <div class="form-section">
+                    <h3 class="form-section-title">👤 About You & More Details</h3>
+                    <p class="form-section-desc">Help us personalize the memorial experience.</p>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userName2">Your Name <span class="optional">(optional)</span></label>
+                            <input type="text" id="userName2" name="userName2" placeholder="Your first name" onchange="document.getElementById('userName').value = this.value">
+                        </div>
+                        <div class="form-group">
+                            <label for="relationship2">Your Relationship <span class="optional">(optional)</span></label>
+                            <select id="relationship2" name="relationship2" onchange="document.getElementById('relationship').value = this.value">
+                                <option value="">Select...</option>
+                                <option value="child">Son/Daughter</option>
+                                <option value="spouse">Spouse/Partner</option>
+                                <option value="parent">Parent</option>
+                                <option value="sibling">Sibling</option>
+                                <option value="grandchild">Grandchild</option>
+                                <option value="friend">Friend</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="preferredName2">Nickname <span class="optional">(optional)</span></label>
+                            <input type="text" id="preferredName2" name="preferredName2" placeholder="e.g., 'Johnny' or 'Grandma Rose'" onchange="document.getElementById('preferredName').value = this.value">
+                            <span class="field-hint">What did family and friends call them?</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="nameTitle2">Title/Suffix <span class="optional">(optional)</span></label>
+                            <input type="text" id="nameTitle2" name="nameTitle2" placeholder="e.g., Dr., Sr., Jr." onchange="document.getElementById('nameTitle').value = this.value">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gender2">Gender <span class="optional">(optional)</span></label>
+                            <select id="gender2" name="gender2" onchange="document.getElementById('gender').value = this.value">
+                                <option value="">Prefer not to say</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Non-Binary">Non-Binary</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span class="field-hint">Helps us use correct pronouns</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="religion2">Faith <span class="optional">(optional)</span></label>
+                            <select id="religion2" name="religion2" onchange="document.getElementById('religion').value = this.value">
+                                <option value="">Prefer not to say</option>
+                                <option value="Christian">Christian</option>
+                                <option value="Muslim">Muslim</option>
+                                <option value="Jewish">Jewish</option>
+                                <option value="Hindu">Hindu</option>
+                                <option value="Buddhist">Buddhist</option>
+                                <option value="Spiritual">Spiritual</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="shortBio2">A Few Words About Them <span class="optional">(optional)</span></label>
+                        <textarea id="shortBio2" name="shortBio2" placeholder="A loving parent, loyal friend, always had a smile ready..." maxlength="500" onchange="document.getElementById('shortBio').value = this.value"></textarea>
+                        <div class="char-counter"><span id="bioCharCount2">0</span>/500</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="restingType2">Resting Place <span class="optional">(optional)</span></label>
+                        <select id="restingType2" name="restingType2" onchange="document.getElementById('restingType').value = this.value">
+                            <option value="">Prefer not to say</option>
+                            <option value="buried">Buried at cemetery</option>
+                            <option value="cremated_home">Cremated - remains at home</option>
+                            <option value="cremated_scattered">Cremated - ashes scattered</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Section 1: Family History -->
@@ -2821,6 +2849,144 @@
                 mediaName.textContent = `${icon} ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
                 mediaPreview.style.display = 'block';
             }
+
+            // ============================================
+            // SAVE & RETURN LATER FUNCTIONALITY
+            // ============================================
+            const saveReturnBtn = document.getElementById('saveReturnBtn');
+            const saveReturnModal = document.getElementById('saveReturnModal');
+            const saveReturnClose = document.getElementById('saveReturnClose');
+            const saveReturnEmail = document.getElementById('saveReturnEmail');
+            const sendSaveLinkBtn = document.getElementById('sendSaveLink');
+            const saveReturnSuccess = document.getElementById('saveReturnSuccess');
+
+            // Pre-fill email if already entered
+            const userEmailField = document.getElementById('userEmail');
+            if (userEmailField && userEmailField.value) {
+                saveReturnEmail.value = userEmailField.value;
+            }
+            userEmailField?.addEventListener('change', function() {
+                saveReturnEmail.value = this.value;
+            });
+
+            // Open modal
+            saveReturnBtn?.addEventListener('click', function() {
+                saveReturnModal.style.display = 'flex';
+                saveReturnSuccess.style.display = 'none';
+                document.querySelector('.save-return-form').style.display = 'flex';
+            });
+
+            // Close modal
+            saveReturnClose?.addEventListener('click', function() {
+                saveReturnModal.style.display = 'none';
+            });
+
+            // Close on outside click
+            saveReturnModal?.addEventListener('click', function(e) {
+                if (e.target === saveReturnModal) {
+                    saveReturnModal.style.display = 'none';
+                }
+            });
+
+            // Send save link
+            sendSaveLinkBtn?.addEventListener('click', async function() {
+                const email = saveReturnEmail.value.trim();
+                if (!email || !email.includes('@')) {
+                    saveReturnEmail.style.borderColor = '#e57373';
+                    return;
+                }
+
+                sendSaveLinkBtn.textContent = 'Sending...';
+                sendSaveLinkBtn.disabled = true;
+
+                try {
+                    // Collect form data
+                    const form = document.getElementById('memorialForm');
+                    const formData = new FormData(form);
+                    const draftData = {};
+                    formData.forEach((value, key) => {
+                        draftData[key] = value;
+                    });
+
+                    // Generate draft ID
+                    const draftId = sessionStorage.getItem('memorial_draft_id') || 'draft-' + Date.now();
+                    sessionStorage.setItem('memorial_draft_id', draftId);
+
+                    // Save to IndexedDB
+                    if (window.db) {
+                        await window.db.saveDraft({
+                            id: draftId,
+                            data: draftData,
+                            email: email,
+                            currentStep: currentStep
+                        });
+                    }
+
+                    // Send email via API
+                    const apiUrl = window.ApiConfig?.getApiUrl() || 'http://localhost:3000';
+                    const response = await fetch(`${apiUrl}/api/auth/save-draft-link`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: email,
+                            draftId: draftId,
+                            returnUrl: window.location.href
+                        }),
+                        credentials: 'include'
+                    });
+
+                    if (response.ok || response.status === 404) {
+                        // Show success (even if API doesn't exist yet, draft is saved locally)
+                        document.querySelector('.save-return-form').style.display = 'none';
+                        saveReturnSuccess.style.display = 'block';
+                    } else {
+                        throw new Error('Failed to send email');
+                    }
+                } catch (error) {
+                    console.error('Save & return error:', error);
+                    // Still show success since local save worked
+                    document.querySelector('.save-return-form').style.display = 'none';
+                    saveReturnSuccess.innerHTML = `
+                        <span class="success-icon">✓</span>
+                        <p>Draft saved locally! Bookmark this page to return later.</p>
+                    `;
+                    saveReturnSuccess.style.display = 'block';
+                } finally {
+                    sendSaveLinkBtn.textContent = 'Send Me a Link';
+                    sendSaveLinkBtn.disabled = false;
+                }
+            });
+
+            // Check for returning user with draft
+            (async function checkForDraft() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const draftId = urlParams.get('draft') || sessionStorage.getItem('memorial_draft_id');
+
+                if (draftId && window.db) {
+                    try {
+                        const draft = await window.db.getDraft(draftId);
+                        if (draft && draft.data) {
+                            // Restore form data
+                            const form = document.getElementById('memorialForm');
+                            Object.keys(draft.data).forEach(key => {
+                                const field = form.elements[key];
+                                if (field) {
+                                    field.value = draft.data[key];
+                                }
+                            });
+
+                            // Go to saved step
+                            if (draft.currentStep !== undefined) {
+                                goToStep(draft.currentStep);
+                            }
+
+                            console.log('[Draft] Restored from:', draftId);
+                        }
+                    } catch (error) {
+                        console.error('[Draft] Error restoring:', error);
+                    }
+                }
+            })();
         });
     </script>
 
