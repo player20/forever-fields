@@ -31,7 +31,6 @@ import {
   Search,
   Plus,
   LayoutDashboard,
-  TreeDeciduous,
   CreditCard,
 } from "lucide-react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -49,7 +48,6 @@ interface HeaderProps {
 const navigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Memorials", href: "/memorials", icon: Heart },
-  { name: "Family Tree", href: "/family-tree", icon: TreeDeciduous },
   { name: "Pricing", href: "/pricing", icon: CreditCard },
   { name: "Shop", href: "/shop", icon: ShoppingBag },
 ];

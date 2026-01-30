@@ -40,12 +40,12 @@ const sidebarSections: SidebarSection[] = [
     items: [
       { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { name: "My Memorials", href: "/memorials", icon: Heart, badge: 3 },
+      { name: "Family Tree", href: "/family-tree", icon: TreeDeciduous },
     ],
   },
   {
     title: "Explore",
     items: [
-      { name: "Family Tree", href: "/family-tree", icon: TreeDeciduous },
       { name: "Search", href: "/search", icon: MapPin },
     ],
   },
