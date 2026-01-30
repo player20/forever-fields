@@ -1,0 +1,185 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ============================================
+  # Backend Build & Test
+  # ============================================
+  backend:
+    name: Backend (Build & Test)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./server
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./server/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
+        continue-on-error: true  # Tests may need DB, mark as non-blocking for now
+
+  # ============================================
+  # Frontend Validation
+  # ============================================
+  frontend:
+    name: Frontend (Validate HTML/CSS/JS)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Check for syntax errors in JS files
+        run: |
+          echo "Checking JavaScript syntax..."
+          for file in js/*.js; do
+            if [ -f "$file" ]; then
+              node --check "$file" || exit 1
+              echo "✓ $file"
+            fi
+          done
+
+      - name: Validate HTML structure
+        run: |
+          echo "Checking HTML files exist and are not empty..."
+          for file in index.html create/index.html memorial/index.html dashboard/index.html; do
+            if [ -f "$file" ]; then
+              if [ -s "$file" ]; then
+                echo "✓ $file exists and has content"
+              else
+                echo "✗ $file is empty"
+                exit 1
+              fi
+            fi
+          done
+
+  # ============================================
+  # Security Scan
+  # ============================================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for secrets in code
+        run: |
+          echo "Scanning for potential secrets..."
+          # Check for common secret patterns (basic scan)
+          if grep -rE "(api_key|apikey|secret|password|token)[\s]*[=:]\s*['\"][^'\"]{20,}" \
+             --include="*.js" --include="*.ts" --include="*.json" \
+             --exclude-dir=node_modules --exclude-dir=.git \
+             --exclude="*.example" --exclude="*.sample" .; then
+            echo "⚠️  Potential secrets found - please review"
+          else
+            echo "✓ No obvious secrets detected"
+          fi
+
+      - name: Check .gitignore coverage
+        run: |
+          echo "Verifying sensitive files are ignored..."
+          required_ignores=(".env" "server/.env" ".env.local" ".env.production")
+          for pattern in "${required_ignores[@]}"; do
+            if grep -q "^${pattern}$\|^${pattern}/" .gitignore 2>/dev/null || \
+               grep -q "^${pattern}$\|^${pattern}/" server/.gitignore 2>/dev/null; then
+              echo "✓ $pattern is in .gitignore"
+            else
+              echo "⚠️  $pattern may not be properly ignored"
+            fi
+          done
+
+  # ============================================
+  # Next.js App (if changed)
+  # ============================================
+  nextjs:
+    name: Next.js App (Build)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || contains(github.event.pull_request.changed_files, 'forever-fields-nextjs')
+
+    defaults:
+      run:
+        working-directory: ./forever-fields-nextjs
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./forever-fields-nextjs/package-lock.json
+
+      - name: Check if Next.js app exists
+        id: check_nextjs
+        run: |
+          if [ -f "package.json" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install dependencies
+        if: steps.check_nextjs.outputs.exists == 'true'
+        run: npm ci || npm install
+
+      - name: Build Next.js
+        if: steps.check_nextjs.outputs.exists == 'true'
+        run: npm run build
+        env:
+          SKIP_ENV_VALIDATION: true
+
+  # ============================================
+  # Summary
+  # ============================================
+  summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [backend, frontend, security]
+    if: always()
+
+    steps:
+      - name: Check job results
+        run: |
+          echo "## CI/CD Pipeline Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend | ${{ needs.backend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend | ${{ needs.frontend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security | ${{ needs.security.result }} |" >> $GITHUB_STEP_SUMMARY

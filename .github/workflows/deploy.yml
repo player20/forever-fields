@@ -1,0 +1,63 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  # ============================================
+  # Deploy Backend to Render
+  # ============================================
+  deploy-backend:
+    name: Deploy Backend to Render
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Trigger Render Deploy
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
+            echo "Triggering Render deployment..."
+            curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+            echo "✓ Deploy hook triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_URL secret not set - skipping deployment"
+            echo "To enable auto-deploy:"
+            echo "1. Go to Render Dashboard > Your Service > Settings > Deploy Hook"
+            echo "2. Copy the deploy hook URL"
+            echo "3. Add it as a GitHub secret named RENDER_DEPLOY_HOOK_URL"
+          fi
+
+  # ============================================
+  # Deploy Frontend to Cloudflare Pages
+  # ============================================
+  deploy-frontend:
+    name: Deploy Frontend to Cloudflare Pages
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Cloudflare Pages
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: forever-fields
+          directory: .
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip deployment notice
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN == '' }}
+        run: |
+          echo "⚠️ Cloudflare secrets not configured - skipping deployment"
+          echo ""
+          echo "To enable Cloudflare Pages deployment:"
+          echo "1. Create an API token at https://dash.cloudflare.com/profile/api-tokens"
+          echo "2. Add these GitHub secrets:"
+          echo "   - CLOUDFLARE_API_TOKEN"
+          echo "   - CLOUDFLARE_ACCOUNT_ID"
