@@ -1862,9 +1862,8 @@ export default function CreateMemorialPage() {
               <div className="space-y-3">
                 <Button
                   onClick={() => {
-                    // Save draft to localStorage before redirecting
-                    clearDraft();
-                    router.push("/signup?redirect=/dashboard&memorial=new");
+                    // Keep draft in localStorage - it will be restored after signup
+                    router.push("/signup?redirect=/create");
                   }}
                   className="w-full"
                 >
@@ -1875,8 +1874,8 @@ export default function CreateMemorialPage() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    clearDraft();
-                    router.push("/login?redirect=/dashboard&memorial=new");
+                    // Keep draft in localStorage - it will be restored after login
+                    router.push("/login?redirect=/create");
                   }}
                   className="w-full"
                 >

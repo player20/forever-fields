@@ -23,9 +23,10 @@ import {
   EyeOff,
   Loader2,
   LogOut,
+  Smartphone,
 } from "lucide-react";
 
-type SettingsTab = "profile" | "password" | "notifications" | "privacy" | "danger";
+type SettingsTab = "profile" | "password" | "notifications" | "privacy" | "app-icon" | "danger";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -70,6 +71,32 @@ export default function SettingsPage() {
     shareActivityWithFamily: true,
   });
 
+  // PWA Icon preference
+  const [pwaIconPreference, setPwaIconPreference] = useState<{
+    memorialId: string;
+    photoUrl: string;
+    name: string;
+  } | null>(null);
+
+  // Demo memorials for icon selection (in production, fetch from API)
+  const demoMemorials = [
+    { id: "demo-1", name: "Margaret Johnson", photoUrl: "/icons/icon-192x192.svg" },
+    { id: "demo-2", name: "Robert Williams", photoUrl: "/icons/icon-192x192.svg" },
+    { id: "demo-3", name: "Eleanor Chen", photoUrl: "/icons/icon-192x192.svg" },
+  ];
+
+  // Load PWA icon preference from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("forever-fields-pwa-icon");
+    if (saved) {
+      try {
+        setPwaIconPreference(JSON.parse(saved));
+      } catch {
+        // Invalid JSON, ignore
+      }
+    }
+  }, []);
+
   // Delete account
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
@@ -79,6 +106,7 @@ export default function SettingsPage() {
     { id: "password" as const, label: "Password", icon: Lock, color: "gold" },
     { id: "notifications" as const, label: "Notifications", icon: Bell, color: "coral" },
     { id: "privacy" as const, label: "Privacy", icon: Shield, color: "twilight" },
+    { id: "app-icon" as const, label: "App Icon", icon: Smartphone, color: "lavender" },
     { id: "danger" as const, label: "Danger Zone", icon: AlertTriangle, color: "red" },
   ];
 
@@ -157,6 +185,26 @@ export default function SettingsPage() {
       toast.error("Failed to save settings");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSelectPwaIcon = (memorial: { id: string; name: string; photoUrl: string } | null) => {
+    if (memorial) {
+      const preference = {
+        memorialId: memorial.id,
+        photoUrl: memorial.photoUrl,
+        name: memorial.name,
+      };
+      setPwaIconPreference(preference);
+      localStorage.setItem("forever-fields-pwa-icon", JSON.stringify(preference));
+      // Set cookie for server-side manifest generation
+      document.cookie = `pwa-icon-preference=${JSON.stringify(preference)}; path=/; max-age=31536000`;
+      toast.success(`App icon set to ${memorial.name}`);
+    } else {
+      setPwaIconPreference(null);
+      localStorage.removeItem("forever-fields-pwa-icon");
+      document.cookie = "pwa-icon-preference=; path=/; max-age=0";
+      toast.success("App icon reset to default");
     }
   };
 
@@ -573,6 +621,106 @@ export default function SettingsPage() {
                         </>
                       )}
                     </Button>
+                  </div>
+                </Card>
+              </motion.div>
+            )}
+
+            {/* App Icon Tab */}
+            {activeTab === "app-icon" && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Card className="p-6">
+                  <h2 className="text-lg font-serif font-bold text-gray-dark mb-2 flex items-center gap-2">
+                    <Smartphone className="w-5 h-5 text-lavender" />
+                    App Icon
+                  </h2>
+                  <p className="text-gray-body mb-6">
+                    Personalize your Forever Fields app icon with a memorial photo.
+                    This icon will appear when you install the app on your device.
+                  </p>
+
+                  {/* Current Selection */}
+                  <div className="mb-6 p-4 rounded-lg bg-lavender-pale/30 border border-lavender-subtle">
+                    <h3 className="font-medium text-gray-dark mb-3">Current Icon</h3>
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-xl bg-sage overflow-hidden flex items-center justify-center">
+                        {pwaIconPreference ? (
+                          <span className="text-white text-xl font-serif">
+                            {pwaIconPreference.name.split(" ").map(n => n[0]).join("")}
+                          </span>
+                        ) : (
+                          <Flower2 className="w-8 h-8 text-white" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-dark">
+                          {pwaIconPreference ? pwaIconPreference.name : "Default Flower"}
+                        </p>
+                        <p className="text-sm text-gray-body">
+                          {pwaIconPreference ? "Custom memorial icon" : "Forever Fields logo"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Icon Options */}
+                  <h3 className="font-medium text-gray-dark mb-3">Choose an Icon</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                    {/* Default Option */}
+                    <button
+                      onClick={() => handleSelectPwaIcon(null)}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        !pwaIconPreference
+                          ? "border-sage bg-sage-pale"
+                          : "border-sage-pale hover:border-sage"
+                      }`}
+                    >
+                      <div className="w-12 h-12 rounded-lg bg-sage mx-auto mb-2 flex items-center justify-center">
+                        <Flower2 className="w-6 h-6 text-white" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-dark">Default</p>
+                      <p className="text-xs text-gray-body">Flower icon</p>
+                    </button>
+
+                    {/* Memorial Options */}
+                    {demoMemorials.map((memorial) => (
+                      <button
+                        key={memorial.id}
+                        onClick={() => handleSelectPwaIcon(memorial)}
+                        className={`p-4 rounded-xl border-2 transition-all ${
+                          pwaIconPreference?.memorialId === memorial.id
+                            ? "border-sage bg-sage-pale"
+                            : "border-sage-pale hover:border-sage"
+                        }`}
+                      >
+                        <div className="w-12 h-12 rounded-lg bg-twilight mx-auto mb-2 flex items-center justify-center">
+                          <span className="text-white text-lg font-serif">
+                            {memorial.name.split(" ").map(n => n[0]).join("")}
+                          </span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-dark truncate">{memorial.name}</p>
+                        <p className="text-xs text-gray-body">Memorial</p>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Instructions */}
+                  <div className="p-4 rounded-lg bg-gold-pale/30 border border-gold-light">
+                    <h4 className="font-medium text-gray-dark mb-2 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-gold" />
+                      How to Apply
+                    </h4>
+                    <p className="text-sm text-gray-body">
+                      After selecting an icon, you may need to reinstall the app for changes to take effect:
+                    </p>
+                    <ol className="text-sm text-gray-body mt-2 ml-4 list-decimal">
+                      <li>Remove the app from your home screen</li>
+                      <li>Return to Forever Fields in your browser</li>
+                      <li>Tap &quot;Add to Home Screen&quot; again</li>
+                    </ol>
                   </div>
                 </Card>
               </motion.div>

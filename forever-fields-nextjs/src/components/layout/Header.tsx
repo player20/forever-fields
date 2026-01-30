@@ -33,6 +33,7 @@ import {
   TreeDeciduous,
   CreditCard,
 } from "lucide-react";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 interface HeaderProps {
   user?: {
@@ -101,6 +102,11 @@ export function Header({ user, notifications = 0, className }: HeaderProps) {
 
           {/* Right side actions */}
           <div className="flex items-center gap-2">
+            {/* Language Switcher */}
+            <div className="hidden sm:block">
+              <LanguageSwitcher variant="compact" />
+            </div>
+
             {/* Search button */}
             <button
               className="p-2 rounded-lg text-gray-body hover:text-sage-dark hover:bg-sage-pale/50 transition-colors hidden sm:flex"
@@ -253,6 +259,14 @@ export function Header({ user, notifications = 0, className }: HeaderProps) {
                       Create Memorial
                     </Button>
                   </Link>
+                </div>
+
+                {/* Mobile Language Switcher */}
+                <div className="pt-4 px-4 border-t border-sage-pale/50 mt-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-body">Language</span>
+                    <LanguageSwitcher />
+                  </div>
                 </div>
               </div>
             </motion.div>

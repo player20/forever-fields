@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button, Card } from "@/components/ui";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,6 +20,8 @@ import {
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
   const { register, loginWithGoogle, isLoading, error, clearError, isAuthenticated } = useAuth();
 
   const [name, setName] = useState("");
@@ -32,9 +34,9 @@ export default function SignupPage() {
   // Redirect if already authenticated (use useEffect to avoid setState during render)
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/dashboard");
+      router.push(redirectTo);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, redirectTo]);
 
   // Show nothing while redirecting
   if (isAuthenticated) {

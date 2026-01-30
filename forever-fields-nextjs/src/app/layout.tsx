@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
 import { InstallPrompt, ServiceWorkerProvider } from "@/components/pwa";
@@ -26,7 +28,7 @@ export const metadata: Metadata = {
   keywords: ["memorial", "tribute", "obituary", "remembrance", "legacy", "family history"],
   authors: [{ name: "Forever Fields" }],
   creator: "Forever Fields",
-  manifest: "/manifest.json",
+  manifest: "/api/manifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -63,10 +65,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icons/icon-192x192.svg", sizes: "any", type: "image/svg+xml" },
+      { url: "/icons/icon-192x192.svg", sizes: "192x192", type: "image/svg+xml" },
+      { url: "/icons/icon-512x512.svg", sizes: "512x512", type: "image/svg+xml" },
     ],
     apple: [
-      { url: "/icons/icon-192x192.svg", sizes: "any", type: "image/svg+xml" },
+      { url: "/icons/icon-192x192.svg", sizes: "192x192", type: "image/svg+xml" },
     ],
   },
   other: {
@@ -80,20 +83,25 @@ export const viewport: Viewport = {
   themeColor: "#a7c9a2",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
+    <html lang={locale} className={`${playfair.variable} ${inter.variable}`}>
       <body className="min-h-screen font-sans antialiased">
-        <Providers>
-          <ServiceWorkerProvider />
-          {children}
-          <ToastProvider />
-          <InstallPrompt />
-        </Providers>
+        <NextIntlClientProvider messages={messages}>
+          <Providers>
+            <ServiceWorkerProvider />
+            {children}
+            <ToastProvider />
+            <InstallPrompt />
+          </Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

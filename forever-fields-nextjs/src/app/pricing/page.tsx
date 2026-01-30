@@ -203,7 +203,7 @@ export default function PricingPage() {
                     {isLoading ? (
                       <Flower2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      "Create Your Memorial"
+                      "Create Memorial"
                     )}
                   </Button>
                 </Card>
@@ -358,7 +358,7 @@ export default function PricingPage() {
                     >
                       <Card
                         className={`relative p-6 h-full flex flex-col ${tierColors[tier]} ${
-                          isPopular ? "shadow-lg scale-105" : ""
+                          isPopular ? "shadow-xl ring-2 ring-sage" : ""
                         }`}
                       >
                         {isPopular && (
@@ -424,7 +424,7 @@ export default function PricingPage() {
                           {isLoading ? (
                             <Flower2 className="w-4 h-4 animate-spin" />
                           ) : tier === "free" ? (
-                            "Get Started"
+                            "Create Memorial"
                           ) : (
                             "Start 7-Day Trial"
                           )}

@@ -23,7 +23,7 @@ const config: Config = {
         },
         "warm-white": "#fffef9",
         gray: {
-          body: "#8d8d8d",
+          body: "#6b6b6b",
           dark: "#4a4a4a",
           light: "#b0b0b0",
         },

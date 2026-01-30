@@ -175,7 +175,7 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/create">
                   <Button size="lg" className="shadow-soft">
-                    Start a Memorial
+                    Create Memorial
                     <ChevronRight className="w-5 h-5 ml-1" />
                   </Button>
                 </Link>
@@ -214,17 +214,35 @@ export default function Home() {
             </SlideUp>
           </div>
 
-          {/* Hero image/illustration placeholder */}
+          {/* Sample Memorial Preview */}
           <SlideUp delay={0.5}>
-            <div className="mt-16 relative">
-              <div className="aspect-video max-w-5xl mx-auto rounded-2xl bg-gradient-to-br from-sage-pale to-white shadow-soft overflow-hidden border border-sage-pale/50">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-20 h-20 rounded-full bg-sage/10 flex items-center justify-center mx-auto mb-4">
-                      <Flower2 className="w-10 h-10 text-sage" />
-                    </div>
-                    <p className="text-gray-body">Memorial Preview</p>
+            <div className="mt-10 sm:mt-16 relative px-4 sm:px-0">
+              <div className="max-w-4xl mx-auto rounded-xl sm:rounded-2xl bg-gradient-to-br from-sage-pale/50 to-white shadow-soft overflow-hidden border border-sage-pale/50">
+                {/* Memorial Header */}
+                <div className="bg-gradient-to-r from-twilight to-gray-dark p-5 sm:p-8 text-center">
+                  <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-white/20 mx-auto mb-3 sm:mb-4 flex items-center justify-center text-2xl sm:text-3xl font-serif text-white">
+                    MJ
                   </div>
+                  <h3 className="text-xl sm:text-2xl font-serif font-bold text-white">Margaret Johnson</h3>
+                  <p className="text-white/80 mt-1 text-sm sm:text-base">1942 — 2024 · 81 years of love</p>
+                  <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mt-3 sm:mt-4 text-white/70 text-xs sm:text-sm">
+                    <span className="flex items-center gap-1">
+                      <Flame className="w-3 h-3 sm:w-4 sm:h-4 text-gold" /> 47 candles
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-rose" /> 23 memories
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Users className="w-3 h-3 sm:w-4 sm:h-4" /> 12 family
+                    </span>
+                  </div>
+                </div>
+                {/* Memorial Content Preview */}
+                <div className="p-4 sm:p-6 bg-white">
+                  <p className="text-gray-body italic text-center text-sm sm:text-base">
+                    &quot;She taught us that love is not about grand gestures, but about showing up every day with kindness in your heart.&quot;
+                  </p>
+                  <p className="text-gray-body text-xs sm:text-sm text-center mt-2">— Emily, Granddaughter</p>
                 </div>
               </div>
 

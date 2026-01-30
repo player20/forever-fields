@@ -33,6 +33,7 @@
     "maplibre-gl": "^5.17.0",
     "nanoid": "^5.1.6",
     "next": "14.2.35",
+    "next-intl": "^4.8.0",
     "pixi.js": "^8.15.0",
     "prisma": "^7.3.0",
     "qrcode.react": "^4.2.0",
