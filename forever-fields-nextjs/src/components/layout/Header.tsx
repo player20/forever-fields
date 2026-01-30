@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
@@ -56,6 +57,7 @@ const navigation = [
 export function Header({ user, notifications = 0, className }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const t = useTranslations();
 
   return (
     <header
@@ -119,7 +121,7 @@ export function Header({ user, notifications = 0, className }: HeaderProps) {
             <Link href="/create">
               <Button size="sm" className="hidden sm:flex items-center gap-1">
                 <Plus className="w-4 h-4" />
-                <span className="hidden lg:inline">Create Memorial</span>
+                <span className="hidden lg:inline">{t("common.createMemorial")}</span>
               </Button>
             </Link>
 
@@ -166,26 +168,26 @@ export function Header({ user, notifications = 0, className }: HeaderProps) {
                   <Link href="/dashboard">
                     <DropdownMenuItem>
                       <LayoutDashboard className="w-4 h-4 mr-2" />
-                      Dashboard
+                      {t("common.dashboard")}
                     </DropdownMenuItem>
                   </Link>
                   <Link href="/settings">
                     <DropdownMenuItem>
                       <Settings className="w-4 h-4 mr-2" />
-                      Settings
+                      {t("common.settings")}
                     </DropdownMenuItem>
                   </Link>
                   <Link href="/help">
                     <DropdownMenuItem>
                       <HelpCircle className="w-4 h-4 mr-2" />
-                      Help & Support
+                      {t("nav.support")}
                     </DropdownMenuItem>
                   </Link>
                   <DropdownMenuSeparator />
                   <Link href="/login">
                     <DropdownMenuItem destructive>
                       <LogOut className="w-4 h-4 mr-2" />
-                      Sign out
+                      {t("common.logout")}
                     </DropdownMenuItem>
                   </Link>
                 </DropdownMenuContent>
@@ -194,12 +196,12 @@ export function Header({ user, notifications = 0, className }: HeaderProps) {
               <div className="flex items-center gap-2">
                 <Link href="/login">
                   <Button variant="ghost" size="sm">
-                    Sign in
+                    {t("common.login")}
                   </Button>
                 </Link>
                 <Link href="/signup">
                   <Button size="sm" className="hidden sm:flex">
-                    Get Started
+                    {t("common.getStarted")}
                   </Button>
                 </Link>
               </div>
@@ -256,7 +258,7 @@ export function Header({ user, notifications = 0, className }: HeaderProps) {
                   <Link href="/create" onClick={() => setMobileMenuOpen(false)}>
                     <Button className="w-full flex items-center justify-center gap-2">
                       <Plus className="w-5 h-5" />
-                      Create Memorial
+                      {t("common.createMemorial")}
                     </Button>
                   </Link>
                 </div>

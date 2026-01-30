@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Button, Badge } from "@/components/ui";
@@ -100,13 +101,18 @@ export function CemeteryMap({
     // Add navigation controls
     map.current.addControl(new maplibregl.NavigationControl({ showCompass: true }), "bottom-right");
 
+    // Capture ref values for cleanup
+    const markers = markersRef.current;
+    const userMarker = userMarkerRef.current;
+    const mapInstance = map.current;
+
     return () => {
-      markersRef.current.forEach(marker => marker.remove());
-      markersRef.current.clear();
-      if (userMarkerRef.current) {
-        userMarkerRef.current.remove();
+      markers.forEach(marker => marker.remove());
+      markers.clear();
+      if (userMarker) {
+        userMarker.remove();
       }
-      map.current?.remove();
+      mapInstance?.remove();
       map.current = null;
     };
   }, [mapCenter.lat, mapCenter.lng]);
@@ -399,10 +405,12 @@ export function CemeteryMap({
                 {/* Avatar */}
                 <div className={`relative w-16 h-16 rounded-${selectedPlot.type === 'pet' ? 'xl' : 'full'} overflow-hidden ring-2 ring-${selectedPlot.type === 'pet' ? 'gold' : 'sage'} flex-shrink-0`}>
                   {selectedPlot.profilePhoto ? (
-                    <img
+                    <Image
                       src={selectedPlot.profilePhoto}
                       alt={selectedPlot.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      unoptimized
+                      className="object-cover"
                     />
                   ) : (
                     <div className={`w-full h-full flex items-center justify-center ${

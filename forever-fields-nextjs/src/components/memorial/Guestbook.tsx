@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { useSocket, type GuestbookEntry } from "@/lib/socket";
 import { Button, Card, Badge } from "@/components/ui";
 import { MessageSquare, Send, User, Clock } from "lucide-react";
@@ -175,10 +176,13 @@ export function Guestbook({
                 {/* Avatar */}
                 <div className="shrink-0">
                   {entry.userAvatar ? (
-                    <img
+                    <Image
                       src={entry.userAvatar}
                       alt={entry.userName}
-                      className="w-10 h-10 rounded-full object-cover"
+                      width={40}
+                      height={40}
+                      unoptimized
+                      className="rounded-full object-cover"
                     />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-sage-pale flex items-center justify-center">

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { PawPrint, Flower2, Bird, Cat, Dog, Flame } from "lucide-react";
 import type { Pet } from "./types";
 
@@ -74,10 +75,12 @@ export function PetNode({ pet, isSelected, onClick }: PetNodeProps) {
           style={{ width: 64, height: 64 }}
         >
           {pet.profilePhoto ? (
-            <img
+            <Image
               src={pet.profilePhoto}
               alt={pet.name}
-              className="w-full h-full object-cover"
+              fill
+              unoptimized
+              className="object-cover"
             />
           ) : (
             <div

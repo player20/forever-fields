@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button, Card, Badge } from "@/components/ui";
 import { Header } from "@/components/layout";
@@ -1060,10 +1061,12 @@ export default function CreateMemorialPage() {
 
                       {formData.photoPreview ? (
                         <div className="relative w-32 h-32 mx-auto">
-                          <img
+                          <Image
                             src={formData.photoPreview}
                             alt="Preview"
-                            className="w-full h-full object-cover rounded-full border-4 border-sage-pale"
+                            fill
+                            unoptimized
+                            className="object-cover rounded-full border-4 border-sage-pale"
                           />
                           <button
                             type="button"
@@ -1494,12 +1497,14 @@ export default function CreateMemorialPage() {
                   {/* Memorial Preview Card */}
                   <div className="bg-sage-pale/30 rounded-xl p-6 text-center mb-6">
                     {/* Photo or placeholder */}
-                    <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden border-4 border-white shadow-md">
+                    <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden border-4 border-white shadow-md relative">
                       {formData.photoPreview ? (
-                        <img
+                        <Image
                           src={formData.photoPreview}
                           alt={formData.firstName}
-                          className="w-full h-full object-cover"
+                          fill
+                          unoptimized
+                          className="object-cover"
                         />
                       ) : (
                         <div className="w-full h-full bg-sage-pale flex items-center justify-center">

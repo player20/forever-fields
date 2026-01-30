@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { PawPrint, Flower2, Flame, User } from "lucide-react";
 import type { MemorialPlot } from "./types";
 
@@ -59,10 +60,12 @@ export function PlotMarker({ plot, isSelected, onClick }: PlotMarkerProps) {
           }}
         >
           {plot.profilePhoto ? (
-            <img
+            <Image
               src={plot.profilePhoto}
               alt={plot.name}
-              className="w-full h-full object-cover"
+              fill
+              unoptimized
+              className="object-cover"
             />
           ) : (
             <div

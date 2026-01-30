@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Button, Card, Badge } from "@/components/ui";
 import {
   AlertTriangle,
@@ -111,10 +112,12 @@ export function DuplicateWarning({
                   {/* Profile Photo or Placeholder */}
                   <div className="w-12 h-12 rounded-full bg-sage-pale flex items-center justify-center overflow-hidden">
                     {match.memorial.profilePhotoUrl ? (
-                      <img
+                      <Image
                         src={match.memorial.profilePhotoUrl}
                         alt={match.memorial.firstName}
-                        className="w-full h-full object-cover"
+                        fill
+                        unoptimized
+                        className="object-cover"
                       />
                     ) : (
                       <Users className="w-6 h-6 text-sage" />

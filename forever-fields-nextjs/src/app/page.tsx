@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import {
   Button,
   Card,
@@ -116,6 +117,8 @@ const stats = [
 ];
 
 export default function Home() {
+  const t = useTranslations();
+
   return (
     <div className="min-h-screen bg-cream">
       <Header />
@@ -175,13 +178,13 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/create">
                   <Button size="lg" className="shadow-soft">
-                    Create Memorial
+                    {t("common.createMemorial")}
                     <ChevronRight className="w-5 h-5 ml-1" />
                   </Button>
                 </Link>
                 <Button variant="outline" size="lg">
                   <Play className="w-5 h-5 mr-2" />
-                  Watch Demo
+                  {t("home.hero.secondaryCta")}
                 </Button>
               </div>
             </SlideUp>
@@ -1012,7 +1015,7 @@ export default function Home() {
                     size="lg"
                     className="bg-white text-sage-dark hover:bg-cream"
                   >
-                    Create a Memorial
+                    {t("common.createMemorial")}
                   </Button>
                 </Link>
                 <Link href="/pricing">
@@ -1021,7 +1024,7 @@ export default function Home() {
                     size="lg"
                     className="border-white text-white hover:bg-white/10"
                   >
-                    View Pricing
+                    {t("nav.pricing")}
                   </Button>
                 </Link>
               </div>
@@ -1094,7 +1097,7 @@ export default function Home() {
 
           <div className="border-t border-gray-body/20 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-light">
-              © 2024 Forever Fields. All rights reserved.
+              {t("footer.copyright", { year: new Date().getFullYear() })}
             </p>
             <p className="text-sm text-gray-light">
               Built with Next.js 14 + Claude AI

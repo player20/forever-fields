@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button, Card } from "@/components/ui";
@@ -236,12 +237,14 @@ export default function InviteAcceptPage() {
         <Card className="p-8">
           {/* Invitation Header */}
           <div className="text-center mb-6">
-            <div className="w-20 h-20 rounded-full bg-sage-pale flex items-center justify-center mx-auto mb-4 overflow-hidden">
+            <div className="w-20 h-20 rounded-full bg-sage-pale flex items-center justify-center mx-auto mb-4 overflow-hidden relative">
               {invitation.memorialPhoto ? (
-                <img
+                <Image
                   src={invitation.memorialPhoto}
                   alt=""
-                  className="w-full h-full object-cover"
+                  fill
+                  unoptimized
+                  className="object-cover"
                 />
               ) : (
                 <Users className="w-10 h-10 text-sage" />

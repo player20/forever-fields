@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { User, Flower2, Flame } from "lucide-react";
 import type { FamilyMember } from "./types";
 
@@ -65,10 +66,12 @@ export function PersonNode({ member, isSelected, isHighlighted, onClick }: Perso
           style={{ width: 88, height: 88 }}
         >
           {member.profilePhoto ? (
-            <img
+            <Image
               src={member.profilePhoto}
               alt={`${member.firstName} ${member.lastName}`}
-              className="w-full h-full object-cover"
+              fill
+              unoptimized
+              className="object-cover"
             />
           ) : (
             <div

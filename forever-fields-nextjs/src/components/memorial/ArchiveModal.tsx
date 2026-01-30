@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { PERMANENCE_PRICING } from "@/lib/arweave/types";
@@ -45,14 +45,7 @@ export function ArchiveModal({
   } | null>(null);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
-  // Fetch cost estimate when modal opens
-  useEffect(() => {
-    if (isOpen && !estimate) {
-      fetchEstimate();
-    }
-  }, [isOpen]);
-
-  const fetchEstimate = async () => {
+  const fetchEstimate = useCallback(async () => {
     try {
       const response = await fetch(
         `/api/permanence/archive?memorialId=${memorialId}&estimate=true`
@@ -68,7 +61,14 @@ export function ArchiveModal({
     } catch {
       setError("Failed to fetch estimate");
     }
-  };
+  }, [memorialId]);
+
+  // Fetch cost estimate when modal opens
+  useEffect(() => {
+    if (isOpen && !estimate) {
+      fetchEstimate();
+    }
+  }, [isOpen, estimate, fetchEstimate]);
 
   const handleArchive = async () => {
     setIsLoading(true);
