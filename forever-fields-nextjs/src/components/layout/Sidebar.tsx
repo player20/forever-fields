@@ -9,9 +9,6 @@ import { Badge } from "@/components/ui/Badge";
 import {
   LayoutDashboard,
   Heart,
-  Image,
-    MessageSquare,
-  Calendar,
   Settings,
   HelpCircle,
   ChevronRight,
@@ -19,9 +16,6 @@ import {
   FileText,
   ShoppingBag,
   MapPin,
-  Book,
-  Mic,
-  Video,
   TreeDeciduous,
   Crown,
   PanelLeftClose,
@@ -49,21 +43,10 @@ const sidebarSections: SidebarSection[] = [
     ],
   },
   {
-    title: "Memorial",
+    title: "Explore",
     items: [
-      { name: "Photos & Albums", href: "/photos", icon: Image },
-      { name: "Stories", href: "/stories", icon: Book },
       { name: "Family Tree", href: "/family-tree", icon: TreeDeciduous },
-      { name: "Timeline", href: "/timeline", icon: Calendar },
-      { name: "Guestbook", href: "/guestbook", icon: MessageSquare, badge: "New" },
-    ],
-  },
-  {
-    title: "Advanced",
-    items: [
-      { name: "Voice Memories", href: "/voice", icon: Mic },
-      { name: "Video Messages", href: "/video", icon: Video },
-      { name: "Grave Locator", href: "/grave-locator", icon: MapPin },
+      { name: "Search", href: "/search", icon: MapPin },
     ],
   },
   {
@@ -71,7 +54,6 @@ const sidebarSections: SidebarSection[] = [
     items: [
       { name: "Funeral Planning", href: "/planning", icon: FileText },
       { name: "Memorial Shop", href: "/shop", icon: ShoppingBag },
-      { name: "Pre-Planning", href: "/pre-planning", icon: Calendar },
     ],
   },
 ];

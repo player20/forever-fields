@@ -9,7 +9,7 @@ import {
   Heart,
   Plus,
   ShoppingBag,
-  User,
+  Settings,
 } from "lucide-react";
 
 interface MobileNavProps {
@@ -21,7 +21,7 @@ const navItems = [
   { name: "Memorials", href: "/memorials", icon: Heart },
   { name: "Create", href: "/create", icon: Plus, isAction: true },
   { name: "Shop", href: "/shop", icon: ShoppingBag },
-  { name: "Profile", href: "/profile", icon: User },
+  { name: "Settings", href: "/settings", icon: Settings },
 ];
 
 export function MobileNav({ className }: MobileNavProps) {

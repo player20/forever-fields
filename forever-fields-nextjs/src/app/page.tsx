@@ -1052,32 +1052,39 @@ export default function Home() {
               {
                 title: "Product",
                 links: [
-                  "Features",
-                  "Pricing",
-                  "For Funeral Homes",
-                  "Mobile App",
+                  { name: "Features", href: "/pricing" },
+                  { name: "Pricing", href: "/pricing" },
+                  { name: "For Funeral Homes", href: "/partners" },
                 ],
               },
               {
                 title: "Company",
-                links: ["About", "Blog", "Careers", "Contact"],
+                links: [
+                  { name: "About", href: "/about" },
+                  { name: "Contact", href: "/contact" },
+                ],
               },
               {
                 title: "Support",
-                links: ["Help Center", "Privacy", "Terms", "Grief Resources"],
+                links: [
+                  { name: "Help Center", href: "/help" },
+                  { name: "Privacy", href: "/privacy" },
+                  { name: "Terms", href: "/terms" },
+                  { name: "Grief Resources", href: "/grief-support" },
+                ],
               },
             ].map((section) => (
               <div key={section.title}>
                 <h4 className="font-semibold mb-4">{section.title}</h4>
                 <ul className="space-y-2">
                   {section.links.map((link) => (
-                    <li key={link}>
-                      <a
-                        href="#"
+                    <li key={link.name}>
+                      <Link
+                        href={link.href}
                         className="text-gray-light hover:text-cream transition-colors text-sm"
                       >
-                        {link}
-                      </a>
+                        {link.name}
+                      </Link>
                     </li>
                   ))}
                 </ul>
