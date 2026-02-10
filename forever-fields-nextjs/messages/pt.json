@@ -1,5 +1,6 @@
 {
   "common": {
+    "create": "Criar",
     "createMemorial": "Criar Memorial",
     "signUp": "Cadastrar",
     "login": "Entrar",
@@ -25,12 +26,24 @@
   },
   "nav": {
     "home": "Início",
+    "memorials": "Memoriais",
     "pricing": "Preços",
+    "shop": "Loja",
     "about": "Sobre",
     "contact": "Contato",
     "support": "Suporte",
     "griefSupport": "Apoio ao Luto",
-    "partners": "Cemitérios Parceiros"
+    "partners": "Cemitérios Parceiros",
+    "dashboard": "Painel",
+    "familyTree": "Árvore Genealógica",
+    "search": "Buscar",
+    "planning": "Planejamento Funerário",
+    "settings": "Configurações",
+    "help": "Ajuda e Suporte"
+  },
+  "sidebar": {
+    "explore": "Explorar",
+    "planningShop": "Planejamento e Loja"
   },
   "home": {
     "hero": {
@@ -144,7 +157,11 @@
     "hasAccount": "Já tem uma conta?",
     "orContinueWith": "Ou continue com",
     "google": "Google",
-    "apple": "Apple"
+    "apple": "Apple",
+    "sendMagicLink": "Enviar Link Mágico",
+    "fullName": "Nome Completo",
+    "termsAgree": "Concordo com os Termos de Serviço e Política de Privacidade",
+    "createAccount": "Criar Conta"
   },
   "partners": {
     "title": "Programa de Parceria de Cemitérios",
@@ -185,7 +202,16 @@
     "privacy": "Privacidade",
     "terms": "Termos",
     "contact": "Contato",
-    "copyright": "© {year} Forever Fields. Todos os direitos reservados."
+    "copyright": "© {year} Forever Fields. Todos os direitos reservados.",
+    "tagline": "Preservando memórias com compaixão e tecnologia.",
+    "product": "Produto",
+    "company": "Empresa",
+    "support": "Suporte",
+    "features": "Recursos",
+    "pricing": "Preços",
+    "forFuneralHomes": "Para Funerárias",
+    "helpCenter": "Central de Ajuda",
+    "griefResources": "Recursos de Luto"
   },
   "errors": {
     "required": "Este campo é obrigatório",

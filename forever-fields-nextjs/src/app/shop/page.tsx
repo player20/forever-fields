@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button, Card, Badge } from "@/components/ui";
 import { Header } from "@/components/layout";
 import { FadeIn, SlideUp, Stagger, StaggerItem } from "@/components/motion";
@@ -21,9 +21,13 @@ import {
   ShoppingBasket,
   TreeDeciduous,
   BookOpen,
+  ShoppingCart,
+  X,
+  Check,
   type LucideIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useShopCart, type ShopProduct } from "@/hooks/useShopCart";
 
 // Sample products
 const products: Array<{
@@ -127,15 +131,147 @@ const categories = [
 
 export default function ShopPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [addedProductId, setAddedProductId] = useState<string | null>(null);
+  const [showCartPreview, setShowCartPreview] = useState(false);
+  const { items, itemCount, subtotal, addItem, removeItem, isLoaded } = useShopCart();
 
   const filteredProducts =
     selectedCategory === "all"
       ? products
       : products.filter((p) => p.category === selectedCategory);
 
+  const handleAddToCart = useCallback((product: typeof products[0]) => {
+    const shopProduct: ShopProduct = {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      category: product.category,
+      rating: product.rating,
+      reviews: product.reviews,
+    };
+    addItem(shopProduct);
+    setAddedProductId(product.id);
+    setShowCartPreview(true);
+    setTimeout(() => setAddedProductId(null), 2000);
+  }, [addItem]);
+
+  const handleCheckout = useCallback(async () => {
+    const cartItems = items.map(item => ({
+      productId: item.product.id,
+      name: item.product.name,
+      description: item.product.description,
+      price: item.product.price,
+      quantity: item.quantity,
+    }));
+
+    try {
+      const response = await fetch("/api/stripe/shop-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: cartItems }),
+      });
+
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+    }
+  }, [items]);
+
   return (
     <div className="min-h-screen bg-cream">
       <Header />
+
+      {/* Floating Cart Button */}
+      {isLoaded && itemCount > 0 && (
+        <motion.button
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          onClick={() => setShowCartPreview(!showCartPreview)}
+          className="fixed bottom-6 right-6 z-50 bg-sage text-white p-4 rounded-full shadow-lg hover:bg-sage-dark transition-colors"
+        >
+          <ShoppingCart className="w-6 h-6" />
+          <span className="absolute -top-1 -right-1 bg-coral text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+            {itemCount}
+          </span>
+        </motion.button>
+      )}
+
+      {/* Cart Preview Sidebar */}
+      <AnimatePresence>
+        {showCartPreview && items.length > 0 && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowCartPreview(false)}
+              className="fixed inset-0 bg-black/30 z-40"
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25 }}
+              className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-xl overflow-y-auto"
+            >
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-serif font-bold text-gray-dark">Your Cart</h2>
+                  <button
+                    onClick={() => setShowCartPreview(false)}
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-4 mb-6">
+                  {items.map((item) => (
+                    <div key={item.id} className="flex gap-4 p-3 bg-sage-pale/20 rounded-lg">
+                      <div className="w-16 h-16 bg-sage-pale/50 rounded-lg flex items-center justify-center shrink-0">
+                        <ShoppingBag className="w-6 h-6 text-sage" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-gray-dark truncate">{item.product.name}</h4>
+                        <p className="text-sm text-gray-body">Qty: {item.quantity}</p>
+                        <p className="text-sm font-semibold text-sage-dark">
+                          ${(item.product.price * item.quantity).toFixed(2)}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="p-1 hover:bg-gray-200 rounded"
+                      >
+                        <X className="w-4 h-4 text-gray-400" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="border-t pt-4">
+                  <div className="flex justify-between mb-4">
+                    <span className="font-medium text-gray-dark">Subtotal</span>
+                    <span className="font-bold text-sage-dark">${subtotal.toFixed(2)}</span>
+                  </div>
+                  <Button onClick={handleCheckout} className="w-full" size="lg">
+                    Checkout
+                  </Button>
+                  <button
+                    onClick={() => setShowCartPreview(false)}
+                    className="w-full mt-2 text-sm text-gray-body hover:text-gray-dark"
+                  >
+                    Continue Shopping
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-r from-gold-pale/40 via-cream to-rose-pale/30 py-16">
@@ -240,7 +376,35 @@ export default function ShopPage() {
                           <span className="text-lg font-semibold text-sage-dark">
                             ${product.price}
                           </span>
-                          <Button size="sm">Add to Cart</Button>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.location.href = `/shop/${product.id}`;
+                              }}
+                            >
+                              Customize
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddToCart(product);
+                              }}
+                              variant={addedProductId === product.id ? "secondary" : "primary"}
+                            >
+                              {addedProductId === product.id ? (
+                                <>
+                                  <Check className="w-4 h-4 mr-1" />
+                                  Added
+                                </>
+                              ) : (
+                                "Add"
+                              )}
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </Card>
@@ -252,20 +416,21 @@ export default function ShopPage() {
         </div>
       </section>
 
-      {/* Gift Cards CTA */}
+      {/* Gift of Remembrance CTA */}
       <section className="py-16 bg-gradient-to-r from-coral-pale/40 to-gold-pale/40">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <SlideUp>
             <div className="flex items-center justify-center gap-3 mb-4">
-              <Gift className="w-8 h-8 text-coral-dark" />
+              <Heart className="w-8 h-8 text-coral-dark" />
               <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-dark">
-                Gift Cards Available
+                Give the Gift of Remembrance
               </h2>
             </div>
-            <p className="text-gray-body mb-6">
-              Not sure what to give? Let them choose with a Forever Fields gift card.
+            <p className="text-gray-body mb-6 max-w-xl mx-auto">
+              Support a grieving family by giving them the choice. A memorial gift card
+              lets them select meaningful tributes when they&apos;re ready.
             </p>
-            <Button size="lg">Purchase Gift Card</Button>
+            <Button size="lg">Send a Memorial Gift Card</Button>
           </SlideUp>
         </div>
       </section>

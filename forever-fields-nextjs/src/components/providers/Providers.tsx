@@ -2,6 +2,8 @@
 
 import { ReactNode } from "react";
 import { AuthProvider } from "@/hooks/useAuth";
+import { PostHogProvider } from "@/lib/posthog";
+import { QueryProvider } from "@/lib/query";
 
 interface ProvidersProps {
   children: ReactNode;
@@ -9,8 +11,12 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <AuthProvider>
-      {children}
-    </AuthProvider>
+    <QueryProvider>
+      <PostHogProvider>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </PostHogProvider>
+    </QueryProvider>
   );
 }

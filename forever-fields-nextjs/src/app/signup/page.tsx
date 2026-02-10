@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Button, Card } from "@/components/ui";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 
 export default function SignupPage() {
+  const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
@@ -30,6 +32,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [isFamilyMember, setIsFamilyMember] = useState(false);
 
   // Redirect if already authenticated (use useEffect to avoid setState during render)
   useEffect(() => {
@@ -80,7 +83,14 @@ export default function SignupPage() {
     try {
       await register(email, password, name || undefined);
       toast.success("Account created! Welcome to Forever Fields.");
-      router.push("/dashboard");
+      // Redirect based on user intent
+      if (isFamilyMember) {
+        // Family members joining existing memorial - go to find/join page
+        router.push("/join-memorial");
+      } else {
+        // New users creating a memorial - go to onboarding
+        router.push("/onboarding");
+      }
     } catch {
       // Error is handled by useAuth
     }
@@ -106,16 +116,16 @@ export default function SignupPage() {
         <Card className="p-8">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-serif font-bold text-gray-dark mb-2">
-              Create Your Account
+              {t("auth.signupTitle")}
             </h1>
             <p className="text-gray-body">
-              Start preserving precious memories today
+              {t("auth.signupSubtitle")}
             </p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            <div role="alert" aria-live="polite" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
               {error}
             </div>
           )}
@@ -124,7 +134,7 @@ export default function SignupPage() {
             {/* Name */}
             <div>
               <label className="block text-sm font-medium text-gray-dark mb-1">
-                Your Name <span className="text-gray-400">(optional)</span>
+                {t("auth.fullName")} <span className="text-gray-400">({t("create.optional")})</span>
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 hidden sm:block" />
@@ -133,7 +143,7 @@ export default function SignupPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Jane Doe"
-                  className="w-full pl-3 sm:pl-10 pr-4 py-2 md:py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
+                  className="w-full pl-3 sm:pl-10 pr-4 py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent text-base"
                 />
               </div>
             </div>
@@ -141,7 +151,7 @@ export default function SignupPage() {
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-dark mb-1">
-                Email Address *
+                {t("auth.email")} *
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 hidden sm:block" />
@@ -150,7 +160,7 @@ export default function SignupPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full pl-3 sm:pl-10 pr-4 py-2 md:py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
+                  className="w-full pl-3 sm:pl-10 pr-4 py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent text-base"
                   required
                 />
               </div>
@@ -159,7 +169,7 @@ export default function SignupPage() {
             {/* Password */}
             <div>
               <label className="block text-sm font-medium text-gray-dark mb-1">
-                Password *
+                {t("auth.password")} *
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 hidden sm:block" />
@@ -168,15 +178,16 @@ export default function SignupPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Create a password"
-                  className="w-full pl-3 sm:pl-10 pr-12 py-2 md:py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
+                  className="w-full pl-3 sm:pl-10 pr-12 py-3 rounded-lg border border-sage-pale focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent text-base"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff className="w-5 h-5" aria-hidden="true" /> : <Eye className="w-5 h-5" aria-hidden="true" />}
                 </button>
               </div>
 
@@ -201,7 +212,7 @@ export default function SignupPage() {
             {/* Confirm Password */}
             <div>
               <label className="block text-sm font-medium text-gray-dark mb-1">
-                Confirm Password *
+                {t("auth.confirmPassword")} *
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 hidden sm:block" />
@@ -210,7 +221,7 @@ export default function SignupPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Confirm your password"
-                  className={`w-full pl-3 sm:pl-10 pr-4 py-2 md:py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent ${
+                  className={`w-full pl-3 sm:pl-10 pr-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent text-base ${
                     confirmPassword.length > 0
                       ? passwordsMatch
                         ? "border-green-300"
@@ -223,6 +234,24 @@ export default function SignupPage() {
               {confirmPassword.length > 0 && !passwordsMatch && (
                 <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
               )}
+            </div>
+
+            {/* Family Member Option */}
+            <div className="flex items-start gap-3 p-3 bg-sage-pale/20 rounded-lg border border-sage-pale/50">
+              <input
+                type="checkbox"
+                id="familyMember"
+                checked={isFamilyMember}
+                onChange={(e) => setIsFamilyMember(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded border-sage-pale text-sage focus:ring-sage"
+              />
+              <label htmlFor="familyMember" className="text-sm text-gray-body">
+                <span className="font-medium text-gray-dark">I was invited by a family member</span>
+                <br />
+                <span className="text-xs text-gray-400">
+                  Check this if you&apos;re joining an existing memorial
+                </span>
+              </label>
             </div>
 
             {/* Terms */}
@@ -256,11 +285,11 @@ export default function SignupPage() {
                   <span className="animate-spin">
                     <Flower2 className="w-4 h-4" />
                   </span>
-                  Setting things up...
+                  {t("common.loading")}
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  Create Account
+                  {t("auth.createAccount")}
                   <ArrowRight className="w-4 h-4" />
                 </span>
               )}
@@ -270,7 +299,7 @@ export default function SignupPage() {
           {/* Social Login */}
           <div className="mt-6 pt-6 border-t border-sage-pale/50">
             <p className="text-sm text-gray-body text-center mb-4">
-              Or sign up with
+              {t("auth.orContinueWith")}
             </p>
             <Button
               type="button"
@@ -297,19 +326,19 @@ export default function SignupPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Continue with Google
+              {t("auth.google")}
             </Button>
           </div>
 
           {/* Sign In Link */}
           <div className="mt-6 pt-6 border-t border-sage-pale/50 text-center">
             <p className="text-gray-body">
-              Already have an account?{" "}
+              {t("auth.hasAccount")}{" "}
               <Link
                 href="/login"
                 className="text-sage hover:text-sage-dark font-medium"
               >
-                Sign in
+                {t("common.login")}
               </Link>
             </p>
           </div>

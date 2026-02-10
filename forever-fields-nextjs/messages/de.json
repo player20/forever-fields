@@ -1,5 +1,6 @@
 {
   "common": {
+    "create": "Erstellen",
     "createMemorial": "Gedenkseite Erstellen",
     "signUp": "Registrieren",
     "login": "Anmelden",
@@ -25,12 +26,24 @@
   },
   "nav": {
     "home": "Startseite",
+    "memorials": "Gedenkseiten",
     "pricing": "Preise",
+    "shop": "Shop",
     "about": "Über Uns",
     "contact": "Kontakt",
     "support": "Hilfe",
     "griefSupport": "Trauerbegleitung",
-    "partners": "Friedhof-Partner"
+    "partners": "Friedhof-Partner",
+    "dashboard": "Übersicht",
+    "familyTree": "Stammbaum",
+    "search": "Suchen",
+    "planning": "Bestattungsplanung",
+    "settings": "Einstellungen",
+    "help": "Hilfe & Support"
+  },
+  "sidebar": {
+    "explore": "Entdecken",
+    "planningShop": "Planung & Shop"
   },
   "home": {
     "hero": {
@@ -144,7 +157,11 @@
     "hasAccount": "Bereits ein Konto?",
     "orContinueWith": "Oder weiter mit",
     "google": "Google",
-    "apple": "Apple"
+    "apple": "Apple",
+    "sendMagicLink": "Magic-Link Senden",
+    "fullName": "Vollständiger Name",
+    "termsAgree": "Ich stimme den Nutzungsbedingungen und der Datenschutzrichtlinie zu",
+    "createAccount": "Konto Erstellen"
   },
   "partners": {
     "title": "Friedhof-Partnerschaftsprogramm",
@@ -185,7 +202,16 @@
     "privacy": "Datenschutz",
     "terms": "Nutzungsbedingungen",
     "contact": "Kontakt",
-    "copyright": "© {year} Forever Fields. Alle Rechte vorbehalten."
+    "copyright": "© {year} Forever Fields. Alle Rechte vorbehalten.",
+    "tagline": "Erinnerungen mit Mitgefühl und Technologie bewahren.",
+    "product": "Produkt",
+    "company": "Unternehmen",
+    "support": "Support",
+    "features": "Funktionen",
+    "pricing": "Preise",
+    "forFuneralHomes": "Für Bestattungsunternehmen",
+    "helpCenter": "Hilfezentrum",
+    "griefResources": "Trauerressourcen"
   },
   "errors": {
     "required": "Dieses Feld ist erforderlich",

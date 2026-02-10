@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Button, Card } from "@/components/ui";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ import {
 type AuthMode = "magic" | "password";
 
 export default function LoginPage() {
+  const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
@@ -140,10 +142,10 @@ export default function LoginPage() {
         <Card className="p-8">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-serif font-bold text-gray-dark mb-2">
-              Welcome Back
+              {t("auth.loginTitle")}
             </h1>
             <p className="text-gray-body">
-              Sign in to manage your memorials
+              {t("auth.loginSubtitle")}
             </p>
           </div>
 
@@ -185,7 +187,7 @@ export default function LoginPage() {
             <form onSubmit={handleMagicLink} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-dark mb-1">
-                  Email Address
+                  {t("auth.email")}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -206,11 +208,11 @@ export default function LoginPage() {
                     <span className="animate-spin">
                       <Flower2 className="w-4 h-4" />
                     </span>
-                    Sending...
+                    {t("common.loading")}
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    Send Magic Link
+                    {t("auth.sendMagicLink")}
                     <ArrowRight className="w-4 h-4" />
                   </span>
                 )}
@@ -228,7 +230,7 @@ export default function LoginPage() {
             <form onSubmit={handlePasswordLogin} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-dark mb-1">
-                  Email Address
+                  {t("auth.email")}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -246,13 +248,13 @@ export default function LoginPage() {
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <label className="block text-sm font-medium text-gray-dark">
-                    Password
+                    {t("auth.password")}
                   </label>
                   <Link
                     href="/reset-password"
                     className="text-sm text-sage hover:text-sage-dark"
                   >
-                    Forgot password?
+                    {t("auth.forgotPassword")}
                   </Link>
                 </div>
                 <div className="relative">
@@ -281,11 +283,11 @@ export default function LoginPage() {
                     <span className="animate-spin">
                       <Flower2 className="w-4 h-4" />
                     </span>
-                    Signing in...
+                    {t("common.loading")}
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    Sign In
+                    {t("common.login")}
                     <ArrowRight className="w-4 h-4" />
                   </span>
                 )}
@@ -296,7 +298,7 @@ export default function LoginPage() {
           {/* Social Login */}
           <div className="mt-6 pt-6 border-t border-sage-pale/50">
             <p className="text-sm text-gray-body text-center mb-4">
-              Or continue with
+              {t("auth.orContinueWith")}
             </p>
             <Button
               type="button"
@@ -323,19 +325,19 @@ export default function LoginPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Continue with Google
+              {t("auth.google")}
             </Button>
           </div>
 
           {/* Sign Up Link */}
           <div className="mt-6 pt-6 border-t border-sage-pale/50 text-center">
             <p className="text-gray-body">
-              Don&apos;t have an account?{" "}
+              {t("auth.noAccount")}{" "}
               <Link
                 href="/signup"
                 className="text-sage hover:text-sage-dark font-medium"
               >
-                Create one
+                {t("common.signUp")}
               </Link>
             </p>
           </div>

@@ -88,6 +88,17 @@ export async function optionalAuth() {
   return { user: user || null, error: null };
 }
 
+/**
+ * Create a Supabase client without strict typing
+ * Use this for tables that are not in the generated types
+ * (analytics_events, cemeteries, anniversary_reminders, etc.)
+ */
+export async function createUntypedSupabaseClient() {
+  const client = await createServerSupabaseClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return client as any;
+}
+
 // Service role client for admin operations (server-side only)
 export async function createServiceRoleClient() {
   const cookieStore = await cookies();

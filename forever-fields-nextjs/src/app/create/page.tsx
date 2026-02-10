@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Button, Card, Badge } from "@/components/ui";
 import { Header } from "@/components/layout";
 import { FadeIn } from "@/components/motion";
@@ -128,6 +129,7 @@ interface DraftData {
 export default function CreateMemorialPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const t = useTranslations();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [currentStep, setCurrentStep] = useState(0); // 0 = intro, 1-4 = steps
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -585,11 +587,10 @@ export default function CreateMemorialPage() {
                   <Heart className="w-8 h-8 text-sage" />
                 </div>
                 <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-dark mb-4">
-                  Create a Memorial
+                  {t("create.title")}
                 </h1>
                 <p className="text-lg text-gray-body max-w-md mx-auto">
-                  Creating a memorial is a meaningful way to celebrate a life.
-                  Take all the time you need—you can always add more later.
+                  {t("create.introText")}
                 </p>
               </div>
 
@@ -603,19 +604,19 @@ export default function CreateMemorialPage() {
                       </div>
                       <div>
                         <p className="font-medium text-gray-dark">
-                          Continue where you left off?
+                          {t("create.continueDraft")}
                         </p>
                         <p className="text-sm text-gray-body">
-                          You have an unfinished memorial
+                          {t("create.unfinishedMemorial")}
                         </p>
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <Button variant="ghost" size="sm" onClick={clearDraft}>
-                        Start Fresh
+                        {t("create.startFresh")}
                       </Button>
                       <Button size="sm" onClick={restoreDraft}>
-                        Continue
+                        {t("create.continue")}
                       </Button>
                     </div>
                   </div>
@@ -635,11 +636,10 @@ export default function CreateMemorialPage() {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-dark mb-1">
-                        Guided Creation
+                        {t("create.guidedCreation")}
                       </h3>
                       <p className="text-sm text-gray-body">
-                        Step-by-step process with AI assistance for writing
-                        their story
+                        {t("create.guidedCreationDesc")}
                       </p>
                     </div>
                     <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-sage transition-colors" />
@@ -657,10 +657,10 @@ export default function CreateMemorialPage() {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-dark mb-1">
-                        Quick Create
+                        {t("create.quickCreate")}
                       </h3>
                       <p className="text-sm text-gray-body">
-                        Just name and dates—add everything else later
+                        {t("create.quickCreateDesc")}
                       </p>
                     </div>
                     <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-sage transition-colors" />
@@ -674,12 +674,10 @@ export default function CreateMemorialPage() {
                   <Info className="w-5 h-5 text-sage shrink-0 mt-0.5" />
                   <div className="text-sm text-gray-body">
                     <p className="font-medium text-gray-dark mb-1">
-                      Your progress is saved automatically
+                      {t("create.progressSavedTitle")}
                     </p>
                     <p>
-                      If you need to step away, your work will be here when you
-                      return. Private by default—only you can see it until you
-                      choose to share.
+                      {t("create.progressSavedDesc")}
                     </p>
                   </div>
                 </div>

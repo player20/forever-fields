@@ -9,6 +9,9 @@ import { MemoryAssistant, LegacyCompanion } from "@/components/ai";
 import { KidsMemorialExplorer, StoryTime, MilestoneMessages, MySpaceForGrandma } from "@/components/kids";
 import { QRMemorialCode, SimpleFamilyTree, LivingPortrait, TraditionsLegacy, MusicGallery, TraditionEditor, MusicEditor } from "@/components/memorial";
 import { GraveLocator } from "@/components/memorial/GraveLocator";
+import { AIFeaturesModal } from "@/components/memorial/AIFeaturesModal";
+import { AIChatWidget } from "@/components/memorial/AIChatWidget";
+import { Timeline } from "@/components/memorial/Timeline";
 import { formatDate, calculateAge } from "@/lib/utils";
 import {
   Share2,
@@ -43,6 +46,10 @@ import {
   Waves,
   Sun,
   Flower2,
+  Crown,
+  Pencil,
+  Eye,
+  Settings,
   type LucideIcon,
 } from "lucide-react";
 
@@ -232,6 +239,7 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
   const [viewMode, setViewMode] = useState<ViewMode>("default");
   const [showQRModal, setShowQRModal] = useState(false);
   const [showGraveLocator, setShowGraveLocator] = useState(false);
+  const [showAIFeatures, setShowAIFeatures] = useState(false);
 
   // Permission check - owners and editors can edit content
   const canEdit = userRole === "owner" || userRole === "editor";
@@ -268,6 +276,14 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
   const [showCandleModal, setShowCandleModal] = useState(false);
   const [candleMessage, setCandleMessage] = useState("");
   const [candleName, setCandleName] = useState("");
+  const [isLightingCandle, setIsLightingCandle] = useState(false);
+
+  // Memory submission state
+  const [isSavingMemory, setIsSavingMemory] = useState(false);
+
+  // Local state for candles (to show new ones immediately)
+  const [localCandles, setLocalCandles] = useState(memorial.candles);
+  const [localMemories, setLocalMemories] = useState(memorial.memories);
 
   const fullName = `${memorial.firstName} ${memorial.lastName}`;
   const age = memorial.birthDate && memorial.deathDate
@@ -275,13 +291,13 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
     : null;
 
   // Featured quote - pull from first memory or use default
-  const featuredQuote = memorial.memories.length > 0
+  const featuredQuote = localMemories.length > 0
     ? {
-        text: memorial.memories[0].content.length > 150
-          ? memorial.memories[0].content.slice(0, 150) + "..."
-          : memorial.memories[0].content,
-        author: memorial.memories[0].authorName,
-        relationship: memorial.memories[0].relationship,
+        text: localMemories[0].content.length > 150
+          ? localMemories[0].content.slice(0, 150) + "..."
+          : localMemories[0].content,
+        author: localMemories[0].authorName,
+        relationship: localMemories[0].relationship,
       }
     : null;
 
@@ -292,28 +308,28 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
     { icon: "📚", label: "Romance novels" },
     { icon: "🍪", label: "Famous cookies" },
     { icon: "🌹", label: "Rose garden" },
-    { icon: "👨‍👩‍👧‍👦", label: `${memorial.memories.length || 0} memories shared` },
+    { icon: "👨‍👩‍👧‍👦", label: `${localMemories.length || 0} memories shared` },
   ];
 
   // Engagement stats
   const engagementStats = {
-    candles: memorial.candles.length,
-    memories: memorial.memories.length,
+    candles: localCandles.length,
+    memories: localMemories.length,
     photos: memorial.photos.length,
     familyMembers: 12, // Would come from collaborators count
   };
 
   // Recent activity for "Living Memorial" indicator
-  const recentActivity = memorial.candles.length > 0
+  const recentActivity = localCandles.length > 0
     ? {
         action: "lit a candle",
-        name: memorial.candles[memorial.candles.length - 1].lighterName || "Someone",
+        name: localCandles[0].lighterName || "Someone",
         timeAgo: "recently",
       }
-    : memorial.memories.length > 0
+    : localMemories.length > 0
     ? {
         action: "shared a memory",
-        name: memorial.memories[memorial.memories.length - 1].authorName,
+        name: localMemories[0].authorName,
         timeAgo: "recently",
       }
     : null;
@@ -329,14 +345,14 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
     deathYear: memorial.deathDate ? new Date(memorial.deathDate).getFullYear().toString() : undefined,
     profilePhotoUrl: memorial.profilePhotoUrl || undefined,
     biography: memorial.biography || undefined,
-    hasLegacyData: memorial.memories.length > 0,
+    hasLegacyData: localMemories.length > 0,
     favoriteThings: [
       { icon: "❤️", label: "Family" },
       { icon: "🌻", label: "Nature" },
       { icon: "📚", label: "Stories" },
       { icon: "🍪", label: "Baking" },
     ],
-    stories: memorial.memories.map(m => ({
+    stories: localMemories.map(m => ({
       id: m.id,
       title: `Memory from ${m.authorName}`,
       content: m.content,
@@ -450,16 +466,100 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
   };
 
   // Light a candle
-  const handleLightCandle = () => {
+  const handleLightCandle = async () => {
     if (!candleName.trim()) {
       toast.error("Please enter your name");
       return;
     }
-    // TODO: POST to /api/memorials/:id/candles
-    toast.success("Candle lit in loving memory");
-    setShowCandleModal(false);
-    setCandleMessage("");
-    setCandleName("");
+
+    setIsLightingCandle(true);
+    try {
+      const response = await fetch(`/api/memorials/${memorial.id}/candles`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          litByName: candleName.trim(),
+          message: candleMessage.trim() || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to light candle");
+      }
+
+      const { candle } = await response.json();
+
+      // Add new candle to local state
+      setLocalCandles((prev) => [
+        {
+          id: candle.id,
+          message: candle.message,
+          lighterName: candle.litByName,
+          createdAt: candle.createdAt,
+        },
+        ...prev,
+      ]);
+
+      toast.success("Candle lit in loving memory");
+      setShowCandleModal(false);
+      setCandleMessage("");
+      setCandleName("");
+    } catch (error) {
+      console.error("Error lighting candle:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to light candle");
+    } finally {
+      setIsLightingCandle(false);
+    }
+  };
+
+  // Save a memory/story
+  const handleSaveMemory = async (content: string, authorName?: string, relationship?: string) => {
+    if (!content.trim()) {
+      toast.error("Please write a memory");
+      return;
+    }
+
+    setIsSavingMemory(true);
+    try {
+      const response = await fetch(`/api/memorials/${memorial.id}/stories`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `Memory of ${memorial.firstName}`,
+          content: content.trim(),
+          authorName: authorName || "Anonymous",
+          authorRelationship: relationship || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to save memory");
+      }
+
+      const { story } = await response.json();
+
+      // Add new memory to local state
+      setLocalMemories((prev) => [
+        {
+          id: story.id,
+          content: story.content,
+          authorName: story.authorName,
+          relationship: story.authorRelationship,
+          createdAt: story.createdAt,
+        },
+        ...prev,
+      ]);
+
+      toast.success("Memory shared! Thank you for contributing.");
+      setShowMemoryAssistant(false);
+    } catch (error) {
+      console.error("Error saving memory:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to save memory");
+    } finally {
+      setIsSavingMemory(false);
+    }
   };
 
   // Tradition handlers
@@ -715,12 +815,46 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
         <div className={`absolute inset-0 bg-gradient-to-t ${theme.heroOverlay}`} />
         <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent" />
 
-        {/* Share & Theme Buttons */}
+        {/* Share, Edit, Settings & Theme Buttons */}
         <div className="absolute top-4 right-4 flex gap-2 z-20">
+          {canEdit && (
+            <motion.a
+              href={`/memorial/${memorial.id}/edit`}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-sage/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2 hover:bg-sage transition-colors text-white"
+            >
+              <Pencil className="w-4 h-4" />
+              <span className="text-sm font-medium hidden sm:inline">Edit</span>
+            </motion.a>
+          )}
+          {userRole === "owner" && (
+            <motion.a
+              href={`/memorial/${memorial.id}/settings`}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2 hover:bg-white transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+              <span className="text-sm font-medium hidden sm:inline">Settings</span>
+            </motion.a>
+          )}
           <motion.button
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
+            onClick={() => setShowAIFeatures(true)}
+            className="bg-gradient-to-r from-purple-500 to-indigo-500 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2 hover:from-purple-600 hover:to-indigo-600 transition-all text-white"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span className="text-sm font-medium hidden sm:inline">AI Features</span>
+          </motion.button>
+          <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
             onClick={() => setShowThemeSelector(true)}
             className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2 hover:bg-white transition-colors"
           >
@@ -739,13 +873,39 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
           </motion.button>
         </div>
 
+        {/* Role Badge Indicator */}
+        {userRole !== "guest" && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6 }}
+            className="absolute top-4 left-4 z-20"
+          >
+            <div className={`backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2 ${
+              userRole === "owner"
+                ? "bg-gold-pale/90 text-gold-dark"
+                : userRole === "editor"
+                ? "bg-sage-pale/90 text-sage-dark"
+                : "bg-white/90 text-gray-600"
+            }`}>
+              {userRole === "owner" && <Crown className="w-4 h-4" />}
+              {userRole === "editor" && <Pencil className="w-4 h-4" />}
+              {userRole === "viewer" && <Eye className="w-4 h-4" />}
+              <span className="text-sm font-medium capitalize">{userRole}</span>
+              {canEdit && (
+                <span className="text-xs opacity-75">· Can edit</span>
+              )}
+            </div>
+          </motion.div>
+        )}
+
         {/* Living Memorial Indicator */}
         {recentActivity && (
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.8 }}
-            className="absolute top-4 left-4 z-20"
+            className={`absolute ${userRole !== "guest" ? "top-16" : "top-4"} left-4 z-20`}
           >
             <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
@@ -1044,7 +1204,7 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
                 <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                   <Mic className="w-5 h-5 text-purple-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-dark">Voice Clone</span>
+                <span className="text-sm font-medium text-gray-dark">Voice Remembrance</span>
                 <span className="text-xs text-gray-500">Hear them again</span>
               </div>
             </Card>
@@ -1094,14 +1254,14 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
               }`}
             >
               {tab}
-              {tab === "memories" && memorial.memories.length > 0 && (
+              {tab === "memories" && localMemories.length > 0 && (
                 <span className="ml-2 text-sm bg-sage-pale text-sage-dark px-2 py-0.5 rounded-full">
-                  {memorial.memories.length}
+                  {localMemories.length}
                 </span>
               )}
-              {tab === "candles" && memorial.candles.length > 0 && (
+              {tab === "candles" && localCandles.length > 0 && (
                 <span className="ml-2 text-sm bg-gold/20 text-gold px-2 py-0.5 rounded-full">
-                  {memorial.candles.length}
+                  {localCandles.length}
                 </span>
               )}
               {tab === "traditions" && traditions.length > 0 && (
@@ -1140,18 +1300,16 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
                   <CardContent>
                     <MemoryAssistant
                       deceasedName={memorial.firstName}
-                      onSave={(text) => {
-                        console.log("Memory to save:", text);
-                        // TODO: POST to /api/memorials/:id/memories
-                        toast.success("Memory saved! (Demo mode)");
-                        setShowMemoryAssistant(false);
+                      onSave={(text, authorName, relationship) => {
+                        handleSaveMemory(text, authorName, relationship);
                       }}
+                      isSaving={isSavingMemory}
                     />
                   </CardContent>
                 </Card>
               )}
 
-              {memorial.memories.length === 0 ? (
+              {localMemories.length === 0 ? (
                 <Card>
                   <CardContent className="py-12 text-center">
                     <p className="text-gray-500">
@@ -1160,7 +1318,7 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
                   </CardContent>
                 </Card>
               ) : (
-                memorial.memories.map((memory) => (
+                localMemories.map((memory) => (
                   <Card key={memory.id}>
                     <CardContent className="pt-6">
                       <p className="text-gray-700 whitespace-pre-line mb-4">
@@ -1324,7 +1482,7 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
                 animate="visible"
                 className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4"
               >
-                {memorial.candles.length === 0 ? (
+                {localCandles.length === 0 ? (
                   <div className="col-span-full">
                     <Card>
                       <CardContent className="py-12 text-center">
@@ -1342,7 +1500,7 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
                     </Card>
                   </div>
                 ) : (
-                  memorial.candles.map((candle) => (
+                  localCandles.map((candle) => (
                     <motion.div
                       key={candle.id}
                       variants={scaleIn}
@@ -1627,12 +1785,26 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
                     variant="outline"
                     className="flex-1"
                     onClick={() => setShowCandleModal(false)}
+                    disabled={isLightingCandle}
                   >
                     Cancel
                   </Button>
-                  <Button className="flex-1" onClick={handleLightCandle}>
-                    <Heart className="w-4 h-4 mr-2" />
-                    Light Candle
+                  <Button
+                    className="flex-1"
+                    onClick={handleLightCandle}
+                    disabled={isLightingCandle}
+                  >
+                    {isLightingCandle ? (
+                      <>
+                        <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Lighting...
+                      </>
+                    ) : (
+                      <>
+                        <Heart className="w-4 h-4 mr-2" />
+                        Light Candle
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -1813,6 +1985,34 @@ export function MemorialView({ memorial, userRole = "owner" }: MemorialViewProps
         onSave={handleSaveMusic}
         music={editingMusic}
         userName="Family Member"
+      />
+
+      {/* AI Features Modal */}
+      <AIFeaturesModal
+        isOpen={showAIFeatures}
+        onClose={() => setShowAIFeatures(false)}
+        memorialName={fullName}
+        userTier="heritage"
+        onFeatureSelect={(feature) => {
+          setShowAIFeatures(false);
+          if (feature === "generate-obituary") {
+            // Navigate to edit page for obituary generation
+            window.location.href = `/memorial/${memorial.id}/edit`;
+          } else if (feature === "chat") {
+            // Chat widget will handle this
+            toast.success("Opening Memory Companion...");
+          } else {
+            toast.info(`${feature} feature selected - navigate to edit page to use`);
+          }
+        }}
+      />
+
+      {/* AI Chat Widget - Floating */}
+      <AIChatWidget
+        memorialName={fullName}
+        memorialId={memorial.id}
+        obituary={memorial.biography || undefined}
+        stories={localMemories.map(m => ({ title: `Memory from ${m.authorName}`, content: m.content }))}
       />
     </div>
   );

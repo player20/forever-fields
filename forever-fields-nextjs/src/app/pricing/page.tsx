@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Button, Card } from "@/components/ui";
 import { useStripe } from "@/hooks/useStripe";
 import { useAuth } from "@/hooks/useAuth";
@@ -45,6 +46,7 @@ export default function PricingPage() {
   const { user } = useAuth();
   const { startSubscriptionCheckout, startOneTimeCheckout, isLoading, error } =
     useStripe(user?.id, user?.email, user?.name);
+  const t = useTranslations();
 
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
     "monthly"
@@ -87,13 +89,13 @@ export default function PricingPage() {
             {user ? (
               <Link href="/dashboard">
                 <Button variant="outline" size="sm">
-                  Dashboard
+                  {t("nav.dashboard")}
                 </Button>
               </Link>
             ) : (
               <Link href="/login">
                 <Button variant="outline" size="sm">
-                  Sign In
+                  {t("common.login")}
                 </Button>
               </Link>
             )}
@@ -110,7 +112,7 @@ export default function PricingPage() {
             className="inline-flex items-center gap-2 text-sage mb-4"
           >
             <Heart className="w-5 h-5" />
-            <span className="text-sm font-medium">No pressure, no rush</span>
+            <span className="text-sm font-medium">{t("pricing.noPressure")}</span>
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -118,7 +120,7 @@ export default function PricingPage() {
             transition={{ delay: 0.05 }}
             className="text-4xl md:text-5xl font-serif font-bold text-gray-dark mb-4"
           >
-            Start Free, Upgrade When You&apos;re Ready
+            {t("pricing.heroTitle")}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -126,7 +128,7 @@ export default function PricingPage() {
             transition={{ delay: 0.1 }}
             className="text-xl text-gray-body max-w-2xl mx-auto mb-4"
           >
-            Create a beautiful memorial at no cost. Add more features if and when it feels right.
+            {t("pricing.heroSubtitle")}
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -134,7 +136,7 @@ export default function PricingPage() {
             transition={{ delay: 0.15 }}
             className="text-sm text-gray-muted max-w-xl mx-auto"
           >
-            Most families start with Free and find it&apos;s everything they need.
+            {t("pricing.mostFamilies")}
           </motion.p>
         </div>
 
@@ -544,54 +546,47 @@ export default function PricingPage() {
         {/* FAQ section */}
         <div className="mt-16 max-w-3xl mx-auto">
           <h2 className="text-2xl font-serif font-bold text-center text-gray-dark mb-8">
-            Frequently Asked Questions
+            {t("pricing.faq")}
           </h2>
           <div className="space-y-6">
             <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-sage">
               <h3 className="font-semibold text-gray-dark mb-2">
-                Can I change my plan later?
+                {t("pricing.faqChangePlan")}
               </h3>
               <p className="text-gray-body">
-                Yes! You can upgrade or downgrade your plan at any time. Changes
-                take effect immediately with prorated billing.
+                {t("pricing.faqChangePlanAnswer")}
               </p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-gold">
               <h3 className="font-semibold text-gray-dark mb-2">
-                What if I&apos;m not ready to decide?
+                {t("pricing.faqNotReady")}
               </h3>
               <p className="text-gray-body">
-                Start with Free. It includes everything you need to create a meaningful memorial.
-                There&apos;s no pressure to upgrade, ever. Take all the time you need.
+                {t("pricing.faqNotReadyAnswer")}
               </p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-coral">
               <h3 className="font-semibold text-gray-dark mb-2">
-                What happens if I cancel?
+                {t("pricing.faqCancel")}
               </h3>
               <p className="text-gray-body">
-                Your memorials are never deleted. If you cancel a paid plan, you keep
-                full access until your billing period ends, then continue on Free.
-                Your memories stay safe.
+                {t("pricing.faqCancelAnswer")}
               </p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-twilight">
               <h3 className="font-semibold text-gray-dark mb-2">
-                What is Perpetual Preservation?
+                {t("pricing.faqPerpetual")}
               </h3>
               <p className="text-gray-body">
-                It&apos;s our commitment to preserving your memorial permanently. We maintain
-                redundant backups across multiple data centers with a 25-year storage guarantee,
-                ensuring your memories are protected for generations.
+                {t("pricing.faqPerpetualAnswer")}
               </p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-rose">
               <h3 className="font-semibold text-gray-dark mb-2">
-                Is there a refund policy?
+                {t("pricing.faqRefund")}
               </h3>
               <p className="text-gray-body">
-                Yes, we offer a 30-day money-back guarantee on all paid plans.
-                Contact us if you&apos;re not satisfied.
+                {t("pricing.faqRefundAnswer")}
               </p>
             </div>
           </div>

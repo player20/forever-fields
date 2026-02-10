@@ -1,5 +1,6 @@
 {
   "common": {
+    "create": "Tạo",
     "createMemorial": "Tạo Tưởng Niệm",
     "signUp": "Đăng Ký",
     "login": "Đăng Nhập",
@@ -25,12 +26,24 @@
   },
   "nav": {
     "home": "Trang Chủ",
+    "memorials": "Trang Tưởng Niệm",
     "pricing": "Bảng Giá",
+    "shop": "Cửa Hàng",
     "about": "Giới Thiệu",
     "contact": "Liên Hệ",
     "support": "Hỗ Trợ",
     "griefSupport": "Hỗ Trợ Tang Lễ",
-    "partners": "Đối Tác Nghĩa Trang"
+    "partners": "Đối Tác Nghĩa Trang",
+    "dashboard": "Bảng Điều Khiển",
+    "familyTree": "Cây Gia Phả",
+    "search": "Tìm Kiếm",
+    "planning": "Kế Hoạch Tang Lễ",
+    "settings": "Cài Đặt",
+    "help": "Trợ Giúp & Hỗ Trợ"
+  },
+  "sidebar": {
+    "explore": "Khám Phá",
+    "planningShop": "Kế Hoạch & Cửa Hàng"
   },
   "home": {
     "hero": {
@@ -144,7 +157,11 @@
     "hasAccount": "Đã có tài khoản?",
     "orContinueWith": "Hoặc tiếp tục với",
     "google": "Google",
-    "apple": "Apple"
+    "apple": "Apple",
+    "sendMagicLink": "Gửi Liên Kết Ma Thuật",
+    "fullName": "Họ Tên Đầy Đủ",
+    "termsAgree": "Tôi đồng ý với Điều Khoản Dịch Vụ và Chính Sách Bảo Mật",
+    "createAccount": "Tạo Tài Khoản"
   },
   "partners": {
     "title": "Chương Trình Đối Tác Nghĩa Trang",
@@ -185,7 +202,16 @@
     "privacy": "Quyền Riêng Tư",
     "terms": "Điều Khoản",
     "contact": "Liên Hệ",
-    "copyright": "© {year} Forever Fields. Bảo lưu mọi quyền."
+    "copyright": "© {year} Forever Fields. Bảo lưu mọi quyền.",
+    "tagline": "Lưu giữ ký ức với lòng trắc ẩn và công nghệ.",
+    "product": "Sản Phẩm",
+    "company": "Công Ty",
+    "support": "Hỗ Trợ",
+    "features": "Tính Năng",
+    "pricing": "Bảng Giá",
+    "forFuneralHomes": "Cho Nhà Tang Lễ",
+    "helpCenter": "Trung Tâm Trợ Giúp",
+    "griefResources": "Tài Nguyên Về Tang Chế"
   },
   "errors": {
     "required": "Trường này là bắt buộc",

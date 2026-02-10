@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout";
 import { Button, Card } from "@/components/ui";
 import { FadeIn, SlideUp } from "@/components/motion";
@@ -50,6 +51,8 @@ const _team = [
 ];
 
 export default function AboutPage() {
+  const t = useTranslations();
+
   return (
     <div className="min-h-screen bg-cream">
       <Header />
@@ -61,7 +64,7 @@ export default function AboutPage() {
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-6">
               <Flower2 className="w-4 h-4 text-sage" />
               <span className="text-sm font-medium text-gray-dark">
-                About Forever Fields
+                {t("nav.about")} Forever Fields
               </span>
             </div>
           </FadeIn>

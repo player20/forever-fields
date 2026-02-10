@@ -1,6 +1,14 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest } from "next/server";
 import { requireAuth } from "@/lib/supabase/server";
+import { DEMO_MODE, RATE_LIMITS } from "@/lib/constants";
+import {
+  apiUnauthorized,
+  apiBadRequest,
+  handleApiError,
+  checkRateLimit,
+  apiRateLimited,
+} from "@/lib/api";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -91,13 +99,19 @@ interface RequestBody {
 
 export async function POST(request: NextRequest) {
   try {
-    // Require authentication
-    const { user, error: authError } = await requireAuth();
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+    // Skip auth in demo mode
+    if (!DEMO_MODE) {
+      // Require authentication
+      const { user, error: authError } = await requireAuth();
+      if (authError || !user) {
+        return apiUnauthorized();
+      }
+
+      // Check rate limit for AI endpoints
+      const rateLimitResult = await checkRateLimit(request, RATE_LIMITS.AI);
+      if (rateLimitResult.limited) {
+        return apiRateLimited(rateLimitResult.reset);
+      }
     }
 
     const body = (await request.json()) as RequestBody;
@@ -116,10 +130,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!deceasedName) {
-      return new Response(
-        JSON.stringify({ error: "Deceased name is required" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return apiBadRequest("Deceased name is required");
     }
 
     // Demo mode - return mock obituary without calling Claude
@@ -165,10 +176,13 @@ export async function POST(request: NextRequest) {
     // Handle refinement of existing text
     if (existingText && refinement) {
       const refinementInstructions: Record<string, string> = {
-        shorter: "Make this obituary shorter and more concise while keeping the key sentiments.",
+        shorter:
+          "Make this obituary shorter and more concise while keeping the key sentiments.",
         longer: "Expand this obituary with more detail and emotional depth.",
-        more_formal: "Rewrite this obituary in a more formal, traditional tone.",
-        more_casual: "Rewrite this obituary in a warmer, more conversational tone.",
+        more_formal:
+          "Rewrite this obituary in a more formal, traditional tone.",
+        more_casual:
+          "Rewrite this obituary in a warmer, more conversational tone.",
       };
 
       userMessage = `Please refine this obituary for ${deceasedName}:
@@ -204,7 +218,9 @@ Keep all the factual information the same but adjust as requested.`;
         personalDetails.push(`A cherished memory: ${prompts.bestMemory}`);
       }
       if (prompts?.legacy) {
-        personalDetails.push(`How they want to be remembered: ${prompts.legacy}`);
+        personalDetails.push(
+          `How they want to be remembered: ${prompts.legacy}`
+        );
       }
 
       userMessage = `Please write a ${length} obituary for ${deceasedName}.
@@ -239,7 +255,9 @@ Write a heartfelt obituary that honors ${deceasedName}'s memory.`;
               event.delta.type === "text_delta"
             ) {
               const text = event.delta.text;
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ text })}\n\n`)
+              );
             }
           }
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
@@ -259,10 +277,6 @@ Write a heartfelt obituary that honors ${deceasedName}'s memory.`;
       },
     });
   } catch (error) {
-    console.error("Obituary generation error:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to generate obituary" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return handleApiError(error);
   }
 }

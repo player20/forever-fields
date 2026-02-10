@@ -7,11 +7,12 @@ import {
   Button,
   Card,
   Avatar,
-  AvatarGroup,
   Badge,
 } from "@/components/ui";
 import { Header } from "@/components/layout";
 import { FadeIn, SlideUp, Stagger, StaggerItem } from "@/components/motion";
+import { Experiment, useExperiment } from "@/lib/feature-flags";
+import { HeroControl, HeroSimplified } from "@/components/home";
 import {
   Flower2,
   Heart,
@@ -19,9 +20,7 @@ import {
   Mic,
   Video,
   MapPin,
-  Star,
   ChevronRight,
-  Play,
   Sparkles,
   Shield,
   Clock,
@@ -41,23 +40,23 @@ import {
 const features = [
   {
     icon: MessageSquare,
-    title: "AI Memory Assistant",
+    title: "Memory Assistant",
     description:
-      "Get gentle help writing meaningful tributes. Our AI understands the sensitivity of your memories.",
+      "Using recorded stories and audio memories, our Memory Assistant helps capture and describe meaningful moments, making them easier to preserve and remember.",
     color: "sage",
   },
   {
     icon: Mic,
-    title: "Voice Cloning",
+    title: "Voice Remembrance",
     description:
-      "Hear their voice again. Create personalized messages in their voice for special occasions.",
+      "Hear their voice again. Create personalized messages in their voice for special occasions and milestones.",
     color: "gold",
   },
   {
     icon: Video,
-    title: "Animated Memories",
+    title: "Memories in Motion",
     description:
-      "Bring photos to life with gentle animations. See them smile, wave, or share a message.",
+      "Bring meaningful moments gently to life through photos, stories, and motion. Creating memories that feel present and alive.",
     color: "coral",
   },
   {
@@ -69,9 +68,9 @@ const features = [
   },
   {
     icon: MapPin,
-    title: "Grave Locator",
+    title: "Resting Place Locator",
     description:
-      "Never forget where they rest. GPS navigation to the exact location.",
+      "A gentle way to locate and return to their place of rest, helping loved ones find the path when they wish to feel close.",
     color: "rose",
   },
   {
@@ -108,189 +107,34 @@ const testimonials = [
   },
 ];
 
-// Stats - investor-friendly growth metrics with color variety
+// Stats - human-centered metrics about families
 const stats = [
-  { label: "Monthly Growth", value: "40%", highlight: true, color: "coral" },
-  { label: "Memorials Created", value: "50K+", color: "gold" },
-  { label: "Family Network Size", value: "5.2", subtext: "avg members", color: "sage" },
-  { label: "Countries", value: "120+", color: "twilight" },
+  { label: "Families Connected", value: "50K+", color: "sage" },
+  { label: "Memories Shared", value: "1.2M+", color: "gold" },
+  { label: "Candles Lit", value: "3.4M+", color: "coral" },
+  { label: "Countries Worldwide", value: "120+", color: "twilight" },
 ];
 
 export default function Home() {
   const t = useTranslations();
+  const { track } = useExperiment("experiment-home-layout");
+
+  const handleHeroCtaClick = () => {
+    track("home_cta_click");
+  };
 
   return (
     <div className="min-h-screen bg-cream">
       <Header />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-sage-pale/50 via-cream to-cream" />
-
-        {/* Decorative elements - warm and varied */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-gold/15 rounded-full blur-3xl" />
-        <div className="absolute top-40 right-10 w-96 h-96 bg-rose/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-1/3 w-64 h-64 bg-sage/10 rounded-full blur-3xl" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 sm:pt-24 sm:pb-32">
-          <div className="text-center max-w-4xl mx-auto">
-            <FadeIn>
-              <div className="flex flex-wrap justify-center gap-3 mb-6">
-                <Badge
-                  variant="outline"
-                  size="lg"
-                  pill
-                  icon={<Sparkles className="w-4 h-4" />}
-                >
-                  AI-Powered Grief Tech
-                </Badge>
-                <Badge
-                  variant="secondary"
-                  size="lg"
-                  pill
-                  className="bg-sage-pale/50"
-                >
-                  Not genealogy. Not photo storage. Something new.
-                </Badge>
-              </div>
-            </FadeIn>
-
-            <SlideUp delay={0.1}>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-gray-dark leading-tight mb-6">
-                AI-Powered{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-sage-dark via-sage to-gold-dark">
-                  Living
-                </span>{" "}
-                Memorials
-              </h1>
-            </SlideUp>
-
-            <SlideUp delay={0.2}>
-              <p className="text-lg sm:text-xl text-gray-body max-w-2xl mx-auto mb-8">
-                Preserve voices, restore old photos, and create lasting tributes
-                with AI that understands grief. Hear grandma tell stories to future
-                generations.
-              </p>
-            </SlideUp>
-
-            <SlideUp delay={0.3}>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/create">
-                  <Button size="lg" className="shadow-soft">
-                    {t("common.createMemorial")}
-                    <ChevronRight className="w-5 h-5 ml-1" />
-                  </Button>
-                </Link>
-                <Button variant="outline" size="lg">
-                  <Play className="w-5 h-5 mr-2" />
-                  {t("home.hero.secondaryCta")}
-                </Button>
-              </div>
-            </SlideUp>
-
-            {/* Social proof */}
-            <SlideUp delay={0.4}>
-              <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6">
-                <AvatarGroup
-                  avatars={[
-                    { name: "Sarah M." },
-                    { name: "Michael T." },
-                    { name: "Eleanor K." },
-                    { name: "James R." },
-                    { name: "Linda P." },
-                  ]}
-                  max={5}
-                  size="md"
-                />
-                <div className="text-left">
-                  <div className="flex items-center gap-1 text-gold">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-current" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-body">
-                    Joined by families from around the world
-                  </p>
-                </div>
-              </div>
-            </SlideUp>
-          </div>
-
-          {/* Sample Memorial Preview */}
-          <SlideUp delay={0.5}>
-            <div className="mt-10 sm:mt-16 relative px-4 sm:px-0">
-              <div className="max-w-4xl mx-auto rounded-xl sm:rounded-2xl bg-gradient-to-br from-sage-pale/50 to-white shadow-soft overflow-hidden border border-sage-pale/50">
-                {/* Memorial Header */}
-                <div className="bg-gradient-to-r from-twilight to-gray-dark p-5 sm:p-8 text-center">
-                  <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-white/20 mx-auto mb-3 sm:mb-4 flex items-center justify-center text-2xl sm:text-3xl font-serif text-white">
-                    MJ
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-serif font-bold text-white">Margaret Johnson</h3>
-                  <p className="text-white/80 mt-1 text-sm sm:text-base">1942 — 2024 · 81 years of love</p>
-                  <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mt-3 sm:mt-4 text-white/70 text-xs sm:text-sm">
-                    <span className="flex items-center gap-1">
-                      <Flame className="w-3 h-3 sm:w-4 sm:h-4 text-gold" /> 47 candles
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-rose" /> 23 memories
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Users className="w-3 h-3 sm:w-4 sm:h-4" /> 12 family
-                    </span>
-                  </div>
-                </div>
-                {/* Memorial Content Preview */}
-                <div className="p-4 sm:p-6 bg-white">
-                  <p className="text-gray-body italic text-center text-sm sm:text-base">
-                    &quot;She taught us that love is not about grand gestures, but about showing up every day with kindness in your heart.&quot;
-                  </p>
-                  <p className="text-gray-body text-xs sm:text-sm text-center mt-2">— Emily, Granddaughter</p>
-                </div>
-              </div>
-
-              {/* Floating cards */}
-              <motion.div
-                initial={{ opacity: 0, y: 20, x: -20 }}
-                animate={{ opacity: 1, y: 0, x: 0 }}
-                transition={{ delay: 0.8, duration: 0.5 }}
-                className="absolute -left-4 top-1/4 hidden lg:block"
-              >
-                <Card className="p-4 shadow-medium w-48">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-rose-pale flex items-center justify-center">
-                      <Heart className="w-5 h-5 text-rose" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-body">Memories</p>
-                      <p className="font-semibold text-gray-dark">1,234</p>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20, x: 20 }}
-                animate={{ opacity: 1, y: 0, x: 0 }}
-                transition={{ delay: 1, duration: 0.5 }}
-                className="absolute -right-4 top-1/3 hidden lg:block"
-              >
-                <Card className="p-4 shadow-medium w-52">
-                  <div className="flex items-center gap-3">
-                    <Avatar name="Margaret S." size="md" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-dark">
-                        Margaret S.
-                      </p>
-                      <p className="text-xs text-gray-body">1932 - 2023</p>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            </div>
-          </SlideUp>
-        </div>
-      </section>
+      {/* Hero Section - A/B Test */}
+      <Experiment
+        experimentKey="experiment-home-layout"
+        variants={{
+          control: <HeroControl onCtaClick={handleHeroCtaClick} />,
+          simplified: <HeroSimplified onCtaClick={handleHeroCtaClick} />,
+        }}
+      />
 
       {/* How It Works Section */}
       <section className="py-16 bg-white border-b border-sage-pale/30">
@@ -881,9 +725,9 @@ export default function Home() {
             {[
               {
                 icon: Mic,
-                title: "Voice Cloning Engine",
-                desc: "Proprietary voice synthesis that captures emotional nuance, not just words. 3+ years of R&D.",
-                badge: "Patent Pending",
+                title: "Voice Remembrance",
+                desc: "Thoughtful voice preservation that captures emotional nuance, not just words. Designed with dignity.",
+                badge: "Unique Technology",
                 color: "gold",
               },
               {
@@ -952,7 +796,7 @@ export default function Home() {
             <div className="grid md:grid-cols-3 gap-6">
               {[
                 { name: "Free", price: "$0", desc: "1 memorial, basic features", cta: "Start Free", color: "sage" },
-                { name: "Family", price: "$9", desc: "5 memorials, AI tools, voice cloning", cta: "7-day free trial", popular: true, color: "gold" },
+                { name: "Family", price: "$9", desc: "5 memorials, memory tools, voice remembrance", cta: "7-day free trial", popular: true, color: "gold" },
                 { name: "Legacy", price: "$29", desc: "Unlimited, priority support, API access", cta: "Contact Sales", color: "twilight" },
               ].map((plan, index) => (
                 <motion.div
@@ -1033,6 +877,33 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Trust & Security Section */}
+      <section className="py-12 bg-sage-pale/20 border-t border-sage-pale/30">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <p className="text-sm text-gray-body">Your memories are safe with us</p>
+          </div>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+            <div className="flex items-center gap-2 text-gray-body">
+              <Shield className="w-5 h-5 text-sage" />
+              <span className="text-sm font-medium">Bank-Level Encryption</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-body">
+              <Clock className="w-5 h-5 text-sage" />
+              <span className="text-sm font-medium">25+ Year Preservation</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-body">
+              <Globe className="w-5 h-5 text-sage" />
+              <span className="text-sm font-medium">GDPR Compliant</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-body">
+              <Heart className="w-5 h-5 text-sage" />
+              <span className="text-sm font-medium">Family-Owned</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-gray-dark text-cream py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1047,46 +918,46 @@ export default function Home() {
                 </span>
               </div>
               <p className="text-gray-light text-sm">
-                Preserving memories with compassion and technology.
+                {t("footer.tagline")}
               </p>
             </div>
 
             {[
               {
-                title: "Product",
+                titleKey: "footer.product",
                 links: [
-                  { name: "Features", href: "/pricing" },
-                  { name: "Pricing", href: "/pricing" },
-                  { name: "For Funeral Homes", href: "/partners" },
+                  { nameKey: "footer.features", href: "/pricing" },
+                  { nameKey: "nav.pricing", href: "/pricing" },
+                  { nameKey: "footer.forFuneralHomes", href: "/partners" },
                 ],
               },
               {
-                title: "Company",
+                titleKey: "footer.company",
                 links: [
-                  { name: "About", href: "/about" },
-                  { name: "Contact", href: "/contact" },
+                  { nameKey: "footer.about", href: "/about" },
+                  { nameKey: "footer.contact", href: "/contact" },
                 ],
               },
               {
-                title: "Support",
+                titleKey: "footer.support",
                 links: [
-                  { name: "Help Center", href: "/help" },
-                  { name: "Privacy", href: "/privacy" },
-                  { name: "Terms", href: "/terms" },
-                  { name: "Grief Resources", href: "/grief-support" },
+                  { nameKey: "footer.helpCenter", href: "/help" },
+                  { nameKey: "footer.privacy", href: "/privacy" },
+                  { nameKey: "footer.terms", href: "/terms" },
+                  { nameKey: "footer.griefResources", href: "/help#grief-support" },
                 ],
               },
             ].map((section) => (
-              <div key={section.title}>
-                <h4 className="font-semibold mb-4">{section.title}</h4>
+              <div key={section.titleKey}>
+                <h4 className="font-semibold mb-4">{t(section.titleKey)}</h4>
                 <ul className="space-y-2">
                   {section.links.map((link) => (
-                    <li key={link.name}>
+                    <li key={link.nameKey}>
                       <Link
                         href={link.href}
                         className="text-gray-light hover:text-cream transition-colors text-sm"
                       >
-                        {link.name}
+                        {t(link.nameKey)}
                       </Link>
                     </li>
                   ))}
@@ -1095,12 +966,20 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="border-t border-gray-body/20 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+          {/* AI Disclaimer */}
+          <div className="border-t border-gray-body/20 pt-6 pb-4">
+            <p className="text-xs text-gray-light text-center max-w-2xl mx-auto">
+              To optimize your experience and help preserve memories with care, Forever Fields may use AI technology.
+              Your data is protected and never shared. <Link href="/privacy" className="underline hover:text-cream">Learn more</Link>
+            </p>
+          </div>
+
+          <div className="border-t border-gray-body/20 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-light">
               {t("footer.copyright", { year: new Date().getFullYear() })}
             </p>
             <p className="text-sm text-gray-light">
-              Built with Next.js 14 + Claude AI
+              Built with Next.js 14
             </p>
           </div>
         </div>

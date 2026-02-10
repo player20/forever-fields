@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout";
 import { Button, Card } from "@/components/ui";
 import { FadeIn, SlideUp } from "@/components/motion";
@@ -47,6 +48,7 @@ const helpLinks = [
 ];
 
 export default function ContactPage() {
+  const t = useTranslations();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -122,14 +124,14 @@ export default function ContactPage() {
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-6">
               <Mail className="w-4 h-4 text-sage" />
               <span className="text-sm font-medium text-gray-dark">
-                Get in Touch
+                {t("nav.contact")}
               </span>
             </div>
           </FadeIn>
 
           <SlideUp delay={0.1}>
             <h1 className="text-3xl sm:text-4xl font-serif font-bold text-twilight mb-4">
-              Contact Us
+              {t("nav.contact")}
             </h1>
           </SlideUp>
 

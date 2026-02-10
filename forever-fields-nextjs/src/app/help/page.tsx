@@ -70,7 +70,7 @@ const popularArticles = [
   "How to create your first memorial",
   "Inviting family members to contribute",
   "Uploading and organizing photos",
-  "Setting up voice cloning",
+  "Setting up Voice Remembrance",
   "Creating milestone messages",
   "Managing privacy settings",
 ];
@@ -249,17 +249,15 @@ export default function HelpPage() {
                 </h2>
                 <div className="space-y-3">
                   {popularArticles.map((article) => (
-                    <a
+                    <div
                       key={article}
-                      href="#"
-                      className="flex items-center gap-3 p-4 rounded-lg hover:bg-sage-pale/30 transition-colors group"
+                      className="flex items-center gap-3 p-4 rounded-lg bg-sage-pale/20"
                     >
                       <FileText className="w-5 h-5 text-sage" />
-                      <span className="text-gray-body group-hover:text-gray-dark">
+                      <span className="text-gray-dark">
                         {article}
                       </span>
-                      <ChevronRight className="w-4 h-4 text-gray-light ml-auto group-hover:text-sage" />
-                    </a>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -311,7 +309,7 @@ export default function HelpPage() {
       </section>
 
       {/* Grief Support Resources */}
-      <section className="py-16 bg-rose-50/30">
+      <section id="grief-support" className="py-16 bg-rose-50/30 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SlideUp>
             <div className="text-center mb-12">

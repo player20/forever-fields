@@ -105,7 +105,7 @@ export function VoiceMessageGenerator({
       const data = await response.json();
 
       if (data.demo) {
-        setError("Demo mode: Voice cloning requires a Replicate API key");
+        setError("Demo mode: Voice Remembrance requires a Replicate API key");
         return;
       }
 
@@ -249,10 +249,10 @@ export function VoiceMessageGenerator({
 
         {/* Voice Quality Notice */}
         <div className="text-xs text-gray-500 border-t pt-4">
-          <p className="font-medium mb-1">About voice generation:</p>
+          <p className="font-medium mb-1">About Voice Remembrance:</p>
           <ul className="space-y-1">
-            <li>• Generated using AI voice cloning (F5-TTS)</li>
-            <li>• Results vary based on voice sample quality</li>
+            <li>• Created using voice preservation technology</li>
+            <li>• Quality depends on the clarity of voice samples</li>
             <li>• Best with clear speech samples (3+ seconds)</li>
           </ul>
         </div>

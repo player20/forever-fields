@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Button, Card, Badge, Avatar, Skeleton } from "@/components/ui";
 import { Header } from "@/components/layout";
 import { FadeIn, SlideUp, Stagger, StaggerItem } from "@/components/motion";
@@ -24,6 +25,8 @@ import {
   Gift,
   Sparkles,
   Search,
+  Pencil,
+  MoreVertical,
 } from "lucide-react";
 
 interface Memorial {
@@ -115,6 +118,7 @@ const quickActions = [
 export default function DashboardPage() {
   // Require authentication
   const { user, isLoading: authLoading } = useRequireAuth();
+  const t = useTranslations();
 
   const [filter, setFilter] = useState<"all" | "creator" | "contributor">("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -136,7 +140,9 @@ export default function DashboardPage() {
           throw new Error(data.error || "Failed to fetch memorials");
         }
 
-        setMemorials(data.memorials || []);
+        // Handle wrapped response format: { success: true, data: { memorials: [...] } }
+        const memorialsData = data.data?.memorials || data.memorials || [];
+        setMemorials(memorialsData);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load memorials");
       } finally {
@@ -218,16 +224,16 @@ export default function DashboardPage() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-serif font-bold text-gray-dark">
-                  Welcome back
+                  {t("dashboard.welcomeBack")}
                 </h1>
                 <p className="text-gray-body mt-1">
-                  Manage your memorials and stay connected with family
+                  {t("dashboard.manageMemorials")}
                 </p>
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
                   <Bell className="w-4 h-4" />
-                  Notifications
+                  {t("dashboard.notifications")}
                   <Badge variant="default" size="sm" pill>3</Badge>
                 </Button>
                 <Link href="/settings">
@@ -395,60 +401,88 @@ export default function DashboardPage() {
                 <div className="space-y-4">
                   {filteredMemorials.map((memorial) => (
                     <StaggerItem key={memorial.id}>
-                      <Link href={`/memorial/${memorial.slug}`}>
-                        <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
-                          <Card className="p-4 hover:shadow-md transition-shadow">
-                            <div className="flex items-start gap-4">
+                      <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
+                        <Card className="p-4 hover:shadow-md transition-shadow">
+                          <div className="flex items-start gap-4">
+                            <Link href={`/memorial/${memorial.slug}`}>
                               <Avatar name={memorial.name} size="lg" />
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
+                            </Link>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Link href={`/memorial/${memorial.slug}`} className="hover:underline">
                                   <h3 className="font-serif font-semibold text-gray-dark truncate">
                                     {memorial.name}
                                   </h3>
-                                  <Badge
-                                    variant={memorial.role === "creator" ? "default" : "secondary"}
-                                    size="sm"
-                                  >
-                                    {memorial.role}
-                                  </Badge>
-                                </div>
-                                <p className="text-sm text-gray-body">{memorial.dates}</p>
-                                <div className="flex items-center gap-4 mt-2 text-sm text-gray-body">
-                                  <span className="flex items-center gap-1">
-                                    <MapPin className="w-3 h-3" />
-                                    {memorial.location}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
-                                    {memorial.lastActivity}
-                                  </span>
-                                </div>
-
-                                {/* Stats Row */}
-                                <div className="flex items-center gap-4 mt-3 pt-3 border-t border-sage-pale/50">
-                                  <span className="flex items-center gap-1 text-sm">
-                                    <Heart className="w-4 h-4 text-sage" />
-                                    {memorial.memoriesCount}
-                                  </span>
-                                  <span className="flex items-center gap-1 text-sm">
-                                    <ImageIcon className="w-4 h-4 text-blue-500" />
-                                    {memorial.photosCount}
-                                  </span>
-                                  <span className="flex items-center gap-1 text-sm">
-                                    <span>🕯️</span>
-                                    {memorial.candlesCount}
-                                  </span>
-                                  <span className="flex items-center gap-1 text-sm text-green-600">
-                                    <Eye className="w-4 h-4" />
-                                    {memorial.viewsThisMonth}
-                                  </span>
-                                </div>
+                                </Link>
+                                <Badge
+                                  variant={memorial.role === "creator" ? "default" : "secondary"}
+                                  size="sm"
+                                >
+                                  {memorial.role}
+                                </Badge>
                               </div>
-                              <ChevronRight className="w-5 h-5 text-gray-400" />
+                              <p className="text-sm text-gray-body">{memorial.dates}</p>
+                              <div className="flex items-center gap-4 mt-2 text-sm text-gray-body">
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  {memorial.location}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  {memorial.lastActivity}
+                                </span>
+                              </div>
+
+                              {/* Stats Row */}
+                              <div className="flex items-center gap-4 mt-3 pt-3 border-t border-sage-pale/50">
+                                <span className="flex items-center gap-1 text-sm">
+                                  <Heart className="w-4 h-4 text-sage" />
+                                  {memorial.memoriesCount}
+                                </span>
+                                <span className="flex items-center gap-1 text-sm">
+                                  <ImageIcon className="w-4 h-4 text-blue-500" />
+                                  {memorial.photosCount}
+                                </span>
+                                <span className="flex items-center gap-1 text-sm">
+                                  <span>🕯️</span>
+                                  {memorial.candlesCount}
+                                </span>
+                                <span className="flex items-center gap-1 text-sm text-green-600">
+                                  <Eye className="w-4 h-4" />
+                                  {memorial.viewsThisMonth}
+                                </span>
+                              </div>
                             </div>
-                          </Card>
-                        </motion.div>
-                      </Link>
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-2">
+                              <Link
+                                href={`/memorial/${memorial.id}/edit`}
+                                className="p-2 rounded-lg hover:bg-sage-pale/50 transition-colors"
+                                title="Edit memorial"
+                              >
+                                <Pencil className="w-4 h-4 text-sage" />
+                              </Link>
+                              {memorial.role === "creator" && (
+                                <Link
+                                  href={`/memorial/${memorial.id}/settings`}
+                                  className="p-2 rounded-lg hover:bg-sage-pale/50 transition-colors"
+                                  title="Memorial settings"
+                                >
+                                  <Settings className="w-4 h-4 text-gray-500" />
+                                </Link>
+                              )}
+                              <Link
+                                href={`/memorial/${memorial.slug}`}
+                                className="p-2 rounded-lg hover:bg-sage-pale/50 transition-colors"
+                                title="View memorial"
+                              >
+                                <ChevronRight className="w-5 h-5 text-gray-400" />
+                              </Link>
+                            </div>
+                          </div>
+                        </Card>
+                      </motion.div>
                     </StaggerItem>
                   ))}
                 </div>
@@ -521,7 +555,7 @@ export default function DashboardPage() {
                     <div>
                       <h3 className="font-medium text-gray-dark">Unlock More Features</h3>
                       <p className="text-sm text-gray-body mt-1">
-                        Unlimited photos, AI voice cloning, and family collaboration.
+                        Unlimited photos, Voice Remembrance, and family collaboration.
                       </p>
                       <Link href="/pricing">
                         <Button variant="outline" size="sm" className="mt-3">

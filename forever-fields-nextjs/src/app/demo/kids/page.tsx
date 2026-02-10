@@ -1056,9 +1056,9 @@ export default function KidsDemoPage() {
                 <div className="flex items-center gap-4">
                   <span className="text-4xl">📍</span>
                   <div>
-                    <CardTitle>Grave Locator</CardTitle>
+                    <CardTitle>Resting Place Locator</CardTitle>
                     <CardDescription>
-                      GPS navigation to the grave site with directions and visit logging
+                      GPS navigation to their resting place with directions and visit logging
                     </CardDescription>
                   </div>
                 </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -23,7 +24,7 @@ import {
 } from "lucide-react";
 
 interface SidebarItem {
-  name: string;
+  nameKey: string;
   href: string;
   icon: React.ElementType;
   badge?: string | number;
@@ -31,36 +32,36 @@ interface SidebarItem {
 }
 
 interface SidebarSection {
-  title?: string;
+  titleKey?: string;
   items: SidebarItem[];
 }
 
 const sidebarSections: SidebarSection[] = [
   {
     items: [
-      { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-      { name: "My Memorials", href: "/memorials", icon: Heart, badge: 3 },
-      { name: "Family Tree", href: "/family-tree", icon: TreeDeciduous },
+      { nameKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { nameKey: "nav.memorials", href: "/memorials", icon: Heart, badge: 3 },
+      { nameKey: "nav.familyTree", href: "/family-tree", icon: TreeDeciduous },
     ],
   },
   {
-    title: "Explore",
+    titleKey: "sidebar.explore",
     items: [
-      { name: "Search", href: "/search", icon: MapPin },
+      { nameKey: "nav.search", href: "/search", icon: MapPin },
     ],
   },
   {
-    title: "Planning & Shop",
+    titleKey: "sidebar.planningShop",
     items: [
-      { name: "Funeral Planning", href: "/planning", icon: FileText },
-      { name: "Memorial Shop", href: "/shop", icon: ShoppingBag },
+      { nameKey: "nav.planning", href: "/planning", icon: FileText },
+      { nameKey: "nav.shop", href: "/shop", icon: ShoppingBag },
     ],
   },
 ];
 
 const bottomItems: SidebarItem[] = [
-  { name: "Settings", href: "/settings", icon: Settings },
-  { name: "Help & Support", href: "/help", icon: HelpCircle },
+  { nameKey: "nav.settings", href: "/settings", icon: Settings },
+  { nameKey: "nav.help", href: "/help", icon: HelpCircle },
 ];
 
 interface SidebarProps {
@@ -77,28 +78,30 @@ export function Sidebar({
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const pathname = usePathname();
+  const t = useTranslations();
 
-  const toggleExpanded = (name: string) => {
+  const toggleExpanded = (nameKey: string) => {
     setExpandedItems((prev) =>
-      prev.includes(name)
-        ? prev.filter((item) => item !== name)
-        : [...prev, name]
+      prev.includes(nameKey)
+        ? prev.filter((item) => item !== nameKey)
+        : [...prev, nameKey]
     );
   };
 
   const renderItem = (item: SidebarItem, depth = 0) => {
     const isActive = pathname === item.href;
     const hasChildren = item.children && item.children.length > 0;
-    const isExpanded = expandedItems.includes(item.name);
+    const isExpanded = expandedItems.includes(item.nameKey);
+    const name = t(item.nameKey);
 
     return (
-      <div key={item.name}>
+      <div key={item.nameKey}>
         <Link
           href={hasChildren ? "#" : item.href}
           onClick={(e) => {
             if (hasChildren) {
               e.preventDefault();
-              toggleExpanded(item.name);
+              toggleExpanded(item.nameKey);
             }
           }}
           className={cn(
@@ -118,7 +121,7 @@ export function Sidebar({
 
           {!collapsed && (
             <>
-              <span className="flex-1 truncate">{item.name}</span>
+              <span className="flex-1 truncate">{name}</span>
 
               {item.badge && (
                 <Badge
@@ -213,7 +216,7 @@ export function Sidebar({
             </span>
           </div>
           <p className="text-xs text-gray-body">
-            Unlock voice cloning, unlimited photos, and more.
+            Unlock Voice Remembrance, unlimited photos, and more.
           </p>
         </div>
       )}
@@ -222,9 +225,9 @@ export function Sidebar({
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
         {sidebarSections.map((section, index) => (
           <div key={index}>
-            {section.title && !collapsed && (
+            {section.titleKey && !collapsed && (
               <h3 className="px-3 mb-2 text-xs font-semibold text-gray-body uppercase tracking-wider">
-                {section.title}
+                {t(section.titleKey)}
               </h3>
             )}
             <div className="space-y-1">{section.items.map((item) => renderItem(item))}</div>

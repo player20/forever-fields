@@ -1,5 +1,43 @@
 // API utilities with error handling and retry logic
 
+// Re-export server-side API helpers from api/ directory
+export {
+  // Error handling
+  handleApiError,
+  createErrorResponse,
+  // Response helpers
+  apiSuccess,
+  apiCreated,
+  apiNoContent,
+  apiPaginated,
+  apiError,
+  apiBadRequest,
+  apiUnauthorized,
+  apiForbidden,
+  apiNotFound,
+  apiConflict,
+  apiValidationError,
+  apiRateLimited,
+  apiInternalError,
+  apiServiceUnavailable,
+  // Middleware
+  withAuth,
+  withOptionalAuth,
+  withRateLimit,
+  withValidation,
+  withErrorHandling,
+  withRequestId,
+  compose,
+  // Rate limiting
+  checkRateLimit,
+  RateLimitPresets,
+  // Types
+  type ApiHandler,
+  type ApiMiddleware,
+  type RateLimitConfig,
+  type RateLimitResult,
+} from "./api/index";
+
 import {
   ApiError,
   NetworkError,

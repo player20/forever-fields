@@ -12,3 +12,7 @@ export { TraditionsLegacy } from "./TraditionsLegacy";
 export { MusicGallery } from "./MusicGallery";
 export { TraditionEditor } from "./TraditionEditor";
 export { MusicEditor } from "./MusicEditor";
+export { AnniversaryReminders } from "./AnniversaryReminders";
+export { AnalyticsDashboard } from "./AnalyticsDashboard";
+export { TributePlaylist } from "./TributePlaylist";
+export { MemorialMerge } from "./MemorialMerge";

@@ -57,6 +57,7 @@ model User {
   memorials         Memorial[]       @relation("MemorialOwner")
   collaborations    Collaborator[]
   photos            Photo[]          @relation("PhotoUploader")
+  videos            Video[]          @relation("VideoUploader")
   stories           Story[]          @relation("StoryAuthor")
   candleLightings   CandleLighting[] @relation("CandleLighter")
   timeCapsules      TimeCapsule[]    @relation("TimeCapsuleCreator")
@@ -66,6 +67,11 @@ model User {
   voiceProfilesCreated VoiceProfile[] @relation("VoiceProfileCreator")
   voiceGenerations  VoiceGeneration[] @relation("VoiceGenerationCreator")
   permanenceRecords PermanenceRecord[] @relation("PermanenceInitiator")
+  notifications     Notification[]
+  notificationPreferences NotificationPreference?
+  donations         Donation[]       @relation("DonationDonor")
+  anniversaryReminders AnniversaryReminder[]
+  pushSubscriptions PushSubscription[]
 
   @@map("users")
 }
@@ -77,22 +83,77 @@ model Memorial {
   firstName            String         @map("first_name")
   middleName           String?        @map("middle_name")
   lastName             String         @map("last_name")
+  maidenName           String?        @map("maiden_name")
   nickname             String?
+  suffix               String?        // Jr., Sr., III, etc.
   birthDate            DateTime?      @map("birth_date") @db.Date
   deathDate            DateTime?      @map("death_date") @db.Date
   birthPlace           String?        @map("birth_place")
+  deathPlace           String?        @map("death_place")
   restingPlace         String?        @map("resting_place")
   obituary             String?        @db.Text
   profilePhotoUrl      String?        @map("profile_photo_url")
+  coverPhotoUrl        String?        @map("cover_photo_url")
   privacyLevel         PrivacyLevel   @default(private) @map("privacy_level")
   isPublic             Boolean        @default(false) @map("is_public")
   allowGuestbook       Boolean        @default(true) @map("allow_guestbook")
   allowCandleLighting  Boolean        @default(true) @map("allow_candle_lighting")
   allowContributions   Boolean        @default(true) @map("allow_contributions")
+  allowDonations       Boolean        @default(false) @map("allow_donations")
   viewCount            Int            @default(0) @map("view_count")
   theme                String?
+  tributeMusicUrl      String?        @map("tribute_music_url")
+  tributeMusicTitle    String?        @map("tribute_music_title")
   createdAt            DateTime       @default(now()) @map("created_at")
   updatedAt            DateTime       @updatedAt @map("updated_at")
+
+  // Cemetery & Grave Location
+  cemeteryId           String?        @map("cemetery_id") @db.Uuid
+  plotSection          String?        @map("plot_section")
+  plotLot              String?        @map("plot_lot")
+  plotGrave            String?        @map("plot_grave")
+  graveGpsLat          Float?         @map("grave_gps_lat")
+  graveGpsLng          Float?         @map("grave_gps_lng")
+  headstoneInscription String?        @map("headstone_inscription") @db.Text
+
+  // Military & Veteran Info
+  isVeteran            Boolean        @default(false) @map("is_veteran")
+  militaryBranch       String?        @map("military_branch")
+  militaryRank         String?        @map("military_rank")
+  militaryUnit         String?        @map("military_unit")
+  militaryServiceStart DateTime?      @map("military_service_start") @db.Date
+  militaryServiceEnd   DateTime?      @map("military_service_end") @db.Date
+  militaryWars         String[]       @default([]) @map("military_wars")
+
+  // Additional Life Details
+  occupation           String?
+  education            String?
+  religiousAffiliation String?        @map("religious_affiliation")
+  hobbiesInterests     String[]       @default([]) @map("hobbies_interests")
+  causeOfDeath         String?        @map("cause_of_death")
+  spouseName           String?        @map("spouse_name")
+
+  // External IDs for deduplication & imports
+  findAGraveId         String?        @unique @map("find_a_grave_id")
+  familySearchId       String?        @map("familysearch_id")
+  ancestryId           String?        @map("ancestry_id")
+  legacyComId          String?        @map("legacy_com_id")
+  ssnLast4             String?        @map("ssn_last_4") // For verification only
+
+  // Source tracking for bulk imports
+  sourceType           String?        @map("source_type") // "user" | "cemetery_import" | "find_a_grave" | "obituary_scrape"
+  sourceId             String?        @map("source_id") // Reference to import batch
+  sourceAttribution    String?        @map("source_attribution") // "Provided by Oak Hill Cemetery"
+  importedAt           DateTime?      @map("imported_at")
+
+  // QR Code
+  qrCodeUrl            String?        @map("qr_code_url")
+  qrCodeToken          String?        @unique @map("qr_code_token") // Short token for QR URLs
+
+  // Donation settings
+  donationCauseId      String?        @map("donation_cause_id") @db.Uuid
+  donationGoal         Float?         @map("donation_goal")
+  donationTotal        Float          @default(0) @map("donation_total")
 
   // Duplicate prevention
   canonicalHash        String?        @map("canonical_hash") // Hash of name+birth+death for quick lookup
@@ -101,8 +162,11 @@ model Memorial {
 
   // Relations
   owner                User           @relation("MemorialOwner", fields: [userId], references: [id], onDelete: Cascade)
+  cemetery             Cemetery?      @relation(fields: [cemeteryId], references: [id], onDelete: SetNull)
+  donationCause        DonationCause? @relation(fields: [donationCauseId], references: [id], onDelete: SetNull)
   collaborators        Collaborator[]
   photos               Photo[]
+  videos               Video[]
   albums               Album[]
   stories              Story[]
   guestbookEntries     GuestbookEntry[]
@@ -114,12 +178,19 @@ model Memorial {
   consentRecords       ConsentRecord[]
   voiceProfile         VoiceProfile?
   permanenceRecord     PermanenceRecord?
+  donations            Donation[]
+  anniversaryReminders AnniversaryReminder[]
+  analyticsEvents      AnalyticsEvent[]
+  tributePlaylist      TributePlaylistItem[]
 
   @@index([userId])
   @@index([slug])
   @@index([isPublic])
   @@index([canonicalHash])
   @@index([mergedIntoId])
+  @@index([cemeteryId])
+  @@index([findAGraveId])
+  @@index([qrCodeToken])
   @@map("memorials")
 }
 
@@ -561,4 +632,585 @@ model PermanenceRecord {
   @@index([memorialId])
   @@index([verificationStatus])
   @@map("permanence_records")
+}
+
+// ============================================
+// SHOP / E-COMMERCE
+// ============================================
+
+enum ShopOrderStatus {
+  pending          // Order placed, awaiting payment
+  paid             // Payment received
+  processing       // Being prepared
+  sent_to_partner  // Forwarded to fulfillment partner
+  in_production    // Partner is making the item
+  shipped          // In transit
+  delivered        // Received by customer
+  cancelled        // Order cancelled
+  refunded         // Money returned
+}
+
+enum FulfillmentType {
+  internal         // Fulfilled by Forever Fields
+  partner          // Fulfilled by external partner
+  digital          // Digital product (no shipping)
+  donation         // Donation to charity
+}
+
+model ShopPartner {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String
+  slug                String    @unique
+  description         String?   @db.Text
+  logoUrl             String?   @map("logo_url")
+  websiteUrl          String?   @map("website_url")
+
+  // Contact info
+  contactEmail        String    @map("contact_email")
+  contactPhone        String?   @map("contact_phone")
+
+  // Integration settings
+  shopifyStoreUrl     String?   @map("shopify_store_url")    // For Shopify partners
+  shopifyAccessToken  String?   @map("shopify_access_token") // Encrypted
+  webhookUrl          String?   @map("webhook_url")          // For order notifications
+  webhookSecret       String?   @map("webhook_secret")       // For webhook verification
+  apiKey              String?   @map("api_key")              // Partner API key
+
+  // Commission/pricing
+  commissionPercent   Float     @default(0) @map("commission_percent") // % Forever Fields takes
+
+  // Status
+  isActive            Boolean   @default(true) @map("is_active")
+  verifiedAt          DateTime? @map("verified_at")
+
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  products            ShopProduct[]
+  orderItems          ShopOrderItem[]
+
+  @@index([isActive])
+  @@map("shop_partners")
+}
+
+model ShopProduct {
+  id                  String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partnerId           String?         @map("partner_id") @db.Uuid
+
+  // Basic info
+  name                String
+  slug                String          @unique
+  description         String?         @db.Text
+  shortDescription    String?         @map("short_description")
+
+  // Categorization
+  category            String          // flowers, keepsakes, jewelry, etc.
+  tags                String[]        @default([])
+
+  // Pricing
+  basePrice           Float           @map("base_price") // in dollars
+  compareAtPrice      Float?          @map("compare_at_price") // original price if on sale
+  costPrice           Float?          @map("cost_price") // what we pay partner
+
+  // Media
+  images              String[]        @default([])
+  thumbnailUrl        String?         @map("thumbnail_url")
+
+  // Inventory
+  inStock             Boolean         @default(true) @map("in_stock")
+  stockQuantity       Int?            @map("stock_quantity") // null = unlimited
+  trackInventory      Boolean         @default(false) @map("track_inventory")
+
+  // Customization options
+  isCustomizable      Boolean         @default(false) @map("is_customizable")
+  customizationFields Json?           @map("customization_fields") // Array of field definitions
+
+  // Fulfillment
+  fulfillmentType     FulfillmentType @default(partner) @map("fulfillment_type")
+  productionDays      Int             @default(3) @map("production_days")
+  rushAvailable       Boolean         @default(false) @map("rush_available")
+  rushDays            Int?            @map("rush_days")
+  rushPriceMultiplier Float?          @map("rush_price_multiplier")
+
+  // Shipping
+  weight              Float?          // in pounds
+  shippingClass       String?         @map("shipping_class") // standard, oversized, fragile
+  freeShipping        Boolean         @default(false) @map("free_shipping")
+
+  // For Shopify-synced products
+  externalProductId   String?         @map("external_product_id") // Shopify product ID
+  externalVariantId   String?         @map("external_variant_id")
+  lastSyncedAt        DateTime?       @map("last_synced_at")
+
+  // Status
+  isActive            Boolean         @default(true) @map("is_active")
+  isFeatured          Boolean         @default(false) @map("is_featured")
+
+  // Stats
+  salesCount          Int             @default(0) @map("sales_count")
+  rating              Float?          // Average rating
+  reviewCount         Int             @default(0) @map("review_count")
+
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  partner             ShopPartner?    @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+  orderItems          ShopOrderItem[]
+
+  @@index([partnerId])
+  @@index([category])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@map("shop_products")
+}
+
+model ShopOrder {
+  id                  String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderNumber         String          @unique @map("order_number") // Human-readable FF-12345
+  userId              String?         @map("user_id") @db.Uuid // null for guest checkout
+  memorialId          String?         @map("memorial_id") @db.Uuid // If linked to a memorial
+
+  // Stripe
+  stripeSessionId     String?         @unique @map("stripe_session_id")
+  stripePaymentIntent String?         @map("stripe_payment_intent")
+
+  // Customer info (for guest checkout)
+  customerEmail       String          @map("customer_email")
+  customerName        String          @map("customer_name")
+  customerPhone       String?         @map("customer_phone")
+
+  // Shipping address
+  shippingName        String          @map("shipping_name")
+  shippingStreet1     String          @map("shipping_street1")
+  shippingStreet2     String?         @map("shipping_street2")
+  shippingCity        String          @map("shipping_city")
+  shippingState       String          @map("shipping_state")
+  shippingPostalCode  String          @map("shipping_postal_code")
+  shippingCountry     String          @map("shipping_country")
+
+  // Pricing
+  subtotal            Float
+  shippingCost        Float           @map("shipping_cost")
+  taxAmount           Float           @map("tax_amount")
+  discountAmount      Float           @default(0) @map("discount_amount")
+  total               Float
+
+  // Promo code
+  promoCode           String?         @map("promo_code")
+
+  // Status
+  status              ShopOrderStatus @default(pending)
+  paidAt              DateTime?       @map("paid_at")
+  shippedAt           DateTime?       @map("shipped_at")
+  deliveredAt         DateTime?       @map("delivered_at")
+  cancelledAt         DateTime?       @map("cancelled_at")
+
+  // Shipping
+  shippingMethod      String?         @map("shipping_method")
+  trackingNumber      String?         @map("tracking_number")
+  trackingUrl         String?         @map("tracking_url")
+
+  // Notes
+  customerNotes       String?         @map("customer_notes") @db.Text
+  internalNotes       String?         @map("internal_notes") @db.Text
+  giftMessage         String?         @map("gift_message") @db.Text
+  isGift              Boolean         @default(false) @map("is_gift")
+
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  items               ShopOrderItem[]
+
+  @@index([userId])
+  @@index([memorialId])
+  @@index([status])
+  @@index([customerEmail])
+  @@index([createdAt])
+  @@map("shop_orders")
+}
+
+model ShopOrderItem {
+  id                  String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId             String          @map("order_id") @db.Uuid
+  productId           String          @map("product_id") @db.Uuid
+  partnerId           String?         @map("partner_id") @db.Uuid
+
+  // Snapshot of product at time of order
+  productName         String          @map("product_name")
+  productSku          String?         @map("product_sku")
+
+  // Pricing
+  unitPrice           Float           @map("unit_price")
+  quantity            Int
+  totalPrice          Float           @map("total_price")
+
+  // Customization (captured at order time)
+  customization       Json?           // { engraving: "In Loving Memory", photo: "url" }
+
+  // Rush order
+  isRush              Boolean         @default(false) @map("is_rush")
+  rushFee             Float?          @map("rush_fee")
+
+  // Partner fulfillment tracking
+  partnerOrderId      String?         @map("partner_order_id") // ID from partner's system
+  partnerStatus       String?         @map("partner_status") // Status from partner
+  sentToPartnerAt     DateTime?       @map("sent_to_partner_at")
+  partnerShippedAt    DateTime?       @map("partner_shipped_at")
+
+  // Item-level tracking (for split shipments)
+  trackingNumber      String?         @map("tracking_number")
+  shippedAt           DateTime?       @map("shipped_at")
+
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  order               ShopOrder       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product             ShopProduct     @relation(fields: [productId], references: [id])
+  partner             ShopPartner?    @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([partnerId])
+  @@map("shop_order_items")
+}
+
+// ============================================
+// CEMETERY INTEGRATION
+// ============================================
+
+model Cemetery {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String
+  slug                String    @unique
+
+  // Location
+  address             String?
+  city                String
+  state               String?
+  country             String    @default("US")
+  postalCode          String?   @map("postal_code")
+  gpsLat              Float?    @map("gps_lat")
+  gpsLng              Float?    @map("gps_lng")
+
+  // Contact
+  phone               String?
+  email               String?
+  website             String?
+
+  // Partnership details
+  isPartner           Boolean   @default(false) @map("is_partner")
+  partnerSince        DateTime? @map("partner_since")
+  contactPerson       String?   @map("contact_person")
+
+  // Import tracking
+  totalPlots          Int?      @map("total_plots")
+  importedCount       Int       @default(0) @map("imported_count")
+  lastImportAt        DateTime? @map("last_import_at")
+
+  // Features
+  hasGpsMapping       Boolean   @default(false) @map("has_gps_mapping")
+  allowsQrCodes       Boolean   @default(true) @map("allows_qr_codes")
+  hasVirtualTours     Boolean   @default(false) @map("has_virtual_tours")
+
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  memorials           Memorial[]
+  importBatches       CemeteryImportBatch[]
+
+  @@index([city, state])
+  @@index([isPartner])
+  @@map("cemeteries")
+}
+
+model CemeteryImportBatch {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cemeteryId          String    @map("cemetery_id") @db.Uuid
+  fileName            String?   @map("file_name")
+  totalRecords        Int       @map("total_records")
+  importedRecords     Int       @default(0) @map("imported_records")
+  failedRecords       Int       @default(0) @map("failed_records")
+  duplicatesFound     Int       @default(0) @map("duplicates_found")
+  status              String    @default("pending") // pending, processing, completed, failed
+  errorLog            Json?     @map("error_log")
+  importedBy          String?   @map("imported_by") @db.Uuid
+  startedAt           DateTime? @map("started_at")
+  completedAt         DateTime? @map("completed_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  cemetery            Cemetery  @relation(fields: [cemeteryId], references: [id], onDelete: Cascade)
+
+  @@index([cemeteryId])
+  @@index([status])
+  @@map("cemetery_import_batches")
+}
+
+// ============================================
+// VIDEO SUPPORT
+// ============================================
+
+model Video {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memorialId          String    @map("memorial_id") @db.Uuid
+  uploadedBy          String?   @map("uploaded_by") @db.Uuid
+
+  // Video info
+  title               String?
+  description         String?   @db.Text
+  url                 String
+  thumbnailUrl        String?   @map("thumbnail_url")
+  duration            Int?      // seconds
+  fileSize            Int?      @map("file_size") // bytes
+
+  // Processing
+  status              String    @default("processing") // processing, ready, failed
+  processingError     String?   @map("processing_error")
+
+  // Source
+  sourceType          String    @default("upload") @map("source_type") // upload, youtube, vimeo, ai_generated
+  externalId          String?   @map("external_id") // YouTube/Vimeo ID
+
+  sortOrder           Int       @default(0) @map("sort_order")
+  isApproved          Boolean   @default(true) @map("is_approved")
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  memorial            Memorial  @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+  uploader            User?     @relation("VideoUploader", fields: [uploadedBy], references: [id], onDelete: SetNull)
+
+  @@index([memorialId])
+  @@map("videos")
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+enum NotificationType {
+  ANNIVERSARY_BIRTH
+  ANNIVERSARY_DEATH
+  NEW_GUESTBOOK_ENTRY
+  NEW_STORY
+  NEW_PHOTO
+  NEW_VIDEO
+  CANDLE_LIT
+  TIME_CAPSULE_OPENED
+  MEMORIAL_VIEW_MILESTONE
+  DONATION_RECEIVED
+  COLLABORATOR_INVITE
+  CLAIM_REQUEST
+  SYSTEM_ANNOUNCEMENT
+}
+
+model Notification {
+  id                  String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId              String           @map("user_id") @db.Uuid
+  type                NotificationType
+  title               String
+  message             String           @db.Text
+  linkUrl             String?          @map("link_url")
+  linkText            String?          @map("link_text")
+  imageUrl            String?          @map("image_url")
+  metadata            Json?            // Additional context
+  isRead              Boolean          @default(false) @map("is_read")
+  readAt              DateTime?        @map("read_at")
+  createdAt           DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  user                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id                       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                   String   @unique @map("user_id") @db.Uuid
+
+  // Email preferences
+  emailAnniversaries       Boolean  @default(true) @map("email_anniversaries")
+  emailGuestbook           Boolean  @default(true) @map("email_guestbook")
+  emailStories             Boolean  @default(true) @map("email_stories")
+  emailPhotos              Boolean  @default(false) @map("email_photos")
+  emailCandles             Boolean  @default(false) @map("email_candles")
+  emailTimeCapsules        Boolean  @default(true) @map("email_time_capsules")
+  emailDonations           Boolean  @default(true) @map("email_donations")
+  emailDigest              String   @default("weekly") @map("email_digest") // none, daily, weekly
+
+  // Push preferences
+  pushEnabled              Boolean  @default(true) @map("push_enabled")
+  pushAnniversaries        Boolean  @default(true) @map("push_anniversaries")
+  pushGuestbook            Boolean  @default(true) @map("push_guestbook")
+  pushCandles              Boolean  @default(true) @map("push_candles")
+
+  // Quiet hours
+  quietHoursEnabled        Boolean  @default(false) @map("quiet_hours_enabled")
+  quietHoursStart          String?  @map("quiet_hours_start") // "22:00"
+  quietHoursEnd            String?  @map("quiet_hours_end") // "08:00"
+
+  updatedAt                DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+model PushSubscription {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId              String   @map("user_id") @db.Uuid
+  endpoint            String   @unique
+  p256dh              String   // Public key
+  auth                String   // Auth secret
+  userAgent           String?  @map("user_agent")
+  createdAt           DateTime @default(now()) @map("created_at")
+  lastUsedAt          DateTime @default(now()) @map("last_used_at")
+
+  // Relations
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+// ============================================
+// ANNIVERSARY REMINDERS
+// ============================================
+
+model AnniversaryReminder {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId              String   @map("user_id") @db.Uuid
+  memorialId          String   @map("memorial_id") @db.Uuid
+  type                String   // "birth" | "death" | "custom"
+  customDate          DateTime? @map("custom_date") @db.Date
+  customLabel         String?  @map("custom_label")
+  reminderDaysBefore  Int      @default(1) @map("reminder_days_before") // Days before to send reminder
+  isEnabled           Boolean  @default(true) @map("is_enabled")
+  lastSentAt          DateTime? @map("last_sent_at")
+  nextSendAt          DateTime? @map("next_send_at")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  memorial            Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, memorialId, type])
+  @@index([nextSendAt])
+  @@map("anniversary_reminders")
+}
+
+// ============================================
+// DONATIONS
+// ============================================
+
+model DonationCause {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String
+  description         String?   @db.Text
+  organizationName    String    @map("organization_name")
+  organizationUrl     String?   @map("organization_url")
+  logoUrl             String?   @map("logo_url")
+  ein                 String?   // Tax ID for US nonprofits
+  isVerified          Boolean   @default(false) @map("is_verified")
+  isActive            Boolean   @default(true) @map("is_active")
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  memorials           Memorial[]
+  donations           Donation[]
+
+  @@map("donation_causes")
+}
+
+model Donation {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memorialId          String    @map("memorial_id") @db.Uuid
+  causeId             String?   @map("cause_id") @db.Uuid
+  donorUserId         String?   @map("donor_user_id") @db.Uuid
+  donorName           String    @map("donor_name")
+  donorEmail          String?   @map("donor_email")
+  amount              Float
+  currency            String    @default("USD")
+  message             String?   @db.Text
+  isAnonymous         Boolean   @default(false) @map("is_anonymous")
+
+  // Payment
+  stripePaymentId     String?   @unique @map("stripe_payment_id")
+  status              String    @default("pending") // pending, completed, failed, refunded
+
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  memorial            Memorial  @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+  cause               DonationCause? @relation(fields: [causeId], references: [id], onDelete: SetNull)
+  donor               User?     @relation("DonationDonor", fields: [donorUserId], references: [id], onDelete: SetNull)
+
+  @@index([memorialId])
+  @@index([causeId])
+  @@map("donations")
+}
+
+// ============================================
+// ANALYTICS
+// ============================================
+
+model AnalyticsEvent {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memorialId          String   @map("memorial_id") @db.Uuid
+  eventType           String   @map("event_type") // view, share, download, candle_lit, guestbook_signed
+  visitorId           String?  @map("visitor_id") // Anonymous visitor tracking
+  userId              String?  @map("user_id") @db.Uuid
+  referrer            String?
+  userAgent           String?  @map("user_agent")
+  country             String?
+  city                String?
+  deviceType          String?  @map("device_type") // mobile, tablet, desktop
+  metadata            Json?
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  // Relations
+  memorial            Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@index([memorialId, eventType])
+  @@index([memorialId, createdAt])
+  @@map("analytics_events")
+}
+
+// ============================================
+// TRIBUTE MUSIC/PLAYLIST
+// ============================================
+
+model TributePlaylistItem {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memorialId          String   @map("memorial_id") @db.Uuid
+  title               String
+  artist              String?
+  albumArt            String?  @map("album_art")
+
+  // Source
+  sourceType          String   @map("source_type") // spotify, youtube, apple_music, uploaded
+  sourceUrl           String   @map("source_url")
+  sourceId            String?  @map("source_id") // External track ID
+
+  // For uploaded tracks
+  audioUrl            String?  @map("audio_url")
+  duration            Int?     // seconds
+
+  // Ordering
+  sortOrder           Int      @default(0) @map("sort_order")
+  addedBy             String?  @map("added_by") @db.Uuid
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  // Relations
+  memorial            Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+
+  @@index([memorialId])
+  @@map("tribute_playlist_items")
 }

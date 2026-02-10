@@ -248,7 +248,7 @@ export function GraveLocator({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <span>📍</span> Grave Locator
+          <span>📍</span> Resting Place Locator
         </CardTitle>
         <CardDescription>
           Find the resting place of {location.deceasedName}

@@ -39,9 +39,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const sizes = {
-      sm: "text-sm py-2 px-4",
-      md: "text-base py-3 px-6",
-      lg: "text-lg py-4 px-8",
+      sm: "text-sm py-2.5 px-4 min-h-[44px]",
+      md: "text-base py-3 px-6 min-h-[44px]",
+      lg: "text-lg py-4 px-8 min-h-[48px]",
     };
 
     return (
@@ -49,6 +49,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(baseStyles, variants[variant], sizes[size], className)}
         disabled={disabled || isLoading}
+        aria-busy={isLoading}
         {...props}
       >
         {isLoading ? (
@@ -58,6 +59,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <circle
                 className="opacity-25"

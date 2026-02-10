@@ -189,8 +189,8 @@ export function VoiceSampleUploader({
       <CardHeader>
         <CardTitle>Voice Samples for {ancestorName}</CardTitle>
         <CardDescription>
-          Upload voicemails, videos, or recordings to clone their voice.
-          More samples = better quality.
+          Upload voicemails, videos, or recordings to preserve their voice.
+          More samples help create a more authentic remembrance.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -321,7 +321,7 @@ export function VoiceSampleUploader({
               ? "Add more voice samples (at least 10 seconds recommended)"
               : totalDuration < 30
               ? "Good start! More samples will improve quality"
-              : "Great! You have enough samples for good voice cloning"}
+              : "Great! You have enough samples for Voice Remembrance"}
           </p>
         </div>
 

@@ -8,7 +8,8 @@ interface MemoryAssistantProps {
   deceasedName: string;
   relationship?: string;
   initialDraft?: string;
-  onSave?: (content: string) => void;
+  onSave?: (content: string, authorName?: string, authorRelationship?: string) => void;
+  isSaving?: boolean;
   className?: string;
 }
 
@@ -46,11 +47,46 @@ const ASSISTANCE_OPTIONS: {
   },
 ];
 
+// Guided prompts to help users start writing
+const GUIDED_PROMPTS = [
+  {
+    label: "A favorite memory",
+    starter: "One of my favorite memories with them was when ",
+    icon: "💭",
+  },
+  {
+    label: "What made them special",
+    starter: "What made them truly special was ",
+    icon: "✨",
+  },
+  {
+    label: "A lesson they taught",
+    starter: "They taught me that ",
+    icon: "📚",
+  },
+  {
+    label: "Their smile or laugh",
+    starter: "I'll always remember the way they would ",
+    icon: "😊",
+  },
+  {
+    label: "A tradition or habit",
+    starter: "Every time we were together, they would ",
+    icon: "🌟",
+  },
+  {
+    label: "Words they often said",
+    starter: "They used to always say, \"",
+    icon: "💬",
+  },
+];
+
 export function MemoryAssistant({
   deceasedName,
   relationship,
   initialDraft = "",
   onSave,
+  isSaving = false,
   className,
 }: MemoryAssistantProps) {
   const [draft, setDraft] = useState(initialDraft);
@@ -59,6 +95,10 @@ export function MemoryAssistant({
   const [error, setError] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<AssistanceType | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Author information
+  const [authorName, setAuthorName] = useState("");
+  const [authorRelationship, setAuthorRelationship] = useState("");
 
   const requestAssistance = useCallback(
     async (type: AssistanceType) => {
@@ -156,7 +196,7 @@ export function MemoryAssistant({
 
   const handleSave = () => {
     if (onSave && draft.trim()) {
-      onSave(draft);
+      onSave(draft, authorName.trim() || undefined, authorRelationship.trim() || undefined);
     }
   };
 
@@ -182,6 +222,61 @@ export function MemoryAssistant({
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {/* Author info */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-dark mb-1">
+              Your Name *
+            </label>
+            <input
+              type="text"
+              value={authorName}
+              onChange={(e) => setAuthorName(e.target.value)}
+              placeholder="Enter your name"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-sage"
+              disabled={isStreaming || isSaving}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-dark mb-1">
+              Your Relationship
+            </label>
+            <input
+              type="text"
+              value={authorRelationship}
+              onChange={(e) => setAuthorRelationship(e.target.value)}
+              placeholder="e.g., Daughter, Friend, Colleague"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-sage"
+              disabled={isStreaming || isSaving}
+            />
+          </div>
+        </div>
+
+        {/* Guided prompts - show when draft is empty */}
+        {!draft.trim() && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-gray-dark">
+              Not sure where to start? Try one of these:
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {GUIDED_PROMPTS.map((prompt) => (
+                <button
+                  key={prompt.label}
+                  type="button"
+                  onClick={() => setDraft(prompt.starter)}
+                  className="p-3 text-left rounded-lg border border-sage-pale/50 hover:border-sage hover:bg-sage-pale/20 transition-colors"
+                  disabled={isStreaming || isSaving}
+                >
+                  <span className="flex items-center gap-2 text-sm">
+                    <span>{prompt.icon}</span>
+                    <span className="text-gray-dark">{prompt.label}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Draft textarea */}
         <div>
           <Textarea
@@ -190,7 +285,7 @@ export function MemoryAssistant({
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             className="min-h-[150px]"
-            disabled={isStreaming}
+            disabled={isStreaming || isSaving}
           />
           <p className="mt-1 text-sm text-gray-body">
             {draft.length} characters
@@ -290,10 +385,17 @@ export function MemoryAssistant({
             <Button
               variant="secondary"
               onClick={handleSave}
-              disabled={!draft.trim() || isStreaming}
+              disabled={!draft.trim() || !authorName.trim() || isStreaming || isSaving}
               className="w-full"
             >
-              Save Memory
+              {isSaving ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Saving...
+                </span>
+              ) : (
+                "Save Memory"
+              )}
             </Button>
           </div>
         )}

@@ -1,5 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { optionalAuth } from "@/lib/supabase/server";
+import { DEMO_MODE } from "@/lib/constants";
+import {
+  apiSuccess,
+  apiUnauthorized,
+  apiBadRequest,
+  handleApiError,
+} from "@/lib/api";
 import {
   giveConsent,
   revokeConsent,
@@ -11,28 +18,24 @@ import {
   ConsentType,
 } from "@/lib/audit";
 
-// Demo mode
-const DEMO_MODE = !process.env.DATABASE_URL;
+const VALID_CONSENT_TYPES: ConsentType[] = [
+  "VOICE_SELF",
+  "VOICE_FAMILY",
+  "AI_COMPANION",
+  "EVENT_RECORDING",
+  "LOCATION_TRACKING",
+  "DATA_PROCESSING",
+];
 
 /**
  * POST /api/consent - Give consent for a feature
- *
- * Body:
- * - consentType: Required consent type
- * - memorialId: Optional memorial ID (required for some consent types)
- * - authorizationType: Optional for family authorization
- * - proofDocumentUrl: Optional for family authorization
- * - relationshipToDeceased: Optional for family authorization
  */
 export async function POST(request: NextRequest) {
   try {
     const { user } = await optionalAuth();
 
     if (!user && !DEMO_MODE) {
-      return NextResponse.json(
-        { error: "You must be logged in to give consent" },
-        { status: 401 }
-      );
+      return apiUnauthorized("You must be logged in to give consent");
     }
 
     const body = await request.json();
@@ -45,40 +48,23 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validate consent type
-    const validConsentTypes: ConsentType[] = [
-      "VOICE_SELF",
-      "VOICE_FAMILY",
-      "AI_COMPANION",
-      "EVENT_RECORDING",
-      "LOCATION_TRACKING",
-      "DATA_PROCESSING",
-    ];
-
-    if (!consentType || !validConsentTypes.includes(consentType)) {
-      return NextResponse.json(
-        { error: "Invalid consent type" },
-        { status: 400 }
-      );
+    if (!consentType || !VALID_CONSENT_TYPES.includes(consentType)) {
+      return apiBadRequest("Invalid consent type");
     }
 
     // For family authorization, require additional fields
     if (consentType === "VOICE_FAMILY") {
       if (!authorizationType) {
-        return NextResponse.json(
-          { error: "Authorization type is required for family voice consent" },
-          { status: 400 }
+        return apiBadRequest(
+          "Authorization type is required for family voice consent"
         );
       }
       if (!relationshipToDeceased) {
-        return NextResponse.json(
-          { error: "Relationship to deceased is required" },
-          { status: 400 }
-        );
+        return apiBadRequest("Relationship to deceased is required");
       }
       if (!memorialId) {
-        return NextResponse.json(
-          { error: "Memorial ID is required for family voice consent" },
-          { status: 400 }
+        return apiBadRequest(
+          "Memorial ID is required for family voice consent"
         );
       }
     }
@@ -100,8 +86,7 @@ export async function POST(request: NextRequest) {
       requestInfo
     );
 
-    return NextResponse.json({
-      success: true,
+    return apiSuccess({
       message: "Consent recorded successfully",
       consentRecord: {
         id: consentRecord.id,
@@ -112,30 +97,19 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error recording consent:", error);
-    return NextResponse.json(
-      { error: "Failed to record consent" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
 /**
  * GET /api/consent - Check consent status or get user consents
- *
- * Query params:
- * - consentType: Optional specific consent type to check
- * - memorialId: Optional memorial ID
  */
 export async function GET(request: NextRequest) {
   try {
     const { user } = await optionalAuth();
 
     if (!user && !DEMO_MODE) {
-      return NextResponse.json(
-        { error: "You must be logged in to check consent" },
-        { status: 401 }
-      );
+      return apiUnauthorized("You must be logged in to check consent");
     }
 
     const { searchParams } = new URL(request.url);
@@ -152,7 +126,7 @@ export async function GET(request: NextRequest) {
         memorialId || undefined
       );
 
-      return NextResponse.json({
+      return apiSuccess({
         consentType,
         hasConsent: result.hasConsent,
         needsReConsent: result.needsReConsent,
@@ -171,7 +145,7 @@ export async function GET(request: NextRequest) {
     // Otherwise, get all consents for user
     const consents = await getUserConsents(userId);
 
-    return NextResponse.json({
+    return apiSuccess({
       consents: consents.map((c) => ({
         id: c.id,
         consentType: c.consentType,
@@ -183,40 +157,26 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error("Error checking consent:", error);
-    return NextResponse.json(
-      { error: "Failed to check consent" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
 /**
  * DELETE /api/consent - Revoke consent
- *
- * Body:
- * - consentType: Required consent type
- * - memorialId: Optional memorial ID
  */
 export async function DELETE(request: NextRequest) {
   try {
     const { user } = await optionalAuth();
 
     if (!user && !DEMO_MODE) {
-      return NextResponse.json(
-        { error: "You must be logged in to revoke consent" },
-        { status: 401 }
-      );
+      return apiUnauthorized("You must be logged in to revoke consent");
     }
 
     const body = await request.json();
     const { consentType, memorialId } = body;
 
     if (!consentType) {
-      return NextResponse.json(
-        { error: "Consent type is required" },
-        { status: 400 }
-      );
+      return apiBadRequest("Consent type is required");
     }
 
     const userId = user?.id || "demo-user";
@@ -229,16 +189,11 @@ export async function DELETE(request: NextRequest) {
       requestInfo
     );
 
-    return NextResponse.json({
-      success: true,
+    return apiSuccess({
       message: "Consent revoked successfully",
       revokedAt: revokedRecord?.revokedAt || new Date(),
     });
   } catch (error) {
-    console.error("Error revoking consent:", error);
-    return NextResponse.json(
-      { error: "Failed to revoke consent" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

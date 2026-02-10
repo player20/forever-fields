@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   Home,
@@ -17,15 +18,16 @@ interface MobileNavProps {
 }
 
 const navItems = [
-  { name: "Home", href: "/", icon: Home },
-  { name: "Memorials", href: "/memorials", icon: Heart },
-  { name: "Create", href: "/create", icon: Plus, isAction: true },
-  { name: "Shop", href: "/shop", icon: ShoppingBag },
-  { name: "Settings", href: "/settings", icon: Settings },
+  { nameKey: "nav.home", href: "/", icon: Home },
+  { nameKey: "nav.memorials", href: "/memorials", icon: Heart },
+  { nameKey: "common.create", href: "/create", icon: Plus, isAction: true },
+  { nameKey: "nav.shop", href: "/shop", icon: ShoppingBag },
+  { nameKey: "nav.settings", href: "/settings", icon: Settings },
 ];
 
 export function MobileNav({ className }: MobileNavProps) {
   const pathname = usePathname();
+  const t = useTranslations();
 
   return (
     <nav
@@ -40,11 +42,12 @@ export function MobileNav({ className }: MobileNavProps) {
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const isAction = item.isAction;
+          const name = t(item.nameKey);
 
           if (isAction) {
             return (
               <Link
-                key={item.name}
+                key={item.nameKey}
                 href={item.href}
                 className="flex flex-col items-center justify-center -mt-6"
               >
@@ -56,7 +59,7 @@ export function MobileNav({ className }: MobileNavProps) {
                   <item.icon className="w-6 h-6 text-white" />
                 </motion.div>
                 <span className="text-xs font-medium text-sage-dark mt-1">
-                  {item.name}
+                  {name}
                 </span>
               </Link>
             );
@@ -64,7 +67,7 @@ export function MobileNav({ className }: MobileNavProps) {
 
           return (
             <Link
-              key={item.name}
+              key={item.nameKey}
               href={item.href}
               className={cn(
                 "flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors",
@@ -97,7 +100,7 @@ export function MobileNav({ className }: MobileNavProps) {
                   isActive ? "text-sage-dark" : "text-gray-body"
                 )}
               >
-                {item.name}
+                {name}
               </span>
             </Link>
           );

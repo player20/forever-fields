@@ -32,7 +32,7 @@ export const SUBSCRIPTION_TIERS = {
     features: [
       "5 memorials",
       "5GB storage",
-      "AI Memory Assistant",
+      "Memory Assistant",
       "Photo enhancement",
       "Email support",
     ],
@@ -52,9 +52,9 @@ export const SUBSCRIPTION_TIERS = {
     features: [
       "Unlimited memorials",
       "50GB storage",
-      "Voice cloning",
+      "Voice Remembrance",
       "3D cemetery view",
-      "Animated memories",
+      "Memories in Motion",
       "Priority support",
     ],
     limits: {

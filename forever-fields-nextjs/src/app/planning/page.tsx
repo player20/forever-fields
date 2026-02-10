@@ -80,7 +80,7 @@ const pricingPlans = [
     features: [
       "Everything in Starter",
       "Unlimited photos & videos",
-      "Voice cloning (5 hours)",
+      "Voice Remembrance (5 hours)",
       "Video messages",
       "Milestone messages",
       "Priority support",
@@ -96,9 +96,9 @@ const pricingPlans = [
     features: [
       "Everything in Family",
       "Lifetime storage",
-      "Unlimited voice cloning",
+      "Unlimited Voice Remembrance",
       "Professional digitization",
-      "Legacy Companion AI",
+      "Legacy Companion",
       "Family concierge",
     ],
     cta: "Learn More",

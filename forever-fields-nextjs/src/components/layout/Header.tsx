@@ -45,17 +45,23 @@ interface HeaderProps {
   className?: string;
 }
 
-const navigation = [
-  { name: "Home", href: "/", icon: Home },
-  { name: "Memorials", href: "/memorials", icon: Heart },
-  { name: "Pricing", href: "/pricing", icon: CreditCard },
-  { name: "Shop", href: "/shop", icon: ShoppingBag },
+const navigationItems = [
+  { key: "nav.home", href: "/", icon: Home },
+  { key: "nav.memorials", href: "/memorials", icon: Heart },
+  { key: "nav.pricing", href: "/pricing", icon: CreditCard },
+  { key: "nav.shop", href: "/shop", icon: ShoppingBag },
 ];
 
 export function Header({ user, notifications = 0, className }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const t = useTranslations();
+
+  // Build navigation with translated names
+  const navigation = navigationItems.map(item => ({
+    ...item,
+    name: t(item.key),
+  }));
 
   return (
     <header

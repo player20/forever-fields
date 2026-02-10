@@ -56,9 +56,9 @@ const benefits = [
   },
   {
     icon: MapPin,
-    title: "Grave Locator Included",
+    title: "Resting Place Locator Included",
     description:
-      "Visitors can navigate directly to the grave using GPS. No more families wandering lost.",
+      "Visitors can navigate directly to the resting place using GPS. No more families wandering lost.",
   },
   {
     icon: BarChart3,
@@ -99,9 +99,9 @@ const familyFeatures = [
 // Premium features (families pay if they want)
 const premiumFeatures = [
   "Time capsules (reveal on future dates)",
-  "Voice cloning and messages",
-  "Animated photo memories",
-  "AI-powered tribute writing",
+  "Voice Remembrance messages",
+  "Memories in Motion",
+  "Tribute writing assistance",
   "Blockchain permanence guarantee",
 ];
 

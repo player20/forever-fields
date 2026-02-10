@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Button, Card } from "@/components/ui";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ import {
 type ResetStep = "request" | "sent" | "reset" | "success";
 
 export default function ResetPasswordPage() {
+  const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -126,7 +128,7 @@ export default function ResetPasswordPage() {
             <>
               <div className="text-center mb-6">
                 <h1 className="text-2xl font-serif font-bold text-gray-dark mb-2">
-                  Reset Password
+                  {t("auth.forgotPassword")}
                 </h1>
                 <p className="text-gray-body">
                   Enter your email and we&apos;ll send you a reset link
@@ -142,7 +144,7 @@ export default function ResetPasswordPage() {
               <form onSubmit={handleRequestReset} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-dark mb-1">
-                    Email Address
+                    {t("auth.email")}
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -250,7 +252,7 @@ export default function ResetPasswordPage() {
               <form onSubmit={handleResetPassword} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-dark mb-1">
-                    New Password
+                    {t("auth.password")}
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -290,7 +292,7 @@ export default function ResetPasswordPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-dark mb-1">
-                    Confirm New Password
+                    {t("auth.confirmPassword")}
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />

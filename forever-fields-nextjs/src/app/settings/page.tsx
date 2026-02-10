@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Button, Card } from "@/components/ui";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -24,11 +25,46 @@ import {
   Loader2,
   LogOut,
   Smartphone,
+  CreditCard,
+  Download,
+  RefreshCw,
+  Crown,
+  Sparkles,
+  Users,
 } from "lucide-react";
 
-type SettingsTab = "profile" | "password" | "notifications" | "privacy" | "app-icon" | "danger";
+type SettingsTab = "profile" | "billing" | "password" | "notifications" | "privacy" | "app-icon" | "danger";
+
+// Subscription types
+interface SubscriptionData {
+  id: string;
+  status: string;
+  tier: string;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
+  canceledAt: string | null;
+  trialEnd: string | null;
+}
+
+interface Invoice {
+  id: string;
+  number: string | null;
+  status: string | null;
+  amount: number;
+  currency: string;
+  date: string;
+  pdfUrl: string | null;
+}
+
+interface TierInfo {
+  name: string;
+  price: number;
+  features: string[];
+}
 
 export default function SettingsPage() {
+  const t = useTranslations();
   const router = useRouter();
   const { user, logout, isLoading: authLoading } = useAuth();
 
@@ -101,13 +137,100 @@ export default function SettingsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
+  // Billing/Subscription state
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [tierInfo, setTierInfo] = useState<TierInfo | null>(null);
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+
+  // Fetch subscription data when billing tab is active
+  useEffect(() => {
+    if (activeTab === "billing" && !subscription && !billingLoading) {
+      fetchSubscription();
+    }
+  }, [activeTab]);
+
+  const fetchSubscription = async () => {
+    setBillingLoading(true);
+    try {
+      const response = await fetch("/api/subscription");
+      if (response.ok) {
+        const data = await response.json();
+        setSubscription(data.subscription);
+        setInvoices(data.invoices || []);
+        setTierInfo(data.tier);
+      }
+    } catch (error) {
+      console.error("Failed to fetch subscription:", error);
+      toast.error("Failed to load subscription details");
+    } finally {
+      setBillingLoading(false);
+    }
+  };
+
+  const handleOpenPortal = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/subscription/portal", { method: "POST" });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.message || "Failed to open billing portal");
+      }
+    } catch {
+      toast.error("Failed to open billing portal");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/subscription/cancel", { method: "POST" });
+      const data = await response.json();
+      if (data.success) {
+        toast.success(data.message);
+        setShowCancelModal(false);
+        fetchSubscription(); // Refresh
+      } else {
+        toast.error(data.error || "Failed to cancel subscription");
+      }
+    } catch {
+      toast.error("Failed to cancel subscription");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/subscription/cancel", { method: "DELETE" });
+      const data = await response.json();
+      if (data.success) {
+        toast.success(data.message);
+        fetchSubscription(); // Refresh
+      } else {
+        toast.error(data.error || "Failed to reactivate subscription");
+      }
+    } catch {
+      toast.error("Failed to reactivate subscription");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const tabs = [
-    { id: "profile" as const, label: "Profile", icon: User, color: "sage" },
-    { id: "password" as const, label: "Password", icon: Lock, color: "gold" },
-    { id: "notifications" as const, label: "Notifications", icon: Bell, color: "coral" },
-    { id: "privacy" as const, label: "Privacy", icon: Shield, color: "twilight" },
-    { id: "app-icon" as const, label: "App Icon", icon: Smartphone, color: "lavender" },
-    { id: "danger" as const, label: "Danger Zone", icon: AlertTriangle, color: "red" },
+    { id: "profile" as const, labelKey: "settings.profile", icon: User, color: "sage" },
+    { id: "billing" as const, labelKey: "settings.billing", icon: CreditCard, color: "gold" },
+    { id: "password" as const, labelKey: "settings.password", icon: Lock, color: "coral" },
+    { id: "notifications" as const, labelKey: "settings.notifications", icon: Bell, color: "twilight" },
+    { id: "privacy" as const, labelKey: "settings.privacy", icon: Shield, color: "lavender" },
+    { id: "app-icon" as const, labelKey: "settings.appIcon", icon: Smartphone, color: "sage" },
+    { id: "danger" as const, labelKey: "settings.danger", icon: AlertTriangle, color: "red" },
   ];
 
   const passwordRequirements = [
@@ -124,9 +247,17 @@ export default function SettingsPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      // API call would go here
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Profile updated successfully");
+      const response = await fetch("/api/settings/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.message || "Profile updated successfully");
+      } else {
+        toast.error(data.error || "Failed to update profile");
+      }
     } catch {
       toast.error("Failed to update profile");
     } finally {
@@ -149,12 +280,20 @@ export default function SettingsPage() {
 
     setIsLoading(true);
     try {
-      // API call would go here
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Password changed successfully");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+      const response = await fetch("/api/settings/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.message || "Password changed successfully");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        toast.error(data.error || "Failed to change password");
+      }
     } catch {
       toast.error("Failed to change password");
     } finally {
@@ -165,9 +304,17 @@ export default function SettingsPage() {
   const handleSaveNotifications = async () => {
     setIsLoading(true);
     try {
-      // API call would go here
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Notification preferences saved");
+      const response = await fetch("/api/settings/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(notifications),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.message || "Notification preferences saved");
+      } else {
+        toast.error(data.error || "Failed to save preferences");
+      }
     } catch {
       toast.error("Failed to save preferences");
     } finally {
@@ -178,9 +325,17 @@ export default function SettingsPage() {
   const handleSavePrivacy = async () => {
     setIsLoading(true);
     try {
-      // API call would go here
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Privacy settings saved");
+      const response = await fetch("/api/settings/privacy", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(privacy),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.message || "Privacy settings saved");
+      } else {
+        toast.error(data.error || "Failed to save settings");
+      }
     } catch {
       toast.error("Failed to save settings");
     } finally {
@@ -251,7 +406,7 @@ export default function SettingsPage() {
             <div className="flex items-center gap-2">
               <Flower2 className="w-6 h-6 text-sage" />
               <h1 className="text-xl font-serif font-bold text-gray-dark">
-                Account Settings
+                {t("settings.title")}
               </h1>
             </div>
           </div>
@@ -283,7 +438,7 @@ export default function SettingsPage() {
                     } ${tab.id === "danger" && !isActive ? "text-red-600 hover:bg-red-50" : ""}`}
                   >
                     <Icon className={`w-5 h-5 ${tab.id === "danger" && !isActive ? "text-red-500" : ""}`} />
-                    {tab.label}
+                    {t(tab.labelKey)}
                   </button>
                 );
               })}
@@ -300,7 +455,7 @@ export default function SettingsPage() {
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-gray-body hover:bg-sage-pale/30 transition-colors"
               >
                 <LogOut className="w-5 h-5" />
-                Sign Out
+                {t("common.logout")}
               </button>
             </div>
           </aside>
@@ -321,7 +476,7 @@ export default function SettingsPage() {
                   <form onSubmit={handleSaveProfile} className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-dark mb-1">
-                        Full Name
+                        {t("auth.fullName")}
                       </label>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -337,7 +492,7 @@ export default function SettingsPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-dark mb-1">
-                        Email Address
+                        {t("auth.email")}
                       </label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -360,11 +515,235 @@ export default function SettingsPage() {
                       ) : (
                         <>
                           <Save className="w-4 h-4 mr-2" />
-                          Save Changes
+                          {t("common.save")}
                         </>
                       )}
                     </Button>
                   </form>
+                </Card>
+              </motion.div>
+            )}
+
+            {/* Billing Tab */}
+            {activeTab === "billing" && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Card className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-lg font-serif font-bold text-gray-dark">
+                      Subscription & Billing
+                    </h2>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={fetchSubscription}
+                      disabled={billingLoading}
+                    >
+                      {billingLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
+
+                  {billingLoading && !subscription ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 text-sage animate-spin" />
+                    </div>
+                  ) : subscription ? (
+                    <div className="space-y-6">
+                      {/* Current Plan */}
+                      <div className="p-4 rounded-lg bg-sage-pale/30 border border-sage-pale">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-sage/10 flex items-center justify-center">
+                              {subscription.tier === "heritage" ? (
+                                <Crown className="w-5 h-5 text-gold" />
+                              ) : subscription.tier === "legacy" ? (
+                                <Users className="w-5 h-5 text-twilight" />
+                              ) : subscription.tier === "remember" ? (
+                                <Sparkles className="w-5 h-5 text-coral" />
+                              ) : (
+                                <Flower2 className="w-5 h-5 text-sage" />
+                              )}
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-gray-dark">
+                                {tierInfo?.name || "Free"} Plan
+                              </h3>
+                              <p className="text-sm text-gray-body mt-1">
+                                {tierInfo?.price === 0
+                                  ? "Free forever"
+                                  : `$${tierInfo?.price}/month`}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                subscription.status === "active"
+                                  ? "bg-green-100 text-green-800"
+                                  : subscription.status === "trialing"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : subscription.status === "past_due"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
+                              {subscription.status === "active"
+                                ? "Active"
+                                : subscription.status === "trialing"
+                                ? "Trial"
+                                : subscription.status === "past_due"
+                                ? "Past Due"
+                                : subscription.status}
+                            </span>
+                          </div>
+                        </div>
+
+                        {subscription.cancelAtPeriodEnd && (
+                          <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                            <p className="text-sm text-amber-800">
+                              <AlertTriangle className="w-4 h-4 inline mr-1" />
+                              Your subscription will end on{" "}
+                              {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                            </p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleReactivateSubscription}
+                              disabled={isLoading}
+                              className="mt-2"
+                            >
+                              {isLoading ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                "Reactivate Subscription"
+                              )}
+                            </Button>
+                          </div>
+                        )}
+
+                        {subscription.trialEnd && new Date(subscription.trialEnd) > new Date() && (
+                          <p className="mt-3 text-sm text-blue-600">
+                            Trial ends on {new Date(subscription.trialEnd).toLocaleDateString()}
+                          </p>
+                        )}
+
+                        <div className="mt-4 pt-4 border-t border-sage-pale/50">
+                          <p className="text-xs text-gray-muted">
+                            Current period: {new Date(subscription.currentPeriodStart).toLocaleDateString()} -{" "}
+                            {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Plan Features */}
+                      {tierInfo && tierInfo.features.length > 0 && (
+                        <div>
+                          <h3 className="font-medium text-gray-dark mb-3">Your Plan Includes</h3>
+                          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {tierInfo.features.map((feature, i) => (
+                              <li key={i} className="flex items-center gap-2 text-sm text-gray-body">
+                                <Check className="w-4 h-4 text-green-500" />
+                                {feature}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      <div className="flex flex-wrap gap-3">
+                        <Link href="/pricing">
+                          <Button variant="outline">
+                            {subscription.tier === "free" ? "Upgrade Plan" : "Change Plan"}
+                          </Button>
+                        </Link>
+                        <Button variant="outline" onClick={handleOpenPortal} disabled={isLoading}>
+                          {isLoading ? (
+                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          ) : (
+                            <CreditCard className="w-4 h-4 mr-2" />
+                          )}
+                          Manage Payment Method
+                        </Button>
+                        {subscription.tier !== "free" && !subscription.cancelAtPeriodEnd && (
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowCancelModal(true)}
+                            className="text-red-600 hover:bg-red-50"
+                          >
+                            Cancel Subscription
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Billing History */}
+                      {invoices.length > 0 && (
+                        <div className="pt-6 border-t border-sage-pale/50">
+                          <h3 className="font-medium text-gray-dark mb-4">Billing History</h3>
+                          <div className="space-y-2">
+                            {invoices.map((invoice) => (
+                              <div
+                                key={invoice.id}
+                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded bg-gray-200 flex items-center justify-center">
+                                    <CreditCard className="w-4 h-4 text-gray-500" />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium text-gray-dark">
+                                      {invoice.number || `Invoice ${invoice.id.slice(-8)}`}
+                                    </p>
+                                    <p className="text-xs text-gray-muted">
+                                      {new Date(invoice.date).toLocaleDateString()}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <span
+                                    className={`text-xs px-2 py-0.5 rounded-full ${
+                                      invoice.status === "paid"
+                                        ? "bg-green-100 text-green-700"
+                                        : "bg-gray-100 text-gray-700"
+                                    }`}
+                                  >
+                                    {invoice.status}
+                                  </span>
+                                  <span className="text-sm font-medium text-gray-dark">
+                                    ${(invoice.amount / 100).toFixed(2)}
+                                  </span>
+                                  {invoice.pdfUrl && (
+                                    <a
+                                      href={invoice.pdfUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="p-1 hover:bg-gray-200 rounded"
+                                    >
+                                      <Download className="w-4 h-4 text-gray-500" />
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Flower2 className="w-12 h-12 mx-auto mb-4 text-sage opacity-50" />
+                      <p className="text-gray-body mb-4">You&apos;re on the Free plan</p>
+                      <Link href="/pricing">
+                        <Button>View Plans</Button>
+                      </Link>
+                    </div>
+                  )}
                 </Card>
               </motion.div>
             )}
@@ -377,7 +756,7 @@ export default function SettingsPage() {
               >
                 <Card className="p-6">
                   <h2 className="text-lg font-serif font-bold text-gray-dark mb-6">
-                    Change Password
+                    {t("settings.changePassword")}
                   </h2>
 
                   <form onSubmit={handleChangePassword} className="space-y-6">
@@ -468,7 +847,7 @@ export default function SettingsPage() {
                       {isLoading ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
-                        "Change Password"
+                        t("settings.changePassword")
                       )}
                     </Button>
                   </form>
@@ -742,7 +1121,7 @@ export default function SettingsPage() {
                   </p>
 
                   <div className="p-4 rounded-lg bg-red-50 border border-red-200">
-                    <h3 className="font-medium text-red-700 mb-2">Delete Account</h3>
+                    <h3 className="font-medium text-red-700 mb-2">{t("settings.deleteAccount")}</h3>
                     <p className="text-sm text-red-600 mb-4">
                       Permanently delete your account and all associated data. This includes
                       all memorials you own, photos, stories, and personal information.
@@ -762,6 +1141,60 @@ export default function SettingsPage() {
           </div>
         </div>
       </main>
+
+      {/* Cancel Subscription Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-xl max-w-md w-full p-6"
+          >
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-8 h-8 text-amber-600" />
+              </div>
+              <h3 className="text-xl font-serif font-bold text-gray-dark mb-2">
+                Cancel Your Subscription?
+              </h3>
+              <p className="text-gray-body">
+                Your subscription will remain active until the end of your current billing period.
+                You can reactivate anytime before then.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 mb-6">
+              <h4 className="font-medium text-amber-800 mb-2">What happens when you cancel:</h4>
+              <ul className="text-sm text-amber-700 space-y-1">
+                <li>• Access continues until {subscription ? new Date(subscription.currentPeriodEnd).toLocaleDateString() : "end of period"}</li>
+                <li>• Your memorials and data are preserved</li>
+                <li>• You&apos;ll be downgraded to the Free plan</li>
+              </ul>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowCancelModal(false)}
+                className="flex-1"
+              >
+                Keep Subscription
+              </Button>
+              <Button
+                onClick={handleCancelSubscription}
+                disabled={isLoading}
+                className="flex-1 bg-amber-600 hover:bg-amber-700"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Cancel Subscription"
+                )}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       {/* Delete Account Modal */}
       {showDeleteModal && (
@@ -806,7 +1239,7 @@ export default function SettingsPage() {
                 }}
                 className="flex-1"
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button
                 onClick={handleDeleteAccount}

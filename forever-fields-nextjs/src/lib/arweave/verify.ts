@@ -28,8 +28,35 @@ export async function storePermanenceRecord(
     return;
   }
 
-  // Production: Store in database via Prisma
-  // await prisma.permanenceRecord.create({ data: record });
+  // Production: Store in database via Supabase
+  try {
+    const { createServerSupabaseClient } = await import("@/lib/supabase/server");
+    const supabase = await createServerSupabaseClient();
+
+    const { error } = await supabase.from("permanence_records").insert({
+      id: record.id,
+      memorial_id: record.memorialId,
+      user_id: record.userId,
+      arweave_tx_id: record.arweaveTxId,
+      arweave_url: record.arweaveUrl,
+      bundlr_id: record.bundlrId,
+      content_hash: record.contentHash,
+      profile_photo_hash: record.profilePhotoHash,
+      archive_version: record.archiveVersion,
+      archived_at: record.archivedAt.toISOString(),
+      bytes_stored: record.bytesStored,
+      cost_usd: record.costUsd,
+      verification_status: record.verificationStatus,
+    });
+
+    if (error) {
+      console.error("Failed to store permanence record:", error);
+      throw error;
+    }
+  } catch (error) {
+    console.error("Failed to store permanence record:", error);
+    throw error;
+  }
 }
 
 /**
@@ -42,8 +69,41 @@ export async function getPermanenceRecord(
     return demoPermanenceRecords.get(memorialId) || null;
   }
 
-  // Production: Query database
-  return null;
+  // Production: Query database via Supabase
+  try {
+    const { createServerSupabaseClient } = await import("@/lib/supabase/server");
+    const supabase = await createServerSupabaseClient();
+
+    const { data, error } = await supabase
+      .from("permanence_records")
+      .select("*")
+      .eq("memorial_id", memorialId)
+      .single();
+
+    if (error || !data) return null;
+
+    return {
+      id: data.id,
+      memorialId: data.memorial_id,
+      userId: data.user_id,
+      arweaveTxId: data.arweave_tx_id,
+      arweaveUrl: data.arweave_url,
+      bundlrId: data.bundlr_id,
+      contentHash: data.content_hash,
+      profilePhotoHash: data.profile_photo_hash,
+      archiveVersion: data.archive_version,
+      archivedAt: new Date(data.archived_at),
+      bytesStored: data.bytes_stored,
+      costUsd: data.cost_usd,
+      lastVerifiedAt: data.last_verified_at ? new Date(data.last_verified_at) : undefined,
+      verificationStatus: data.verification_status,
+      verificationError: data.verification_error,
+      previousVersionId: data.previous_version_id,
+    };
+  } catch (error) {
+    console.error("Failed to get permanence record:", error);
+    return null;
+  }
 }
 
 /**
@@ -66,7 +126,22 @@ export async function updateVerificationStatus(
     return;
   }
 
-  // Production: Update database
+  // Production: Update database via Supabase
+  try {
+    const { createServerSupabaseClient } = await import("@/lib/supabase/server");
+    const supabase = await createServerSupabaseClient();
+
+    await supabase
+      .from("permanence_records")
+      .update({
+        verification_status: status,
+        last_verified_at: new Date().toISOString(),
+        verification_error: error || null,
+      })
+      .eq("memorial_id", memorialId);
+  } catch (err) {
+    console.error("Failed to update verification status:", err);
+  }
 }
 
 /**
@@ -172,7 +247,50 @@ export async function verifyAllPending(): Promise<{
   }
 
   // Production: Query database for pending records
-  return { verified: 0, failed: 0, total: 0 };
+  try {
+    const { createServerSupabaseClient } = await import("@/lib/supabase/server");
+    const supabase = await createServerSupabaseClient();
+
+    const { data, error } = await supabase
+      .from("permanence_records")
+      .select("*")
+      .eq("verification_status", "pending");
+
+    if (error || !data) return { verified: 0, failed: 0, total: 0 };
+
+    const records: PermanenceRecord[] = data.map((row) => ({
+      id: row.id,
+      memorialId: row.memorial_id,
+      userId: row.user_id,
+      arweaveTxId: row.arweave_tx_id,
+      arweaveUrl: row.arweave_url,
+      bundlrId: row.bundlr_id,
+      contentHash: row.content_hash,
+      profilePhotoHash: row.profile_photo_hash,
+      archiveVersion: row.archive_version,
+      archivedAt: new Date(row.archived_at),
+      bytesStored: row.bytes_stored,
+      costUsd: row.cost_usd,
+      lastVerifiedAt: row.last_verified_at ? new Date(row.last_verified_at) : undefined,
+      verificationStatus: row.verification_status,
+      verificationError: row.verification_error,
+      previousVersionId: row.previous_version_id,
+    }));
+
+    for (const record of records) {
+      const result = await verifyPermanenceRecord(record);
+      if (result.verified) {
+        verified++;
+      } else {
+        failed++;
+      }
+    }
+
+    return { verified, failed, total: records.length };
+  } catch (error) {
+    console.error("Failed to verify all pending:", error);
+    return { verified: 0, failed: 0, total: 0 };
+  }
 }
 
 /**
@@ -225,8 +343,40 @@ export async function getAllPermanenceRecords(): Promise<PermanenceRecord[]> {
     return Array.from(demoPermanenceRecords.values());
   }
 
-  // Production: Query database
-  return [];
+  // Production: Query database via Supabase
+  try {
+    const { createServerSupabaseClient } = await import("@/lib/supabase/server");
+    const supabase = await createServerSupabaseClient();
+
+    const { data, error } = await supabase
+      .from("permanence_records")
+      .select("*")
+      .order("archived_at", { ascending: false });
+
+    if (error || !data) return [];
+
+    return data.map((row) => ({
+      id: row.id,
+      memorialId: row.memorial_id,
+      userId: row.user_id,
+      arweaveTxId: row.arweave_tx_id,
+      arweaveUrl: row.arweave_url,
+      bundlrId: row.bundlr_id,
+      contentHash: row.content_hash,
+      profilePhotoHash: row.profile_photo_hash,
+      archiveVersion: row.archive_version,
+      archivedAt: new Date(row.archived_at),
+      bytesStored: row.bytes_stored,
+      costUsd: row.cost_usd,
+      lastVerifiedAt: row.last_verified_at ? new Date(row.last_verified_at) : undefined,
+      verificationStatus: row.verification_status,
+      verificationError: row.verification_error,
+      previousVersionId: row.previous_version_id,
+    }));
+  } catch (error) {
+    console.error("Failed to get all permanence records:", error);
+    return [];
+  }
 }
 
 /**
